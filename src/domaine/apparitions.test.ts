@@ -29,7 +29,7 @@ describe("libellés", () => {
 
   it("rend lisible un identifiant inconnu au lieu de le masquer", () => {
     expect(libelleIdentifiant("#cobblemon:nether/is_soul_sand")).toBe("nether soul sand");
-    expect(libelleBiome("#mod:is_crystal_cave")).toBe("crystal cave");
+    expect(libelleBiome("#mod:is_crystal_cave")).toBe("crystal cave (mod)");
   });
 });
 

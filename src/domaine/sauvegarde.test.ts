@@ -51,22 +51,42 @@ describe("lireSauvegarde", () => {
   });
 });
 
-describe("migration v1 -> v2", () => {
+describe("migrations", () => {
   const v1 = (total: number) => ({
     version: 1,
     statuts: { pikachu: "capture" },
     reglagesCompletion: { base: "capture", total, objectif: 20 },
   });
 
-  it("passe un ancien total par défaut en calcul automatique, sans perdre les statuts", () => {
+  it("amène une sauvegarde v1 jusqu'à la version courante sans perdre les statuts", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 2,
+        version: 3,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
+        chasse: { especes: [], capturees: [], debut: null },
       },
     });
+  });
+
+  it("ajoute une chasse vide à une sauvegarde v2", () => {
+    const v2 = {
+      version: 2,
+      statuts: { eevee: "vu" },
+      reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
+    };
+    const resultat = lireSauvegarde(v2);
+    expect(resultat.succes && resultat.sauvegarde.chasse).toEqual({
+      especes: [],
+      capturees: [],
+      debut: null,
+    });
+  });
+
+  it("refuse une chasse de plus de six Pokémon", () => {
+    const chasse = { especes: ["a", "b", "c", "d", "e", "f", "g"], capturees: [], debut: null };
+    expect(lireSauvegarde({ ...sauvegardeVide(), chasse }).succes).toBe(false);
   });
 
   it("conserve un total personnalisé comme total manuel", () => {

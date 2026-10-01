@@ -60,7 +60,7 @@ describe("creerStockageFichier", () => {
       }),
     );
     const lecture = await creerStockageFichier(dossier).lire();
-    expect(lecture.etat === "trouvee" && lecture.sauvegarde.version).toBe(2);
+    expect(lecture.etat === "trouvee" && lecture.sauvegarde.version).toBe(3);
   });
 
   it("archive le fichier précédent dans l'historique du jour", async () => {
