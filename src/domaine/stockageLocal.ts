@@ -65,3 +65,30 @@ export function enregistrerSauvegardeLocale(sauvegarde: Sauvegarde): boolean {
     return false;
   }
 }
+
+/*
+ * Marqueur "modifications pas encore écrites dans le fichier". Posé à chaque changement,
+ * levé quand le serveur confirme l'écriture. Au démarrage, s'il est présent, la copie du
+ * navigateur est plus récente que le fichier : c'est elle qui gagne.
+ */
+const CLE_NON_SYNCHRONISE = "pokeislandhub:modifications-non-synchronisees";
+
+export function marquerNonSynchronise(estNonSynchronise: boolean): void {
+  try {
+    if (estNonSynchronise) {
+      localStorage.setItem(CLE_NON_SYNCHRONISE, new Date().toISOString());
+    } else {
+      localStorage.removeItem(CLE_NON_SYNCHRONISE);
+    }
+  } catch {
+    /* Stockage inaccessible : l'avertissement de chargement le signale déjà. */
+  }
+}
+
+export function aDesModificationsNonSynchronisees(): boolean {
+  try {
+    return localStorage.getItem(CLE_NON_SYNCHRONISE) !== null;
+  } catch {
+    return false;
+  }
+}
