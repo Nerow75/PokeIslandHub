@@ -54,6 +54,7 @@ function correspondAuFiltreStatut(statut: StatutPokemon, filtre: Filtres["statut
 const App = () => {
   const {
     sauvegarde,
+    modeStockage,
     nombreImports,
     avertissement,
     fermerAvertissement,
@@ -121,7 +122,11 @@ const App = () => {
               </button>
             ))}
           </nav>
-          <BarreSauvegarde onExporter={exporter} onImporter={importer} />
+          <BarreSauvegarde
+            modeStockage={modeStockage}
+            onExporter={exporter}
+            onImporter={importer}
+          />
         </div>
       </header>
 

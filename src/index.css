@@ -1062,3 +1062,24 @@ main {
     transition: none !important;
   }
 }
+
+/* Indicateur de stockage dans la barre */
+
+.stockage {
+  padding: var(--espace-1) var(--espace-3);
+  border-radius: var(--rayon-pilule);
+  background: rgb(28 31 38 / 0.28);
+  font-size: var(--texte-xs);
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.stockage--fichier {
+  color: var(--jaune);
+}
+
+.stockage--navigateur {
+  color: var(--blanc-casse);
+  text-decoration: underline wavy;
+}

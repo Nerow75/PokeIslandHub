@@ -26,3 +26,6 @@ dist-ssr
 # Cache des réponses PokeAPI du script de génération
 .cache
 .vitest
+
+# Sauvegarde du joueur (fichier local, jamais versionné)
+donnees
