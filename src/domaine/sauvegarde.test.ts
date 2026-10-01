@@ -8,6 +8,7 @@ import {
   serialiserSauvegarde,
 } from "./sauvegarde.ts";
 import { statutSuivant } from "./statut.ts";
+import { votesParDefaut } from "./votes.ts";
 
 describe("lireSauvegarde", () => {
   it("relit une sauvegarde exportée à l'identique", () => {
@@ -62,10 +63,11 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 3,
+        version: 4,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
         chasse: { especes: [], capturees: [], debut: null },
+        votes: votesParDefaut(),
       },
     });
   });
@@ -82,6 +84,23 @@ describe("migrations", () => {
       capturees: [],
       debut: null,
     });
+  });
+
+  it("ajoute les votes par défaut à une sauvegarde v3", () => {
+    const v3 = {
+      version: 3,
+      statuts: {},
+      reglagesCompletion: { base: "capture", totalManuel: null, objectif: 45 },
+      chasse: { especes: ["pikachu"], capturees: [], debut: null },
+    };
+    const resultat = lireSauvegarde(v3);
+    expect(resultat.succes && resultat.sauvegarde.votes).toEqual(votesParDefaut());
+    expect(resultat.succes && resultat.sauvegarde.chasse.especes).toEqual(["pikachu"]);
+  });
+
+  it("refuse un lien de vote non http(s)", () => {
+    const votes = [{ ...votesParDefaut()[0], url: "javascript:alert(1)" }];
+    expect(lireSauvegarde({ ...sauvegardeVide(), votes }).succes).toBe(false);
   });
 
   it("refuse une chasse de plus de six Pokémon", () => {
