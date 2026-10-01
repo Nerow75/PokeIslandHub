@@ -456,7 +456,11 @@ textarea {
 
 @media (min-width: 768px) {
   .evolution {
-    grid-template-columns: 3.5rem 12rem auto 14rem 1fr;
+    grid-template-columns: 3.5rem 12rem auto 14rem 1fr auto;
+  }
+
+  .evolution__action {
+    order: 1;
   }
 }
 
@@ -590,4 +594,19 @@ textarea {
   flex-direction: row;
   align-items: center;
   gap: var(--espace-2);
+}
+
+.evolution__action {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.confirmation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-4);
+  padding: var(--espace-3) var(--espace-4);
+  border: 1px solid var(--couleur-capture);
+  border-radius: var(--rayon);
 }

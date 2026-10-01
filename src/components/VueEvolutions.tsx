@@ -11,18 +11,40 @@ import {
 import { decrireCondition } from "../domaine/conditionsEvolution.ts";
 import { listerEvolutions, type PorteeEvolutions } from "../domaine/evolutionsAFaire.ts";
 import SpritePokemon from "./SpritePokemon.tsx";
-import { LIBELLES_STATUT, type StatutEnregistre } from "../domaine/statut.ts";
+import { LIBELLES_STATUT, type StatutEnregistre, type StatutPokemon } from "../domaine/statut.ts";
+import type { EspecePokemon } from "../types/pokedex.ts";
 
 interface VueEvolutionsProps {
   statuts: Readonly<Record<string, StatutEnregistre>>;
+  onStatutChange: (slug: string, statut: StatutPokemon) => void;
+}
+
+/** Dernière évolution marquée, pour pouvoir l'annuler. */
+interface DerniereEvolution {
+  vers: EspecePokemon;
+  statutPrecedent: StatutPokemon;
 }
 
 /**
  * Évolutions à réaliser pour découvrir de nouvelles espèces, triées par niveau requis.
  */
-const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts }) => {
+const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
   const [portee, setPortee] = useState<PorteeEvolutions>("mes-captures");
   const [recherche, setRecherche] = useState("");
+  const [derniere, setDerniere] = useState<DerniereEvolution | null>(null);
+
+  /* Faire évoluer un Pokémon enregistre l'espèce obtenue comme capturée. */
+  const handleEvolutionFaite = (vers: EspecePokemon, statutPrecedent: StatutPokemon): void => {
+    onStatutChange(vers.slug, "capture");
+    setDerniere({ vers, statutPrecedent });
+  };
+
+  const handleAnnuler = (): void => {
+    if (derniere) {
+      onStatutChange(derniere.vers.slug, derniere.statutPrecedent);
+      setDerniere(null);
+    }
+  };
 
   const evolutions = useMemo(
     () => listerEvolutions(ESPECES, ESPECES_PAR_SLUG, (slug) => statuts[slug] ?? "non-vu", portee),
@@ -69,6 +91,18 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts }) => {
         </p>
       </div>
 
+      {derniere && (
+        <div className="confirmation" role="status">
+          <p>
+            {derniere.vers.nomFr} marqué comme capturé (avant :{" "}
+            {LIBELLES_STATUT[derniere.statutPrecedent].toLowerCase()}).
+          </p>
+          <button type="button" className="bouton" onClick={handleAnnuler}>
+            Annuler
+          </button>
+        </div>
+      )}
+
       {evolutionsFiltrees.length === 0 ? (
         <p className="vide">
           {portee === "mes-captures"
@@ -101,6 +135,18 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts }) => {
                   </span>
                 </span>
               </span>
+              {statutCible === "capture" ? (
+                <span className="evolution__action texte-discret">Déjà capturé</span>
+              ) : (
+                <button
+                  type="button"
+                  className="bouton evolution__action"
+                  aria-label={`Évolution faite : marquer ${vers.nomFr} comme capturé`}
+                  onClick={() => handleEvolutionFaite(vers, statutCible)}
+                >
+                  Évolution faite
+                </button>
+              )}
               <ul className="evolution__conditions">
                 {conditions.map((condition, index) => (
                   <li key={JSON.stringify(condition)}>

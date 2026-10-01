@@ -127,7 +127,9 @@ const App = () => {
           onReglagesChange={modifierReglagesCompletion}
         />
 
-        {onglet === "evolutions" && <VueEvolutions statuts={sauvegarde.statuts} />}
+        {onglet === "evolutions" && (
+          <VueEvolutions statuts={sauvegarde.statuts} onStatutChange={definirStatut} />
+        )}
         {onglet === "pokefinder" && <VuePokeFinder statuts={sauvegarde.statuts} />}
         {onglet === "ev" && <VueEv statuts={sauvegarde.statuts} />}
 
