@@ -51,6 +51,30 @@ describe("lireSauvegarde", () => {
   });
 });
 
+describe("migration v1 -> v2", () => {
+  const v1 = (total: number) => ({
+    version: 1,
+    statuts: { pikachu: "capture" },
+    reglagesCompletion: { base: "capture", total, objectif: 20 },
+  });
+
+  it("passe un ancien total par défaut en calcul automatique, sans perdre les statuts", () => {
+    expect(lireSauvegarde(v1(1025))).toEqual({
+      succes: true,
+      sauvegarde: {
+        version: 2,
+        statuts: { pikachu: "capture" },
+        reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
+      },
+    });
+  });
+
+  it("conserve un total personnalisé comme total manuel", () => {
+    const resultat = lireSauvegarde(v1(1100));
+    expect(resultat.succes && resultat.sauvegarde.reglagesCompletion.totalManuel).toBe(1100);
+  });
+});
+
 describe("statutSuivant", () => {
   it("parcourt non vu -> vu -> capturé -> non vu", () => {
     expect(statutSuivant("non-vu")).toBe("vu");

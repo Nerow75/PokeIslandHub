@@ -7,6 +7,7 @@ import {
   ESPECES,
   ESPECES_PAR_SLUG,
   estEntreeServeur,
+  TOTAL_POKEDEX_SERVEUR,
 } from "./donnees.ts";
 
 describe("entrées du Pokédex", () => {
@@ -16,6 +17,10 @@ describe("entrées du Pokédex", () => {
       9001, 9002, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015,
       9016, 9017, 9018, 9100,
     ]);
+  });
+
+  it("calcule le total du serveur : 1025 + 19 entrées serveur + 1 non identifiée", () => {
+    expect(TOTAL_POKEDEX_SERVEUR).toBe(1045);
   });
 
   it("garde des slugs uniques, clés des sauvegardes", () => {

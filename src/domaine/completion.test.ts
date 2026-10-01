@@ -22,33 +22,38 @@ describe("compteSelonBase", () => {
 });
 
 describe("calculerCompletion", () => {
-  const sur1025 = { base: "capture" as const, total: 1025, objectif: 20 };
+  const sur1025 = { base: "capture" as const, totalManuel: 1025, objectif: 20 };
+  const TOTAL_SERVEUR = 1045;
 
   it("retrouve les 17,80 % du jeu : 186 capturés sur 1045", () => {
-    const etat = calculerCompletion(186, REGLAGES_COMPLETION_PAR_DEFAUT);
+    const etat = calculerCompletion(186, REGLAGES_COMPLETION_PAR_DEFAUT, TOTAL_SERVEUR);
     expect(formaterPourcentage(etat.pourcentage)).toBe("17,80 %");
     expect(etat.requisPourObjectif).toBe(209);
     expect(etat.restantPourObjectif).toBe(23);
   });
 
   it("retrouve 15,22 % pour 156 sur 1025", () => {
-    const etat = calculerCompletion(156, sur1025);
+    const etat = calculerCompletion(156, sur1025, TOTAL_SERVEUR);
     expect(formaterPourcentage(etat.pourcentage)).toBe("15,22 %");
   });
 
   it("calcule le nombre requis pour 20 % sans erreur d'arrondi flottant", () => {
-    const etat = calculerCompletion(156, sur1025);
+    const etat = calculerCompletion(156, sur1025, TOTAL_SERVEUR);
     expect(etat.requisPourObjectif).toBe(205);
     expect(etat.restantPourObjectif).toBe(49);
   });
 
   it("ne descend pas sous zéro une fois l'objectif atteint", () => {
-    const etat = calculerCompletion(300, REGLAGES_COMPLETION_PAR_DEFAUT);
+    const etat = calculerCompletion(300, REGLAGES_COMPLETION_PAR_DEFAUT, TOTAL_SERVEUR);
     expect(etat.restantPourObjectif).toBe(0);
   });
 
   it("arrondit l'objectif à l'entrée supérieure", () => {
-    const etat = calculerCompletion(0, { base: "capture", total: 999, objectif: 20 });
+    const etat = calculerCompletion(
+      0,
+      { base: "capture", totalManuel: 999, objectif: 20 },
+      TOTAL_SERVEUR,
+    );
     expect(etat.requisPourObjectif).toBe(200);
   });
 
