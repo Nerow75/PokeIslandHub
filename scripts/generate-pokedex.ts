@@ -20,7 +20,8 @@ import {
   objetsDeLaChaine,
   schemaChaineEvolutionApi,
   schemaEspeceApi,
-  schemaObjetApi,
+  referencesATraduire,
+  schemaRessourceTraduiteApi,
   schemaPokemonApi,
   slugVarieteParDefaut,
   type ChaineEvolutionApi,
@@ -96,6 +97,25 @@ async function enParallele<E, R>(
   return resultats;
 }
 
+/** Récupère le nom français de chaque ressource (objet, capacité, type), à défaut l'anglais. */
+async function traduire(
+  slugs: Set<string>,
+  ressource: string,
+  libelle: string,
+): Promise<Record<string, string>> {
+  const reponses = await enParallele(
+    [...slugs].sort(),
+    (slug) => recuperer(`${URL_API}/${ressource}/${slug}/`, schemaRessourceTraduiteApi),
+    libelle,
+  );
+  const noms: Record<string, string> = {};
+  for (const reponse of reponses) {
+    noms[reponse.name] =
+      nomDansLangue(reponse.names, "fr") ?? nomDansLangue(reponse.names, "en") ?? reponse.name;
+  }
+  return noms;
+}
+
 async function generer(): Promise<void> {
   await mkdir(DOSSIER_CACHE, { recursive: true });
 
@@ -132,20 +152,14 @@ async function generer(): Promise<void> {
     }
   }
 
-  const objetsApi = await enParallele(
-    [...slugsObjets].sort(),
-    (slug) => recuperer(`${URL_API}/item/${slug}/`, schemaObjetApi),
-    "Objets",
-  );
-  const objets: Record<string, string> = {};
-  for (const objet of objetsApi) {
-    objets[objet.name] =
-      nomDansLangue(objet.names, "fr") ?? nomDansLangue(objet.names, "en") ?? objet.name;
-  }
-
   const especes: EspecePokemon[] = especesApi.map((espece, index) =>
     construireEspece(espece, pokemonsApi[index]!, evolutions.get(espece.name) ?? []),
   );
+  const { capacites, types } = referencesATraduire(especes);
+
+  const objets = await traduire(slugsObjets, "item", "Objets");
+  const nomsCapacites = await traduire(capacites, "move", "Capacités");
+  const nomsTypes = await traduire(types, "type", "Types");
 
   const sansNomFr = especesApi.filter((e) => !nomDansLangue(e.names, "fr"));
   if (sansNomFr.length > 0) {
@@ -160,6 +174,8 @@ async function generer(): Promise<void> {
     genereLe: new Date().toISOString(),
     especes,
     objets,
+    capacites: nomsCapacites,
+    types: nomsTypes,
   };
   await mkdir(dirname(FICHIER_SORTIE), { recursive: true });
   await writeFile(FICHIER_SORTIE, `${JSON.stringify(pokedex)}\n`);

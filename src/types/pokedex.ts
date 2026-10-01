@@ -14,7 +14,7 @@ export type EvRapportes = Record<StatEv, number>;
 /**
  * Une condition d'évolution telle que décrite par PokeAPI.
  * Les identifiants (objet, capacité, lieu...) restent des slugs PokeAPI ;
- * seuls les objets sont traduits, via `PokedexGenere.objets`.
+ * les objets, capacités et types sont traduits via `PokedexGenere`.
  */
 export interface ConditionEvolution {
   declencheur: string;
@@ -65,4 +65,8 @@ export interface PokedexGenere {
   especes: EspecePokemon[];
   /** Slug d'objet PokeAPI -> nom français. */
   objets: Record<string, string>;
+  /** Slug de capacité PokeAPI -> nom français. */
+  capacites: Record<string, string>;
+  /** Slug de type PokeAPI -> nom français. */
+  types: Record<string, string>;
 }

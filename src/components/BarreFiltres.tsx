@@ -58,9 +58,7 @@ const BarreFiltres: FC<BarreFiltresProps> = ({ filtres, nombreResultats, onFiltr
         Statut
         <select
           value={filtres.statut}
-          onChange={(e) =>
-            onFiltresChange({ ...filtres, statut: e.target.value as FiltreStatut })
-          }
+          onChange={(e) => onFiltresChange({ ...filtres, statut: e.target.value as FiltreStatut })}
         >
           {(Object.keys(LIBELLES_FILTRE_STATUT) as FiltreStatut[]).map((statut) => (
             <option key={statut} value={statut}>

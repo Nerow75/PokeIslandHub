@@ -74,11 +74,12 @@ export const schemaChaineEvolutionApi = z.object({
 });
 export type ChaineEvolutionApi = z.infer<typeof schemaChaineEvolutionApi>;
 
-export const schemaObjetApi = z.object({
+/** Ressource PokeAPI portant des noms traduits : objet, capacité, type. */
+export const schemaRessourceTraduiteApi = z.object({
   name: z.string(),
   names: z.array(z.object({ name: z.string(), language: ressourceNommee })),
 });
-export type ObjetApi = z.infer<typeof schemaObjetApi>;
+export type RessourceTraduiteApi = z.infer<typeof schemaRessourceTraduiteApi>;
 
 /* Conversions vers le modèle du projet. */
 
@@ -229,4 +230,24 @@ export function construireEspece(
     estLegendaire: espece.is_legendary,
     estFabuleux: espece.is_mythical,
   };
+}
+
+/** Slugs des capacités et des types cités par les conditions d'évolution et les types d'espèces. */
+export function referencesATraduire(especes: EspecePokemon[]): {
+  capacites: Set<string>;
+  types: Set<string>;
+} {
+  const capacites = new Set<string>();
+  const types = new Set<string>();
+  for (const espece of especes) {
+    espece.types.forEach((type) => types.add(type));
+    for (const evolution of espece.evolutions) {
+      for (const condition of evolution.conditions) {
+        if (condition.capaciteConnue) capacites.add(condition.capaciteConnue);
+        if (condition.typeCapaciteConnue) types.add(condition.typeCapaciteConnue);
+        if (condition.typeEquipe) types.add(condition.typeEquipe);
+      }
+    }
+  }
+  return { capacites, types };
 }
