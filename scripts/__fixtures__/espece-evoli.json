@@ -1,0 +1,60 @@
+{
+  "id": 133,
+  "name": "eevee",
+  "is_legendary": false,
+  "is_mythical": false,
+  "generation": {
+    "name": "generation-i",
+    "url": "https://pokeapi.co/api/v2/generation/1/"
+  },
+  "evolves_from_species": null,
+  "evolution_chain": {
+    "url": "https://pokeapi.co/api/v2/evolution-chain/67/"
+  },
+  "varieties": [
+    {
+      "is_default": true,
+      "pokemon": {
+        "name": "eevee",
+        "url": "https://pokeapi.co/api/v2/pokemon/133/"
+      }
+    },
+    {
+      "is_default": false,
+      "pokemon": {
+        "name": "eevee-starter",
+        "url": "https://pokeapi.co/api/v2/pokemon/10159/"
+      }
+    },
+    {
+      "is_default": false,
+      "pokemon": {
+        "name": "eevee-gmax",
+        "url": "https://pokeapi.co/api/v2/pokemon/10205/"
+      }
+    }
+  ],
+  "names": [
+    {
+      "name": "Évoli",
+      "language": {
+        "name": "fr",
+        "url": "https://pokeapi.co/api/v2/language/5/"
+      }
+    },
+    {
+      "name": "Eevee",
+      "language": {
+        "name": "en",
+        "url": "https://pokeapi.co/api/v2/language/9/"
+      }
+    },
+    {
+      "name": "イーブイ",
+      "language": {
+        "name": "ja",
+        "url": "https://pokeapi.co/api/v2/language/11/"
+      }
+    }
+  ]
+}
