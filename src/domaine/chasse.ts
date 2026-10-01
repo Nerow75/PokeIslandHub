@@ -110,3 +110,23 @@ export function formaterDuree(millisecondes: number): string {
   const minutes = Math.floor(secondes / 60);
   return `${String(minutes).padStart(2, "0")}:${String(secondes % 60).padStart(2, "0")}`;
 }
+
+/** Début de chasse tel qu'il reste exactement `restantMs` à partir de `maintenant`. */
+export function debutPourTempsRestant(restantMs: number, maintenant: Date): string {
+  const borne = Math.min(Math.max(restantMs, 0), DUREE_CHASSE_MS);
+  return new Date(maintenant.getTime() + borne - DUREE_CHASSE_MS).toISOString();
+}
+
+/**
+ * Lit une durée saisie à la main : "42:07", "42" (minutes) ou "0:30".
+ * Retourne des millisecondes, ou null si la saisie est invalide ou dépasse une heure.
+ */
+export function lireDuree(saisie: string): number | null {
+  const correspondance = /^\s*(\d{1,2})(?::(\d{1,2}))?\s*$/.exec(saisie);
+  if (!correspondance) return null;
+  const minutes = Number(correspondance[1]);
+  const secondes = Number(correspondance[2] ?? 0);
+  if (secondes > 59) return null;
+  const total = (minutes * 60 + secondes) * 1000;
+  return total <= DUREE_CHASSE_MS ? total : null;
+}

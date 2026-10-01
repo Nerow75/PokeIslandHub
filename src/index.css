@@ -1273,3 +1273,34 @@ main {
 .chasse__resume img {
   image-rendering: pixelated;
 }
+
+.chasse__actions {
+  flex-wrap: wrap;
+}
+
+.chrono-groupe,
+.chrono-reglage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.chrono-reglage {
+  align-items: flex-end;
+}
+
+.chrono-reglage input {
+  width: 7rem;
+  min-height: 2.75rem;
+  padding: var(--espace-2) var(--espace-4);
+  background: var(--couleur-surface);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-pilule);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.chrono-reglage .message-erreur {
+  flex-basis: 100%;
+}

@@ -17,8 +17,11 @@ import {
 import {
   classerBiomesDeChasse,
   chasseVide,
+  debutPourTempsRestant,
+  DUREE_CHASSE_MS,
   especesPresentesPartout,
   formaterDuree,
+  lireDuree,
   NOMBRE_POKEMON_CHASSE,
   tempsRestant,
   type Chasse,
@@ -52,8 +55,20 @@ const SuggestionsNoms = memo(function SuggestionsNoms() {
   );
 });
 
-function Chrono({ debut, onDemarrer }: { debut: string | null; onDemarrer: () => void }) {
+/**
+ * Minuteur de chasse. Réglable à la main : le temps affiché en jeu et celui du hub
+ * peuvent dériver (lancement décalé, pause).
+ */
+function Chrono({
+  debut,
+  onDebutChange,
+}: {
+  debut: string | null;
+  onDebutChange: (debut: string) => void;
+}) {
   const [maintenant, setMaintenant] = useState(() => new Date());
+  const [saisie, setSaisie] = useState<string | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   useEffect(() => {
     if (!debut) return;
@@ -61,18 +76,97 @@ function Chrono({ debut, onDemarrer }: { debut: string | null; onDemarrer: () =>
     return () => clearInterval(minuteur);
   }, [debut]);
 
-  if (!debut) {
+  const restant = debut ? tempsRestant(debut, maintenant) : DUREE_CHASSE_MS;
+
+  const regler = (restantMs: number): void => {
+    const instant = new Date();
+    setMaintenant(instant);
+    onDebutChange(debutPourTempsRestant(restantMs, instant));
+  };
+
+  const handleSaisie = (evenement: FormEvent): void => {
+    evenement.preventDefault();
+    const duree = lireDuree(saisie ?? "");
+    if (duree === null) {
+      setErreur("Format attendu : minutes:secondes, 60:00 maximum.");
+      return;
+    }
+    regler(duree);
+    setSaisie(null);
+    setErreur(null);
+  };
+
+  if (saisie !== null) {
     return (
-      <button type="button" className="bouton bouton--plein" onClick={onDemarrer}>
-        Lancer le chrono (1 h)
-      </button>
+      <form className="chrono-reglage" onSubmit={handleSaisie}>
+        <label>
+          Temps restant (mm:ss)
+          <input
+            type="text"
+            inputMode="numeric"
+            autoFocus
+            value={saisie}
+            onChange={(e) => setSaisie(e.target.value)}
+            aria-describedby={erreur ? "chrono-erreur" : undefined}
+          />
+        </label>
+        <button type="submit" className="bouton bouton--plein">
+          Valider
+        </button>
+        <button type="button" className="bouton" onClick={() => setSaisie(null)}>
+          Annuler
+        </button>
+        {erreur && (
+          <p id="chrono-erreur" className="message-erreur" role="alert">
+            {erreur}
+          </p>
+        )}
+      </form>
     );
   }
-  const restant = tempsRestant(debut, maintenant);
+
+  if (!debut) {
+    return (
+      <div className="chrono-groupe">
+        <button
+          type="button"
+          className="bouton bouton--plein"
+          onClick={() => regler(DUREE_CHASSE_MS)}
+        >
+          Lancer le chrono (1 h)
+        </button>
+        <button type="button" className="bouton" onClick={() => setSaisie("60:00")}>
+          Lancer à…
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <p className={`chrono${restant === 0 ? " chrono--fini" : ""}`} role="timer" aria-live="off">
-      {restant === 0 ? "Temps écoulé" : formaterDuree(restant)}
-    </p>
+    <div className="chrono-groupe">
+      <p className={`chrono${restant === 0 ? " chrono--fini" : ""}`} role="timer" aria-live="off">
+        {restant === 0 ? "Temps écoulé" : formaterDuree(restant)}
+      </p>
+      <button
+        type="button"
+        className="bouton"
+        aria-label="Retirer une minute"
+        onClick={() => regler(restant - 60_000)}
+      >
+        −1 min
+      </button>
+      <button
+        type="button"
+        className="bouton"
+        aria-label="Ajouter une minute"
+        onClick={() => regler(restant + 60_000)}
+      >
+        +1 min
+      </button>
+      <button type="button" className="bouton" onClick={() => setSaisie(formaterDuree(restant))}>
+        Régler
+      </button>
+    </div>
   );
 }
 
@@ -153,7 +247,7 @@ const VueChasse: FC<VueChasseProps> = ({ chasse, statuts, onChasseChange, onStat
         <div className="chasse__actions">
           <Chrono
             debut={chasse.debut}
-            onDemarrer={() => onChasseChange((c) => ({ ...c, debut: new Date().toISOString() }))}
+            onDebutChange={(nouveauDebut) => onChasseChange((c) => ({ ...c, debut: nouveauDebut }))}
           />
           <button type="button" className="bouton" onClick={handleNouvelleChasse}>
             Nouvelle chasse
