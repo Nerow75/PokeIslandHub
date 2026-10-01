@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { chasseVide, NOMBRE_POKEMON_CHASSE } from "./chasse.ts";
 import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
+import { votesParDefaut } from "./votes.ts";
 
 /*
  * Format de la sauvegarde utilisateur.
@@ -10,7 +11,7 @@ import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 3;
+export const VERSION_SAUVEGARDE = 4;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -27,12 +28,22 @@ const schemaChasse = z.object({
   debut: z.iso.datetime().nullable(),
 });
 
+const schemaVote = z.object({
+  id: z.string().min(1),
+  nom: z.string().min(1).max(60),
+  /* http(s) uniquement : le lien est ouvert tel quel. */
+  url: z.url({ protocol: /^https?$/ }).nullable(),
+  delaiMinutes: z.number().int().positive(),
+  dernierVote: z.iso.datetime().nullable(),
+});
+
 export const schemaSauvegarde = z.object({
   version: z.literal(VERSION_SAUVEGARDE),
   /** Slug d'espèce -> statut. Une espèce absente est "non vue". */
   statuts: z.record(z.string(), z.enum(["vu", "capture"])),
   reglagesCompletion: schemaReglagesCompletion,
   chasse: schemaChasse,
+  votes: z.array(schemaVote),
 });
 
 export type Sauvegarde = z.infer<typeof schemaSauvegarde>;
@@ -62,6 +73,8 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
   },
   /* v2 -> v3 : ajout de la chasse en cours, vide. */
   2: (donnees) => ({ ...donnees, version: 3, chasse: chasseVide() }),
+  /* v3 -> v4 : ajout des votes (2 h et 24 h), liens à renseigner. */
+  3: (donnees) => ({ ...donnees, version: 4, votes: votesParDefaut() }),
 };
 
 export function sauvegardeVide(): Sauvegarde {
@@ -70,6 +83,7 @@ export function sauvegardeVide(): Sauvegarde {
     statuts: {},
     reglagesCompletion: { ...REGLAGES_COMPLETION_PAR_DEFAUT },
     chasse: chasseVide(),
+    votes: votesParDefaut(),
   };
 }
 

@@ -1,6 +1,7 @@
 // src/App.tsx
 
 import { useDeferredValue, useMemo, useState } from "react";
+import AlerteVotes from "./components/AlerteVotes.tsx";
 import BarreFiltres from "./components/BarreFiltres.tsx";
 import BarreSauvegarde from "./components/BarreSauvegarde.tsx";
 import CartePokemon from "./components/CartePokemon.tsx";
@@ -10,6 +11,7 @@ import VueEv from "./components/VueEv.tsx";
 import VueEvolutions from "./components/VueEvolutions.tsx";
 import VueOuTrouver from "./components/VueOuTrouver.tsx";
 import VuePokeFinder from "./components/VuePokeFinder.tsx";
+import VueVotes from "./components/VueVotes.tsx";
 import {
   ENTREES_POKEDEX,
   ESPECES_PAR_SLUG,
@@ -22,7 +24,7 @@ import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
 import type { StatutPokemon } from "./domaine/statut.ts";
 import { useSauvegarde } from "./hooks/useSauvegarde.ts";
 
-type Onglet = "pokedex" | "chasse" | "evolutions" | "ou-trouver" | "pokefinder" | "ev";
+type Onglet = "pokedex" | "chasse" | "evolutions" | "ou-trouver" | "pokefinder" | "ev" | "votes";
 
 const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "pokedex", libelle: "Pokédex" },
@@ -31,6 +33,7 @@ const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "ou-trouver", libelle: "Où trouver" },
   { id: "pokefinder", libelle: "PokéFinder" },
   { id: "ev", libelle: "EV" },
+  { id: "votes", libelle: "Votes" },
 ] as const;
 
 /** Onglet indiqué dans l'URL (#evolutions...), pour le conserver au rafraîchissement. */
@@ -64,6 +67,7 @@ const App = () => {
     definirStatut,
     modifierReglagesCompletion,
     modifierChasse,
+    modifierVote,
     importer,
     exporter,
   } = useSauvegarde();
@@ -125,6 +129,7 @@ const App = () => {
               </button>
             ))}
           </nav>
+          <AlerteVotes votes={sauvegarde.votes} onOuvrir={() => handleOngletChange("votes")} />
           <BarreSauvegarde
             modeStockage={modeStockage}
             onExporter={exporter}
@@ -167,6 +172,7 @@ const App = () => {
           )}
           {onglet === "ou-trouver" && <VueOuTrouver statuts={sauvegarde.statuts} />}
           {onglet === "pokefinder" && <VuePokeFinder statuts={sauvegarde.statuts} />}
+          {onglet === "votes" && <VueVotes votes={sauvegarde.votes} onVoteChange={modifierVote} />}
           {onglet === "ev" && <VueEv statuts={sauvegarde.statuts} />}
 
           {onglet === "pokedex" && (

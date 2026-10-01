@@ -9,6 +9,7 @@ import {
   type Sauvegarde,
 } from "../domaine/sauvegarde.ts";
 import type { StatutPokemon } from "../domaine/statut.ts";
+import type { Vote } from "../domaine/votes.ts";
 import {
   chargerSauvegardeFichier,
   enregistrerSauvegardeFichier,
@@ -172,6 +173,13 @@ export function useSauvegarde() {
     modifier((precedente) => ({ ...precedente, chasse: transformerChasse(precedente.chasse) }));
   };
 
+  const modifierVote = (id: string, transformerVote: (vote: Vote) => Vote): void => {
+    modifier((precedente) => ({
+      ...precedente,
+      votes: precedente.votes.map((vote) => (vote.id === id ? transformerVote(vote) : vote)),
+    }));
+  };
+
   const modifierReglagesCompletion = (reglages: ReglagesCompletion): void => {
     modifier((precedente) => ({ ...precedente, reglagesCompletion: reglages }));
   };
@@ -199,6 +207,7 @@ export function useSauvegarde() {
     definirStatut,
     modifierReglagesCompletion,
     modifierChasse,
+    modifierVote,
     importer,
     exporter,
   };
