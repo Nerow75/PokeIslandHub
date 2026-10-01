@@ -1,9 +1,8 @@
 // src/components/VueChasse.tsx
 
-import { memo, useEffect, useState, type FC, type FormEvent } from "react";
+import { useEffect, useState, type FC, type FormEvent } from "react";
 import {
   ESPECE_PAR_NOM_NORMALISE,
-  ESPECES,
   ESPECES_PAR_SLUG,
   NOMS_TYPES,
   normaliserRecherche,
@@ -33,6 +32,7 @@ import type { EspecePokemon } from "../types/pokedex.ts";
 import { BlocApparition, SansApparition } from "./BlocApparition.tsx";
 import ChampACopier from "./ChampACopier.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
+import SuggestionsNoms from "./SuggestionsNoms.tsx";
 
 interface VueChasseProps {
   chasse: Chasse;
@@ -43,17 +43,6 @@ interface VueChasseProps {
 
 const ID_LISTE_NOMS = "chasse-noms-pokemon";
 const NOMBRE_BIOMES_AFFICHES = 8;
-
-/* Liste de suggestions des noms français : 1025 options, rendue une seule fois. */
-const SuggestionsNoms = memo(function SuggestionsNoms() {
-  return (
-    <datalist id={ID_LISTE_NOMS}>
-      {ESPECES.map((espece) => (
-        <option key={espece.slug} value={espece.nomFr} />
-      ))}
-    </datalist>
-  );
-});
 
 /**
  * Minuteur de chasse. Réglable à la main : le temps affiché en jeu et celui du hub
@@ -270,7 +259,7 @@ const VueChasse: FC<VueChasseProps> = ({ chasse, statuts, onChasseChange, onStat
           <button type="submit" className="bouton bouton--plein" disabled={!saisie.trim()}>
             Ajouter
           </button>
-          <SuggestionsNoms />
+          <SuggestionsNoms id={ID_LISTE_NOMS} />
         </form>
       )}
       {erreurSaisie && (
@@ -301,7 +290,11 @@ const VueChasse: FC<VueChasseProps> = ({ chasse, statuts, onChasseChange, onStat
                   Retirer
                 </button>
                 <SpritePokemon espece={espece} taille={96} className="cible__sprite" />
-                <p className="cible__nom">{espece.nomFr}</p>
+                <p className="cible__nom">
+                  <a className="lien-fiche" href={`#fiche/${espece.slug}`}>
+                    {espece.nomFr}
+                  </a>
+                </p>
                 <p className="texte-discret">{espece.nomEn}</p>
                 <span className="carte__types">
                   {espece.types.map((type) => (

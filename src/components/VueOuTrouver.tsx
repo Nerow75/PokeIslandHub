@@ -205,7 +205,11 @@ function ListeOuTrouver({
                 <div className="fiche-apparition__identite">
                   <SpritePokemon espece={espece} taille={72} className="fiche-apparition__sprite" />
                   <div>
-                    <p className="fiche-apparition__nom">{espece.nomFr}</p>
+                    <p className="fiche-apparition__nom">
+                      <a className="lien-fiche" href={`#fiche/${espece.slug}`}>
+                        {espece.nomFr}
+                      </a>
+                    </p>
                     <p className="texte-discret">
                       #{String(espece.id).padStart(4, "0")} {espece.nomEn}
                     </p>

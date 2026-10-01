@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import AlerteVotes from "./components/AlerteVotes.tsx";
 import BarreFiltres from "./components/BarreFiltres.tsx";
 import BarreSauvegarde from "./components/BarreSauvegarde.tsx";
@@ -8,6 +8,7 @@ import CartePokemon from "./components/CartePokemon.tsx";
 import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
 import VueChasse from "./components/VueChasse.tsx";
 import VueEv from "./components/VueEv.tsx";
+import VueFiche from "./components/VueFiche.tsx";
 import VueEvolutions from "./components/VueEvolutions.tsx";
 import VueOuTrouver from "./components/VueOuTrouver.tsx";
 import VuePokeFinder from "./components/VuePokeFinder.tsx";
@@ -24,10 +25,12 @@ import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
 import type { StatutPokemon } from "./domaine/statut.ts";
 import { useSauvegarde } from "./hooks/useSauvegarde.ts";
 
-type Onglet = "pokedex" | "chasse" | "evolutions" | "ou-trouver" | "pokefinder" | "ev" | "votes";
+type Onglet =
+  "pokedex" | "fiche" | "chasse" | "evolutions" | "ou-trouver" | "pokefinder" | "ev" | "votes";
 
 const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "pokedex", libelle: "Pokédex" },
+  { id: "fiche", libelle: "Fiche" },
   { id: "chasse", libelle: "Chasse" },
   { id: "evolutions", libelle: "Évolutions" },
   { id: "ou-trouver", libelle: "Où trouver" },
@@ -36,10 +39,17 @@ const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "votes", libelle: "Votes" },
 ] as const;
 
-/** Onglet indiqué dans l'URL (#evolutions...), pour le conserver au rafraîchissement. */
-function ongletDepuisUrl(): Onglet {
-  const demande = window.location.hash.slice(1);
-  return ONGLETS.find((o) => o.id === demande)?.id ?? "pokedex";
+interface Navigation {
+  onglet: Onglet;
+  /** Espèce affichée par l'onglet Fiche (#fiche/eevee). */
+  slugFiche: string | null;
+}
+
+/** Navigation indiquée dans l'URL (#evolutions, #fiche/eevee...), conservée au rafraîchissement. */
+function navigationDepuisUrl(): Navigation {
+  const [demande = "", slug] = window.location.hash.slice(1).split("/");
+  const onglet = ONGLETS.find((o) => o.id === demande)?.id ?? "pokedex";
+  return { onglet, slugFiche: onglet === "fiche" && slug ? decodeURIComponent(slug) : null };
 }
 
 function correspondAuFiltreStatut(statut: StatutPokemon, filtre: Filtres["statut"]): boolean {
@@ -71,11 +81,23 @@ const App = () => {
     importer,
     exporter,
   } = useSauvegarde();
-  const [onglet, setOnglet] = useState<Onglet>(ongletDepuisUrl);
+  const [navigation, setNavigation] = useState<Navigation>(navigationDepuisUrl);
+  const { onglet, slugFiche } = navigation;
+
+  /* Les liens vers une fiche (#fiche/slug) changent l'URL : la navigation la suit. */
+  useEffect(() => {
+    const suivreUrl = (): void => {
+      setNavigation(navigationDepuisUrl());
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener("hashchange", suivreUrl);
+    return () => window.removeEventListener("hashchange", suivreUrl);
+  }, []);
 
   const handleOngletChange = (id: Onglet): void => {
-    setOnglet(id);
-    window.history.replaceState(null, "", `#${id}`);
+    const slug = id === "fiche" ? slugFiche : null;
+    setNavigation({ onglet: id, slugFiche: slug });
+    window.history.replaceState(null, "", slug ? `#fiche/${slug}` : `#${id}`);
   };
   const [filtres, setFiltres] = useState<Filtres>(FILTRES_PAR_DEFAUT);
   const rechercheDifferee = useDeferredValue(filtres.recherche);
@@ -159,6 +181,13 @@ const App = () => {
             onReglagesChange={modifierReglagesCompletion}
           />
 
+          {onglet === "fiche" && (
+            <VueFiche
+              slug={slugFiche}
+              statuts={sauvegarde.statuts}
+              onStatutChange={definirStatut}
+            />
+          )}
           {onglet === "chasse" && (
             <VueChasse
               chasse={sauvegarde.chasse}

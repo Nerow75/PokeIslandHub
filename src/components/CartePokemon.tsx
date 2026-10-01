@@ -25,7 +25,7 @@ const CartePokemon = memo(function CartePokemon({
   const numero = `#${String(espece.id).padStart(4, "0")}`;
 
   return (
-    <li>
+    <li className="grille__case">
       <button
         type="button"
         className={`carte carte--${statut}`}
@@ -53,6 +53,15 @@ const CartePokemon = memo(function CartePokemon({
         )}
         <span className="carte__statut">{LIBELLES_STATUT[statut]}</span>
       </button>
+      {espece.generation !== 0 && (
+        <a
+          className="carte__fiche"
+          href={`#fiche/${espece.slug}`}
+          aria-label={`Fiche de ${espece.nomFr}`}
+        >
+          Fiche
+        </a>
+      )}
     </li>
   );
 });

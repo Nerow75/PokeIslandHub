@@ -1445,3 +1445,275 @@ a.bouton {
   border: 1px solid var(--couleur-bordure);
   border-radius: var(--rayon-pilule);
 }
+
+/* Liens vers la fiche d'un Pokémon */
+
+.lien-fiche {
+  color: inherit;
+  text-decoration: none;
+}
+
+.lien-fiche:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.grille__case {
+  position: relative;
+}
+
+.carte__fiche {
+  position: absolute;
+  right: var(--espace-2);
+  bottom: var(--espace-2);
+  padding: 0 var(--espace-2);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface-2);
+  color: var(--couleur-texte-discret);
+  font-size: var(--texte-xs);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.carte__fiche:hover {
+  background: var(--couleur-bordure);
+  color: var(--couleur-texte);
+}
+
+/* Fiche */
+
+.fiche__recherche {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espace-3);
+}
+
+.fiche {
+  padding: var(--espace-6);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--couleur-type) 30%, var(--couleur-surface)) 0%,
+    var(--couleur-surface) 55%
+  );
+  border: 1px solid var(--couleur-bordure);
+  border-left: 8px solid var(--couleur-type);
+  border-radius: var(--rayon-carte);
+}
+
+.fiche__identite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-6);
+}
+
+.fiche__scene {
+  display: grid;
+  place-items: center;
+  width: 11rem;
+  height: 11rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--couleur-type) 40%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+.fiche__sprite {
+  image-rendering: pixelated;
+}
+
+.fiche__textes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+}
+
+.fiche__nom {
+  font-size: var(--texte-geant);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.fiche__nom-en {
+  font-size: var(--texte-lg);
+  font-weight: 700;
+  color: var(--couleur-texte-discret);
+}
+
+.fiche__types {
+  justify-content: flex-start;
+}
+
+.fiche__types .type {
+  font-size: var(--texte-sm);
+  padding: 0.125rem var(--espace-3);
+}
+
+.fiche__etiquette {
+  padding: 0.125rem var(--espace-3);
+  border-radius: var(--rayon-pilule);
+  background: var(--jaune);
+  color: var(--encre);
+  font-size: var(--texte-sm);
+  font-weight: 900;
+}
+
+.fiche__statut {
+  display: inline-flex;
+  gap: var(--espace-1);
+  padding: var(--espace-1);
+  background: var(--couleur-surface-2);
+  border-radius: var(--rayon-pilule);
+  align-self: flex-start;
+}
+
+.fiche__choix {
+  min-height: 2.5rem;
+  padding: var(--espace-2) var(--espace-4);
+  background: none;
+  border: none;
+  border-radius: var(--rayon-pilule);
+  color: var(--couleur-texte-discret);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fiche__choix[aria-pressed="true"] {
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  box-shadow: inset 0 0 0 2px var(--couleur-texte-discret);
+}
+
+.fiche__choix--vu[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--couleur-vu);
+  color: var(--couleur-vu);
+}
+
+.fiche__choix--capture[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--couleur-capture);
+  color: var(--couleur-capture);
+}
+
+.fiche__grille {
+  display: grid;
+  gap: var(--espace-4);
+}
+
+@media (min-width: 1024px) {
+  .fiche__grille {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+
+.fiche__colonne {
+  display: grid;
+  gap: var(--espace-4);
+}
+
+.fiche__ev {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--espace-2);
+}
+
+.fiche__ev li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--espace-2);
+  background: var(--couleur-fond);
+  border-radius: var(--rayon-champ);
+  font-size: var(--texte-sm);
+}
+
+.fiche__ev strong {
+  font-size: var(--texte-lg);
+}
+
+/* Arbre d'évolution */
+
+.famille__noeud {
+  display: grid;
+  gap: var(--espace-2);
+}
+
+.famille__tete {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.famille__tete .etiquette {
+  margin-left: 0;
+}
+
+.famille__espece {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-2);
+  padding: var(--espace-1) var(--espace-3) var(--espace-1) var(--espace-1);
+  border-radius: var(--rayon-pilule);
+  color: inherit;
+  font-weight: 900;
+  text-decoration: none;
+  transition: background-color var(--duree-feedback);
+}
+
+.famille__espece img {
+  image-rendering: pixelated;
+}
+
+.famille__espece:hover {
+  background: var(--couleur-surface-2);
+}
+
+.famille__espece--actuelle {
+  background: color-mix(in srgb, var(--jaune) 22%, transparent);
+  outline: 2px solid var(--jaune);
+}
+
+.famille__branches {
+  margin: 0;
+  padding: 0 0 0 var(--espace-6);
+  list-style: none;
+  display: grid;
+  gap: var(--espace-3);
+  border-left: 3px solid var(--couleur-bordure);
+  margin-left: 2rem;
+}
+
+.famille__branche {
+  display: grid;
+  gap: var(--espace-1);
+}
+
+.famille__conditions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--espace-1);
+  font-size: var(--texte-sm);
+  font-weight: 700;
+}
+
+.famille__conditions li {
+  justify-self: start;
+  padding: 0.125rem var(--espace-3);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface-2);
+}
+
+.famille__variantes summary {
+  cursor: pointer;
+  font-size: var(--texte-sm);
+  color: var(--couleur-texte-discret);
+}
