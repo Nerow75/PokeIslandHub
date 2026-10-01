@@ -19,7 +19,7 @@ export interface ReglagesCompletion {
 export const REGLAGES_COMPLETION_PAR_DEFAUT: ReglagesCompletion = {
   base: "capture",
   totalManuel: null,
-  objectif: 20,
+  objectif: 45,
 };
 
 export interface EtatCompletion {

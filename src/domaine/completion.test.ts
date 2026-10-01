@@ -24,9 +24,10 @@ describe("compteSelonBase", () => {
 describe("calculerCompletion", () => {
   const sur1025 = { base: "capture" as const, totalManuel: 1025, objectif: 20 };
   const TOTAL_SERVEUR = 1045;
+  const objectif20 = { base: "capture" as const, totalManuel: null, objectif: 20 };
 
   it("retrouve les 17,80 % du jeu : 186 capturés sur 1045", () => {
-    const etat = calculerCompletion(186, REGLAGES_COMPLETION_PAR_DEFAUT, TOTAL_SERVEUR);
+    const etat = calculerCompletion(186, objectif20, TOTAL_SERVEUR);
     expect(formaterPourcentage(etat.pourcentage)).toBe("17,80 %");
     expect(etat.requisPourObjectif).toBe(209);
     expect(etat.restantPourObjectif).toBe(23);
@@ -43,8 +44,14 @@ describe("calculerCompletion", () => {
     expect(etat.restantPourObjectif).toBe(49);
   });
 
+  it("vise par défaut le rang à 45 % : 471 captures sur 1045", () => {
+    const etat = calculerCompletion(220, REGLAGES_COMPLETION_PAR_DEFAUT, TOTAL_SERVEUR);
+    expect(etat.requisPourObjectif).toBe(471);
+    expect(etat.restantPourObjectif).toBe(251);
+  });
+
   it("ne descend pas sous zéro une fois l'objectif atteint", () => {
-    const etat = calculerCompletion(300, REGLAGES_COMPLETION_PAR_DEFAUT, TOTAL_SERVEUR);
+    const etat = calculerCompletion(300, objectif20, TOTAL_SERVEUR);
     expect(etat.restantPourObjectif).toBe(0);
   });
 
