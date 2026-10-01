@@ -1,6 +1,6 @@
 // src/donnees.ts
 
-import { ENTREES_SERVEUR } from "./data/entreesServeur.ts";
+import { ENTREES_SERVEUR, NOMBRE_ENTREES_NON_IDENTIFIEES } from "./data/entreesServeur.ts";
 import donneesBrutes from "./data/pokedex.json";
 import type { Traductions } from "./domaine/conditionsEvolution.ts";
 import type { EspecePokemon, PokedexGenere } from "./types/pokedex.ts";
@@ -44,6 +44,9 @@ const ESPECES_SERVEUR: readonly EspecePokemon[] = ENTREES_SERVEUR.map((entree) =
 
 /** Toutes les entrées du Pokédex du serveur : espèces officielles puis entrées propres. */
 export const ENTREES_POKEDEX: readonly EspecePokemon[] = [...ESPECES, ...ESPECES_SERVEUR];
+
+/** Total du Pokédex du serveur, utilisé par défaut pour la complétion. */
+export const TOTAL_POKEDEX_SERVEUR = ENTREES_POKEDEX.length + NOMBRE_ENTREES_NON_IDENTIFIEES;
 
 export function estEntreeServeur(espece: EspecePokemon): boolean {
   return espece.generation === GENERATION_SERVEUR;

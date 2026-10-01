@@ -9,11 +9,11 @@ import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 1;
+export const VERSION_SAUVEGARDE = 2;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
-  total: z.number().int().positive(),
+  totalManuel: z.number().int().positive().nullable(),
   objectif: z.number().min(0).max(100),
 });
 
@@ -27,15 +27,29 @@ export const schemaSauvegarde = z.object({
 export type Sauvegarde = z.infer<typeof schemaSauvegarde>;
 
 export type ResultatLecture =
-  | { succes: true; sauvegarde: Sauvegarde }
-  | { succes: false; erreur: string };
+  { succes: true; sauvegarde: Sauvegarde } | { succes: false; erreur: string };
+
+/* Anciennes valeurs par défaut du total, remplacées par le calcul automatique. */
+const ANCIENS_TOTAUX_PAR_DEFAUT = new Set([1025, 1045]);
 
 /**
  * Migrations successives : MIGRATIONS[n] convertit une sauvegarde de version n
- * en version n + 1. Vide tant que seule la version 1 existe.
+ * en version n + 1.
  */
-const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<string, unknown>> =
-  {};
+const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<string, unknown>> = {
+  /* v1 -> v2 : "total" fixe devient "totalManuel", null quand c'était une valeur par défaut. */
+  1: (donnees) => {
+    const reglages = estObjet(donnees["reglagesCompletion"]) ? donnees["reglagesCompletion"] : {};
+    const { total, ...autresReglages } = reglages;
+    const totalManuel =
+      typeof total === "number" && !ANCIENS_TOTAUX_PAR_DEFAUT.has(total) ? total : null;
+    return {
+      ...donnees,
+      version: 2,
+      reglagesCompletion: { ...autresReglages, totalManuel },
+    };
+  },
+};
 
 export function sauvegardeVide(): Sauvegarde {
   return {

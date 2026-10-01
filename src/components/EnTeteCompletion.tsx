@@ -13,6 +13,8 @@ interface EnTeteCompletionProps {
   reglages: ReglagesCompletion;
   nombreVus: number;
   nombreCaptures: number;
+  /** Total calculé à partir des entrées connues du Pokédex du serveur. */
+  totalAutomatique: number;
   onReglagesChange: (reglages: ReglagesCompletion) => void;
 }
 
@@ -24,17 +26,23 @@ const EnTeteCompletion: FC<EnTeteCompletionProps> = ({
   reglages,
   nombreVus,
   nombreCaptures,
+  totalAutomatique,
   onReglagesChange,
 }) => {
   const progressionObjectif =
     etat.objectif > 0 ? Math.min(100, (etat.pourcentage / etat.objectif) * 100) : 100;
 
-  const handleNombre = (cle: "total" | "objectif", valeur: string): void => {
+  const handleTotalManuel = (valeur: string): void => {
     const nombre = Number(valeur);
-    const estValide =
-      cle === "total" ? Number.isInteger(nombre) && nombre > 0 : nombre >= 0 && nombre <= 100;
-    if (valeur !== "" && estValide) {
-      onReglagesChange({ ...reglages, [cle]: nombre });
+    if (valeur !== "" && Number.isInteger(nombre) && nombre > 0) {
+      onReglagesChange({ ...reglages, totalManuel: nombre });
+    }
+  };
+
+  const handleObjectif = (valeur: string): void => {
+    const nombre = Number(valeur);
+    if (valeur !== "" && nombre >= 0 && nombre <= 100) {
+      onReglagesChange({ ...reglages, objectif: nombre });
     }
   };
 
@@ -89,16 +97,31 @@ const EnTeteCompletion: FC<EnTeteCompletionProps> = ({
             <option value="vu">les vus (capturés inclus)</option>
           </select>
         </label>
-        <label>
-          Total de référence
+        <label className="case-a-cocher">
           <input
-            type="number"
-            min={1}
-            step={1}
-            defaultValue={reglages.total}
-            onChange={(e) => handleNombre("total", e.target.value)}
+            type="checkbox"
+            checked={reglages.totalManuel === null}
+            onChange={(e) =>
+              onReglagesChange({
+                ...reglages,
+                totalManuel: e.target.checked ? null : totalAutomatique,
+              })
+            }
           />
+          Total automatique ({totalAutomatique} entrées)
         </label>
+        {reglages.totalManuel !== null && (
+          <label>
+            Total manuel
+            <input
+              type="number"
+              min={1}
+              step={1}
+              defaultValue={reglages.totalManuel}
+              onChange={(e) => handleTotalManuel(e.target.value)}
+            />
+          </label>
+        )}
         <label>
           Objectif (%)
           <input
@@ -107,7 +130,7 @@ const EnTeteCompletion: FC<EnTeteCompletionProps> = ({
             max={100}
             step={0.01}
             defaultValue={reglages.objectif}
-            onChange={(e) => handleNombre("objectif", e.target.value)}
+            onChange={(e) => handleObjectif(e.target.value)}
           />
         </label>
       </details>

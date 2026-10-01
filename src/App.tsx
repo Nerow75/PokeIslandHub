@@ -13,6 +13,7 @@ import {
   ESPECES_PAR_SLUG,
   INDEX_RECHERCHE,
   normaliserRecherche,
+  TOTAL_POKEDEX_SERVEUR,
 } from "./donnees.ts";
 import { calculerCompletion, compteSelonBase } from "./domaine/completion.ts";
 import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
@@ -68,6 +69,7 @@ const App = () => {
   const etatCompletion = calculerCompletion(
     reglages.base === "capture" ? nombreCaptures : nombreVus,
     reglages,
+    TOTAL_POKEDEX_SERVEUR,
   );
 
   const especesFiltrees = useMemo(() => {
@@ -121,6 +123,7 @@ const App = () => {
           reglages={reglages}
           nombreVus={nombreVus}
           nombreCaptures={nombreCaptures}
+          totalAutomatique={TOTAL_POKEDEX_SERVEUR}
           onReglagesChange={modifierReglagesCompletion}
         />
 

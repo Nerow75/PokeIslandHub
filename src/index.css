@@ -585,3 +585,9 @@ textarea {
   font-size: var(--texte-xl);
   font-weight: 700;
 }
+
+.case-a-cocher {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--espace-2);
+}
