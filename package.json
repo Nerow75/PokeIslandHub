@@ -11,6 +11,7 @@
     "test": "vitest run",
     "generate:pokedex": "node scripts/generate-pokedex.ts",
     "generate:apparitions": "node scripts/generate-apparitions.ts",
+    "generate:cobblemon": "node scripts/generate-cobblemon.ts",
     "preview": "vite preview"
   },
   "dependencies": {

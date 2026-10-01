@@ -42,10 +42,9 @@ export const schemaFichierApparitions = z
   .loose();
 export type FichierApparitions = z.infer<typeof schemaFichierApparitions>;
 
-/** Identifiant comparable entre Cobblemon ("mrmime") et PokeAPI ("mr-mime"). */
-export function cleEspece(identifiant: string): string {
-  return identifiant.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
+import { cleEspece } from "../../src/domaine/identifiants.ts";
+
+export { cleEspece };
 
 /**
  * Sépare "meowth galarian" en espèce et aspect. Les propriétés "clé=valeur"

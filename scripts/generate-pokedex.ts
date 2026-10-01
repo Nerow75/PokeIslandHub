@@ -36,7 +36,10 @@ const REQUETES_SIMULTANEES = 8;
 const TENTATIVES_MAX = 3;
 
 function cheminCache(url: string): string {
-  const relatif = url.replace(URL_API, "").replace(/^\/|\/$/g, "").replaceAll("/", "_");
+  const relatif = url
+    .replace(URL_API, "")
+    .replace(/^\/|\/$/g, "")
+    .replaceAll("/", "_");
   return join(DOSSIER_CACHE, `${relatif}.json`);
 }
 

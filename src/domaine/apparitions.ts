@@ -248,6 +248,11 @@ const ASPECTS: Record<string, string> = {
   male: "Mâle",
 };
 
+/** Aspect parlant pour le joueur (forme régionale, sexe), par opposition aux aspects techniques. */
+export function estAspectAffichable(aspect: string): boolean {
+  return aspect in ASPECTS;
+}
+
 export function libelleAspect(aspect: string): string {
   return ASPECTS[aspect] ?? libelleIdentifiant(aspect);
 }

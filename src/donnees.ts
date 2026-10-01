@@ -1,8 +1,18 @@
 // src/donnees.ts
 
 import { ENTREES_SERVEUR, NOMBRE_ENTREES_NON_IDENTIFIEES } from "./data/entreesServeur.ts";
+import donneesCobblemon from "./data/cobblemon.json";
 import donneesBrutes from "./data/pokedex.json";
-import type { Traductions } from "./domaine/conditionsEvolution.ts";
+import { estAspectAffichable } from "./domaine/apparitions.ts";
+import type { EvolutionAffichee } from "./domaine/evolutionsAFaire.ts";
+import {
+  decrireEvolutionCobblemon,
+  niveauEvolutionCobblemon,
+  type TraductionsCobblemon,
+} from "./domaine/evolutionsCobblemon.ts";
+import { cleEspece } from "./domaine/identifiants.ts";
+import { schemaCobblemonGenere } from "./domaine/schemaCobblemon.ts";
+import type { EspeceCobblemon } from "./types/cobblemon.ts";
 import type { EspecePokemon, PokedexGenere } from "./types/pokedex.ts";
 
 /* Fichier généré par scripts/generate-pokedex.ts : ne pas l'éditer à la main. */
@@ -10,8 +20,6 @@ const pokedex: PokedexGenere = donneesBrutes;
 
 /** Les 1025 espèces officielles, issues de PokeAPI. */
 export const ESPECES: readonly EspecePokemon[] = pokedex.especes;
-export const NOMS_OBJETS: Readonly<Record<string, string>> = pokedex.objets;
-export const NOMS_CAPACITES: Readonly<Record<string, string>> = pokedex.capacites;
 export const NOMS_TYPES: Readonly<Record<string, string>> = pokedex.types;
 
 /** Pseudo-génération regroupant les entrées propres au serveur. */
@@ -111,9 +119,72 @@ export const ESPECE_PAR_NOM_NORMALISE: ReadonlyMap<string, EspecePokemon> = (() 
   return index;
 })();
 
-export const TRADUCTIONS: Traductions = {
-  objets: NOMS_OBJETS,
-  capacites: NOMS_CAPACITES,
+/* Données Cobblemon (évolutions du mod, étiquettes), générées par scripts/generate-cobblemon.ts. */
+const resultatCobblemon = schemaCobblemonGenere.safeParse(donneesCobblemon);
+if (!resultatCobblemon.success) {
+  throw new Error("src/data/cobblemon.json invalide : relancer npm run generate:cobblemon.");
+}
+export const COBBLEMON = resultatCobblemon.data;
+
+export function especeCobblemon(slug: string): EspeceCobblemon | undefined {
+  return COBBLEMON.parEspece[slug];
+}
+
+const SLUG_PAR_CLE: ReadonlyMap<string, string> = new Map(
+  ESPECES.map((espece) => [cleEspece(espece.slug), espece.slug]),
+);
+
+/** Slug PokeAPI d'un identifiant Cobblemon ("mrmime" -> "mr-mime"). */
+export function slugDepuisCobblemon(identifiant: string): string | undefined {
+  return SLUG_PAR_CLE.get(cleEspece(identifiant));
+}
+
+export const TRADUCTIONS_COBBLEMON: TraductionsCobblemon = {
+  objets: COBBLEMON.objets,
+  capacites: COBBLEMON.capacites,
   types: NOMS_TYPES,
-  especes: (slug) => ESPECES_PAR_SLUG.get(slug)?.nomFr ?? slug,
+  especes: (identifiant) => {
+    const slug = slugDepuisCobblemon(identifiant);
+    return (slug && ESPECES_PAR_SLUG.get(slug)?.nomFr) || identifiant;
+  },
 };
+
+/**
+ * Évolutions directes d'une espèce selon Cobblemon, décrites en français.
+ * Les variantes qui ne diffèrent que par un détail cosmétique sont fusionnées.
+ */
+export function evolutionsAffichees(slug: string): EvolutionAffichee[] {
+  const parEmpreinte = new Map<string, EvolutionAffichee>();
+  for (const evolution of especeCobblemon(slug)?.evolutions ?? []) {
+    const affichee: EvolutionAffichee = {
+      vers: evolution.vers,
+      niveau: niveauEvolutionCobblemon(evolution),
+      description: decrireEvolutionCobblemon(evolution, TRADUCTIONS_COBBLEMON),
+    };
+    if (evolution.aspectDepart && estAspectAffichable(evolution.aspectDepart)) {
+      affichee.aspectDepart = evolution.aspectDepart;
+    }
+    if (evolution.aspectObtenu && estAspectAffichable(evolution.aspectObtenu)) {
+      affichee.aspectObtenu = evolution.aspectObtenu;
+    }
+    parEmpreinte.set(JSON.stringify(affichee), affichee);
+  }
+  return [...parEmpreinte.values()];
+}
+
+let parentsParEspece: Map<string, { depuis: string; evolution: EvolutionAffichee }[]> | null = null;
+
+/** Espèces dont celle-ci évolue selon Cobblemon, avec l'évolution correspondante. */
+export function evolutionsVers(slug: string): { depuis: string; evolution: EvolutionAffichee }[] {
+  if (!parentsParEspece) {
+    parentsParEspece = new Map();
+    for (const espece of ESPECES) {
+      for (const evolution of evolutionsAffichees(espece.slug)) {
+        const liste = parentsParEspece.get(evolution.vers) ?? [];
+        liste.push({ depuis: espece.slug, evolution });
+        parentsParEspece.set(evolution.vers, liste);
+      }
+    }
+  }
+  return parentsParEspece.get(slug) ?? [];
+}

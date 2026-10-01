@@ -2,13 +2,14 @@
 
 import { useMemo, useState, type FC } from "react";
 import {
+  COBBLEMON,
   ESPECES,
   ESPECES_PAR_SLUG,
+  evolutionsAffichees,
   INDEX_RECHERCHE,
   normaliserRecherche,
-  TRADUCTIONS,
 } from "../donnees.ts";
-import { decrireCondition } from "../domaine/conditionsEvolution.ts";
+import { libelleAspect } from "../domaine/apparitions.ts";
 import { listerEvolutions, type PorteeEvolutions } from "../domaine/evolutionsAFaire.ts";
 import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, type StatutEnregistre, type StatutPokemon } from "../domaine/statut.ts";
@@ -47,7 +48,14 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
   };
 
   const evolutions = useMemo(
-    () => listerEvolutions(ESPECES, ESPECES_PAR_SLUG, (slug) => statuts[slug] ?? "non-vu", portee),
+    () =>
+      listerEvolutions(
+        ESPECES,
+        ESPECES_PAR_SLUG,
+        (slug) => statuts[slug] ?? "non-vu",
+        portee,
+        evolutionsAffichees,
+      ),
     [statuts, portee],
   );
 
@@ -65,7 +73,7 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
           {portee === "mes-captures"
             ? "Tes Pokémon capturés qui peuvent évoluer vers une espèce pas encore capturée."
             : "Toutes les évolutions du Pokédex."}{" "}
-          Conditions des jeux officiels : Cobblemon peut différer.
+          Conditions de Cobblemon {COBBLEMON.versionCobblemon} : le serveur peut les avoir ajustées.
         </p>
       </div>
 
@@ -111,17 +119,30 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
         </p>
       ) : (
         <ul className="liste-evolutions">
-          {evolutionsFiltrees.map(({ depuis, vers, conditions, statutCible, niveau }) => (
-            <li key={`${depuis.slug}-${vers.slug}`} className="evolution">
+          {evolutionsFiltrees.map(({ depuis, vers, evolution, statutCible }) => (
+            <li
+              key={`${depuis.slug}-${vers.slug}-${evolution.aspectDepart ?? ""}-${evolution.description}`}
+              className="evolution"
+            >
               <span
                 className="evolution__niveau"
-                aria-label={niveau ? `Niveau ${niveau}` : "Sans niveau"}
+                aria-label={evolution.niveau ? `Niveau ${evolution.niveau}` : "Sans niveau"}
               >
-                {niveau !== null ? `N.${niveau}` : "–"}
+                {evolution.niveau !== null ? `N.${evolution.niveau}` : "·"}
               </span>
               <span className="evolution__pokemon">
                 <SpritePokemon espece={depuis} taille={56} />
-                {depuis.nomFr}
+                <span>
+                  <a className="lien-fiche" href={`#fiche/${depuis.slug}`}>
+                    {depuis.nomFr}
+                  </a>
+                  {evolution.aspectDepart && (
+                    <span className="texte-discret">
+                      {" "}
+                      ({libelleAspect(evolution.aspectDepart)})
+                    </span>
+                  )}
+                </span>
               </span>
               <span className="evolution__fleche" aria-hidden="true">
                 →
@@ -129,7 +150,15 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
               <span className="evolution__pokemon">
                 <SpritePokemon espece={vers} taille={56} />
                 <span>
-                  {vers.nomFr}
+                  <a className="lien-fiche" href={`#fiche/${vers.slug}`}>
+                    {vers.nomFr}
+                  </a>
+                  {evolution.aspectObtenu && (
+                    <span className="texte-discret">
+                      {" "}
+                      ({libelleAspect(evolution.aspectObtenu)})
+                    </span>
+                  )}
                   <span className={`etiquette etiquette--${statutCible}`}>
                     {LIBELLES_STATUT[statutCible]}
                   </span>
@@ -147,14 +176,7 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
                   Évolution faite
                 </button>
               )}
-              <ul className="evolution__conditions">
-                {conditions.map((condition, index) => (
-                  <li key={JSON.stringify(condition)}>
-                    {index > 0 && <span className="texte-discret">ou </span>}
-                    {decrireCondition(condition, TRADUCTIONS)}
-                  </li>
-                ))}
-              </ul>
+              <p className="evolution__conditions">{evolution.description}</p>
             </li>
           ))}
         </ul>
