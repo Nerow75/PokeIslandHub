@@ -140,7 +140,7 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
               ) : (
                 <button
                   type="button"
-                  className="bouton evolution__action"
+                  className="bouton bouton--plein evolution__action"
                   aria-label={`Évolution faite : marquer ${vers.nomFr} comme capturé`}
                   onClick={() => handleEvolutionFaite(vers, statutCible)}
                 >

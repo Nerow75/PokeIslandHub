@@ -1,52 +1,122 @@
 /* src/styles/tokens.css */
 
+/*
+ * Direction : Pokédex. Rouge Pokédex en couleur de marque, jaune réservé à la
+ * progression, couleurs officielles des types pour les données.
+ * Règle de forme : cartes et panneaux en --rayon-carte, contrôles en pilule.
+ */
+
 :root {
   color-scheme: dark;
 
-  --couleur-fond: #12141a;
-  --couleur-surface: #1b1e27;
-  --couleur-surface-survol: #252937;
-  --couleur-bordure: #2f3443;
-  --couleur-texte: #e8eaf0;
-  --couleur-texte-discret: #9aa1b4;
-  --couleur-accent: #e5484d;
-  --couleur-vu: #4c8dff;
-  --couleur-capture: #3fbf7f;
-  --couleur-erreur: #ff6b6b;
-  --couleur-focus: #ffd166;
+  /* Marque */
+  --rouge: #e3350d;
+  --rouge-fonce: #a8260a;
+  --rouge-profond: #7d1c08;
+  --jaune: #ffcb05;
+  --encre: #1c1f26;
+  --blanc-casse: #f4f4f6;
 
-  --police-base: system-ui, "Segoe UI", Roboto, sans-serif;
+  /* Thème sombre (défaut) */
+  --couleur-fond: #10131b;
+  --couleur-surface: #181c27;
+  --couleur-surface-2: #212636;
+  --couleur-bordure: #2c3244;
+  --couleur-texte: #eef0f6;
+  --couleur-texte-discret: #a3aac0;
+  --couleur-vu: #5aa2ec;
+  --couleur-capture: #ff6a4a;
+  --couleur-erreur: #ff7a7a;
+  --couleur-succes: #5fcf86;
+  --couleur-focus: var(--jaune);
+  --ombre-carte: 0 10px 30px -18px rgb(5 8 15 / 0.9);
+  /* Silhouette des Pokémon non vus : grise sur fond sombre, noire sur fond clair. */
+  --filtre-silhouette: brightness(0) invert(0.62);
+  --opacite-silhouette: 0.45;
+
+  /* Raretés Cobblemon */
+  --rarete-common: #5fa36a;
+  --rarete-uncommon: #4a90d9;
+  --rarete-rare: #b874d4;
+  --rarete-ultra-rare: #e0a800;
+
+  /* Typographie */
+  --police-base: "Nunito Variable", "Nunito", system-ui, sans-serif;
   --texte-xs: 0.75rem;
   --texte-sm: 0.875rem;
   --texte-base: 1rem;
+  --texte-lg: 1.125rem;
   --texte-xl: 1.5rem;
-  --texte-geant: 3rem;
+  --texte-2xl: 2rem;
+  --texte-geant: clamp(2.75rem, 6vw, 4rem);
 
+  /* Espacements */
   --espace-1: 0.25rem;
   --espace-2: 0.5rem;
   --espace-3: 0.75rem;
   --espace-4: 1rem;
+  --espace-5: 1.25rem;
   --espace-6: 1.5rem;
   --espace-8: 2rem;
+  --espace-10: 2.5rem;
 
-  --rayon: 0.75rem;
+  /* Formes */
+  --rayon-carte: 1rem;
+  --rayon-champ: 0.75rem;
+  --rayon-pilule: 999px;
+
+  /* Mouvement */
   --duree-feedback: 150ms;
+  --duree-transition: 250ms;
+  --courbe: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Couleur de type par défaut (entrées sans type) */
+  --couleur-type: var(--couleur-bordure);
+  --texte-type: var(--couleur-texte);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     color-scheme: light;
 
-    --couleur-fond: #f4f5f8;
-    --couleur-surface: #ffffff;
-    --couleur-surface-survol: #eceef4;
-    --couleur-bordure: #d8dbe4;
-    --couleur-texte: #1a1d26;
-    --couleur-texte-discret: #5c6378;
-    --couleur-accent: #c9282d;
-    --couleur-vu: #2463d1;
-    --couleur-capture: #1d8a55;
+    --couleur-fond: #f1f2f7;
+    --couleur-surface: #fbfbfd;
+    --couleur-surface-2: #e9ebf2;
+    --couleur-bordure: #d6dae5;
+    --couleur-texte: #1b1f2b;
+    --couleur-texte-discret: #555d75;
+    --couleur-vu: #2163a8;
+    --couleur-capture: #c42d0b;
     --couleur-erreur: #c62828;
-    --couleur-focus: #b07800;
+    --couleur-succes: #1d7f45;
+    --couleur-focus: #2163a8;
+    --ombre-carte: 0 10px 30px -18px rgb(40 50 80 / 0.45);
+    --filtre-silhouette: brightness(0);
+    --opacite-silhouette: 0.7;
+
+    --rarete-common: #3a7d46;
+    --rarete-uncommon: #2163a8;
+    --rarete-rare: #8b3fae;
+    --rarete-ultra-rare: #9a6f00;
   }
 }
+
+/* Couleurs officielles des types, utilisées via [data-type]. */
+[data-type="normal"] { --couleur-type: #a8a77a; --texte-type: #1c1f26; }
+[data-type="fire"] { --couleur-type: #ee8130; --texte-type: #1c1f26; }
+[data-type="water"] { --couleur-type: #6390f0; --texte-type: #1c1f26; }
+[data-type="electric"] { --couleur-type: #f7d02c; --texte-type: #1c1f26; }
+[data-type="grass"] { --couleur-type: #7ac74c; --texte-type: #1c1f26; }
+[data-type="ice"] { --couleur-type: #96d9d6; --texte-type: #1c1f26; }
+[data-type="fighting"] { --couleur-type: #c22e28; --texte-type: #f4f4f6; }
+[data-type="poison"] { --couleur-type: #a33ea1; --texte-type: #f4f4f6; }
+[data-type="ground"] { --couleur-type: #e2bf65; --texte-type: #1c1f26; }
+[data-type="flying"] { --couleur-type: #a98ff3; --texte-type: #1c1f26; }
+[data-type="psychic"] { --couleur-type: #f95587; --texte-type: #1c1f26; }
+[data-type="bug"] { --couleur-type: #a6b91a; --texte-type: #1c1f26; }
+[data-type="rock"] { --couleur-type: #b6a136; --texte-type: #1c1f26; }
+[data-type="ghost"] { --couleur-type: #735797; --texte-type: #f4f4f6; }
+[data-type="dragon"] { --couleur-type: #6f35fc; --texte-type: #f4f4f6; }
+[data-type="dark"] { --couleur-type: #705746; --texte-type: #f4f4f6; }
+[data-type="steel"] { --couleur-type: #b7b7ce; --texte-type: #1c1f26; }
+[data-type="fairy"] { --couleur-type: #d685ad; --texte-type: #1c1f26; }

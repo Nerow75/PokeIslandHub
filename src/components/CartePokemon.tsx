@@ -1,6 +1,7 @@
 // src/components/CartePokemon.tsx
 
 import { memo } from "react";
+import { NOMS_TYPES } from "../donnees.ts";
 import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, statutSuivant, type StatutPokemon } from "../domaine/statut.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
@@ -28,13 +29,28 @@ const CartePokemon = memo(function CartePokemon({
       <button
         type="button"
         className={`carte carte--${statut}`}
+        data-type={espece.types[0]}
         aria-label={`${espece.nomFr} ${numero}, ${LIBELLES_STATUT[statut]}. Passer à : ${LIBELLES_STATUT[suivant]}`}
         onClick={() => onStatutChange(espece.slug, suivant)}
       >
-        <span className="carte__numero">{numero}</span>
-        <SpritePokemon espece={espece} taille={96} className="carte__sprite" />
+        <span className="carte__haut">
+          <span className="carte__numero">{numero}</span>
+          {statut === "capture" && <span className="pokeball pokeball--mini" aria-hidden="true" />}
+        </span>
+        <span className="carte__scene">
+          <SpritePokemon espece={espece} taille={96} className="carte__sprite" />
+        </span>
         <span className="carte__nom">{espece.nomFr}</span>
         <span className="carte__nom-en">{espece.nomEn}</span>
+        {espece.types.length > 0 && (
+          <span className="carte__types">
+            {espece.types.map((type) => (
+              <span key={type} className="type" data-type={type}>
+                {NOMS_TYPES[type] ?? type}
+              </span>
+            ))}
+          </span>
+        )}
         <span className="carte__statut">{LIBELLES_STATUT[statut]}</span>
       </button>
     </li>

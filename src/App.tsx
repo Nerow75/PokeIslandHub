@@ -7,6 +7,7 @@ import CartePokemon from "./components/CartePokemon.tsx";
 import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
 import VueEv from "./components/VueEv.tsx";
 import VueEvolutions from "./components/VueEvolutions.tsx";
+import VueOuTrouver from "./components/VueOuTrouver.tsx";
 import VuePokeFinder from "./components/VuePokeFinder.tsx";
 import {
   ENTREES_POKEDEX,
@@ -20,14 +21,21 @@ import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
 import type { StatutPokemon } from "./domaine/statut.ts";
 import { useSauvegarde } from "./hooks/useSauvegarde.ts";
 
-type Onglet = "pokedex" | "evolutions" | "pokefinder" | "ev";
+type Onglet = "pokedex" | "evolutions" | "ou-trouver" | "pokefinder" | "ev";
 
 const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "pokedex", libelle: "Pokédex" },
   { id: "evolutions", libelle: "Évolutions" },
+  { id: "ou-trouver", libelle: "Où trouver" },
   { id: "pokefinder", libelle: "PokéFinder" },
   { id: "ev", libelle: "EV" },
 ] as const;
+
+/** Onglet indiqué dans l'URL (#evolutions...), pour le conserver au rafraîchissement. */
+function ongletDepuisUrl(): Onglet {
+  const demande = window.location.hash.slice(1);
+  return ONGLETS.find((o) => o.id === demande)?.id ?? "pokedex";
+}
 
 function correspondAuFiltreStatut(statut: StatutPokemon, filtre: Filtres["statut"]): boolean {
   switch (filtre) {
@@ -55,7 +63,12 @@ const App = () => {
     importer,
     exporter,
   } = useSauvegarde();
-  const [onglet, setOnglet] = useState<Onglet>("pokedex");
+  const [onglet, setOnglet] = useState<Onglet>(ongletDepuisUrl);
+
+  const handleOngletChange = (id: Onglet): void => {
+    setOnglet(id);
+    window.history.replaceState(null, "", `#${id}`);
+  };
   const [filtres, setFiltres] = useState<Filtres>(FILTRES_PAR_DEFAUT);
   const rechercheDifferee = useDeferredValue(filtres.recherche);
 
@@ -88,78 +101,86 @@ const App = () => {
   }, [rechercheDifferee, filtres.generation, filtres.statut, sauvegarde.statuts]);
 
   return (
-    <div className="page">
-      <header className="page__entete">
-        <h1>PokeIslandHub</h1>
-        <nav aria-label="Sections" className="onglets">
-          {ONGLETS.map(({ id, libelle }) => (
-            <button
-              key={id}
-              type="button"
-              className="onglets__bouton"
-              aria-current={onglet === id ? "page" : undefined}
-              onClick={() => setOnglet(id)}
-            >
-              {libelle}
-            </button>
-          ))}
-        </nav>
-        <BarreSauvegarde onExporter={exporter} onImporter={importer} />
+    <>
+      <header className="barre">
+        <div className="barre__contenu">
+          <h1 className="logo">
+            <span className="pokeball" aria-hidden="true" />
+            PokeIsland<span className="logo__hub">Hub</span>
+          </h1>
+          <nav aria-label="Sections" className="onglets">
+            {ONGLETS.map(({ id, libelle }) => (
+              <button
+                key={id}
+                type="button"
+                className="onglets__bouton"
+                aria-current={onglet === id ? "page" : undefined}
+                onClick={() => handleOngletChange(id)}
+              >
+                {libelle}
+              </button>
+            ))}
+          </nav>
+          <BarreSauvegarde onExporter={exporter} onImporter={importer} />
+        </div>
       </header>
 
-      {avertissement && (
-        <div className="avertissement" role="alert">
-          <p>{avertissement}</p>
-          <button type="button" className="bouton" onClick={fermerAvertissement}>
-            Fermer
-          </button>
-        </div>
-      )}
-
-      <main>
-        <EnTeteCompletion
-          key={nombreImports}
-          etat={etatCompletion}
-          reglages={reglages}
-          nombreVus={nombreVus}
-          nombreCaptures={nombreCaptures}
-          totalAutomatique={TOTAL_POKEDEX_SERVEUR}
-          onReglagesChange={modifierReglagesCompletion}
-        />
-
-        {onglet === "evolutions" && (
-          <VueEvolutions statuts={sauvegarde.statuts} onStatutChange={definirStatut} />
+      <div className="page">
+        {avertissement && (
+          <div className="avertissement" role="alert">
+            <p>{avertissement}</p>
+            <button type="button" className="bouton" onClick={fermerAvertissement}>
+              Fermer
+            </button>
+          </div>
         )}
-        {onglet === "pokefinder" && <VuePokeFinder statuts={sauvegarde.statuts} />}
-        {onglet === "ev" && <VueEv statuts={sauvegarde.statuts} />}
 
-        {onglet === "pokedex" && (
-          <section aria-labelledby="titre-pokedex">
-            <h2 id="titre-pokedex" className="visuellement-masque">
-              Pokédex
-            </h2>
-            <BarreFiltres
-              filtres={filtres}
-              nombreResultats={especesFiltrees.length}
-              onFiltresChange={setFiltres}
-            />
-            <p className="texte-discret aide">
-              Cliquer sur un Pokémon pour passer de non vu à vu, puis à capturé.
-            </p>
-            <ul className="grille">
-              {especesFiltrees.map((espece) => (
-                <CartePokemon
-                  key={espece.slug}
-                  espece={espece}
-                  statut={statutDe(espece.slug)}
-                  onStatutChange={definirStatut}
-                />
-              ))}
-            </ul>
-          </section>
-        )}
-      </main>
-    </div>
+        <main>
+          <EnTeteCompletion
+            key={nombreImports}
+            etat={etatCompletion}
+            reglages={reglages}
+            nombreVus={nombreVus}
+            nombreCaptures={nombreCaptures}
+            totalAutomatique={TOTAL_POKEDEX_SERVEUR}
+            onReglagesChange={modifierReglagesCompletion}
+          />
+
+          {onglet === "evolutions" && (
+            <VueEvolutions statuts={sauvegarde.statuts} onStatutChange={definirStatut} />
+          )}
+          {onglet === "ou-trouver" && <VueOuTrouver statuts={sauvegarde.statuts} />}
+          {onglet === "pokefinder" && <VuePokeFinder statuts={sauvegarde.statuts} />}
+          {onglet === "ev" && <VueEv statuts={sauvegarde.statuts} />}
+
+          {onglet === "pokedex" && (
+            <section aria-labelledby="titre-pokedex">
+              <h2 id="titre-pokedex" className="visuellement-masque">
+                Pokédex
+              </h2>
+              <BarreFiltres
+                filtres={filtres}
+                nombreResultats={especesFiltrees.length}
+                onFiltresChange={setFiltres}
+              />
+              <p className="texte-discret aide">
+                Cliquer sur un Pokémon pour passer de non vu à vu, puis à capturé.
+              </p>
+              <ul className="grille">
+                {especesFiltrees.map((espece) => (
+                  <CartePokemon
+                    key={espece.slug}
+                    espece={espece}
+                    statut={statutDe(espece.slug)}
+                    onStatutChange={definirStatut}
+                  />
+                ))}
+              </ul>
+            </section>
+          )}
+        </main>
+      </div>
+    </>
   );
 };
 
