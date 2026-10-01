@@ -22,13 +22,22 @@ describe("compteSelonBase", () => {
 });
 
 describe("calculerCompletion", () => {
+  const sur1025 = { base: "capture" as const, total: 1025, objectif: 20 };
+
+  it("retrouve les 17,80 % du jeu : 186 capturés sur 1045", () => {
+    const etat = calculerCompletion(186, REGLAGES_COMPLETION_PAR_DEFAUT);
+    expect(formaterPourcentage(etat.pourcentage)).toBe("17,80 %");
+    expect(etat.requisPourObjectif).toBe(209);
+    expect(etat.restantPourObjectif).toBe(23);
+  });
+
   it("retrouve 15,22 % pour 156 sur 1025", () => {
-    const etat = calculerCompletion(156, REGLAGES_COMPLETION_PAR_DEFAUT);
+    const etat = calculerCompletion(156, sur1025);
     expect(formaterPourcentage(etat.pourcentage)).toBe("15,22 %");
   });
 
   it("calcule le nombre requis pour 20 % sans erreur d'arrondi flottant", () => {
-    const etat = calculerCompletion(156, REGLAGES_COMPLETION_PAR_DEFAUT);
+    const etat = calculerCompletion(156, sur1025);
     expect(etat.requisPourObjectif).toBe(205);
     expect(etat.restantPourObjectif).toBe(49);
   });

@@ -15,7 +15,8 @@ export interface ReglagesCompletion {
 
 export const REGLAGES_COMPLETION_PAR_DEFAUT: ReglagesCompletion = {
   base: "capture",
-  total: 1025,
+  /* Pokédex du serveur : 1025 espèces officielles + entrées propres au serveur (9001-9018, 9100...). */
+  total: 1045,
   objectif: 20,
 };
 
