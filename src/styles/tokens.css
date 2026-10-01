@@ -1,0 +1,52 @@
+/* src/styles/tokens.css */
+
+:root {
+  color-scheme: dark;
+
+  --couleur-fond: #12141a;
+  --couleur-surface: #1b1e27;
+  --couleur-surface-survol: #252937;
+  --couleur-bordure: #2f3443;
+  --couleur-texte: #e8eaf0;
+  --couleur-texte-discret: #9aa1b4;
+  --couleur-accent: #e5484d;
+  --couleur-vu: #4c8dff;
+  --couleur-capture: #3fbf7f;
+  --couleur-erreur: #ff6b6b;
+  --couleur-focus: #ffd166;
+
+  --police-base: system-ui, "Segoe UI", Roboto, sans-serif;
+  --texte-xs: 0.75rem;
+  --texte-sm: 0.875rem;
+  --texte-base: 1rem;
+  --texte-xl: 1.5rem;
+  --texte-geant: 3rem;
+
+  --espace-1: 0.25rem;
+  --espace-2: 0.5rem;
+  --espace-3: 0.75rem;
+  --espace-4: 1rem;
+  --espace-6: 1.5rem;
+  --espace-8: 2rem;
+
+  --rayon: 0.75rem;
+  --duree-feedback: 150ms;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --couleur-fond: #f4f5f8;
+    --couleur-surface: #ffffff;
+    --couleur-surface-survol: #eceef4;
+    --couleur-bordure: #d8dbe4;
+    --couleur-texte: #1a1d26;
+    --couleur-texte-discret: #5c6378;
+    --couleur-accent: #c9282d;
+    --couleur-vu: #2463d1;
+    --couleur-capture: #1d8a55;
+    --couleur-erreur: #c62828;
+    --couleur-focus: #b07800;
+  }
+}
