@@ -8,6 +8,9 @@ import type { EspecePokemon } from "../types/pokedex.ts";
  */
 export const SEPARATEUR_POKEFINDER = ", ";
 
+/** Nombre maximal d'espèces acceptées par le champ "Espèce" en jeu (constaté). */
+export const MAX_ESPECES_PAR_CHAMP = 26;
+
 export interface ResolutionNoms {
   especes: EspecePokemon[];
   /** Saisies qui ne correspondent à aucune espèce. */

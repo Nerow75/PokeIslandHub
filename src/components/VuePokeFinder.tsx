@@ -6,6 +6,7 @@ import {
   chaineEspeces,
   decouperEnLots,
   estNomAVerifier,
+  MAX_ESPECES_PAR_CHAMP,
   resoudreNoms,
 } from "../domaine/pokefinder.ts";
 import type { StatutEnregistre } from "../domaine/statut.ts";
@@ -17,8 +18,6 @@ interface VuePokeFinderProps {
 }
 
 type CritereManquant = "non-capture" | "non-vu";
-
-const TAILLE_LOT_PAR_DEFAUT = 10;
 
 function AvertissementNoms({ especes }: { especes: readonly EspecePokemon[] }) {
   const aVerifier = especes.filter(estNomAVerifier);
@@ -32,6 +31,26 @@ function AvertissementNoms({ especes }: { especes: readonly EspecePokemon[] }) {
   );
 }
 
+/** Une chaîne à copier par tranche de MAX_ESPECES_PAR_CHAMP espèces. */
+function ListeChaines({ especes }: { especes: readonly EspecePokemon[] }) {
+  const lots = decouperEnLots(especes, MAX_ESPECES_PAR_CHAMP);
+  if (lots.length <= 1) {
+    return <ChampACopier libelle="Espèce" valeur={chaineEspeces(especes)} />;
+  }
+  return (
+    <ol className="liste-lots">
+      {lots.map((lot) => (
+        <li key={lot[0]?.slug}>
+          <ChampACopier
+            libelle={`Espèce (${lot[0]?.nomFr} à ${lot[lot.length - 1]?.nomFr}, ${lot.length} Pokémon)`}
+            valeur={chaineEspeces(lot)}
+          />
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 /**
  * Génère le contenu du champ "Espèce" du PokéFinder : Pokémon du jour saisis
  * en français, ou Pokémon manquants du Pokédex.
@@ -40,7 +59,6 @@ const VuePokeFinder: FC<VuePokeFinderProps> = ({ statuts }) => {
   const [saisieDuJour, setSaisieDuJour] = useState("");
   const [critere, setCritere] = useState<CritereManquant>("non-capture");
   const [generation, setGeneration] = useState<number | null>(null);
-  const [tailleLot, setTailleLot] = useState(TAILLE_LOT_PAR_DEFAUT);
 
   const resolution = resoudreNoms(saisieDuJour, ESPECE_PAR_NOM_NORMALISE, normaliserRecherche);
 
@@ -55,15 +73,14 @@ const VuePokeFinder: FC<VuePokeFinderProps> = ({ statuts }) => {
       }),
     [statuts, critere, generation],
   );
-  const lots = decouperEnLots(manquants, tailleLot);
 
   return (
     <section aria-labelledby="titre-pokefinder" className="vue">
       <div className="vue__entete">
         <h2 id="titre-pokefinder">PokéFinder</h2>
         <p className="texte-discret">
-          Contenu du champ Espèce : noms anglais séparés par une virgule. Les champs Aspect et
-          Étiquette se remplissent à la main en jeu.
+          Contenu du champ Espèce : noms anglais séparés par une virgule, {MAX_ESPECES_PAR_CHAMP}{" "}
+          Pokémon maximum par champ. Les champs Aspect et Étiquette se remplissent à la main en jeu.
         </p>
       </div>
 
@@ -83,7 +100,7 @@ const VuePokeFinder: FC<VuePokeFinderProps> = ({ statuts }) => {
             Introuvable : {resolution.inconnus.join(", ")}
           </p>
         )}
-        <ChampACopier libelle="Espèce" valeur={chaineEspeces(resolution.especes)} />
+        <ListeChaines especes={resolution.especes} />
         <AvertissementNoms especes={resolution.especes} />
       </div>
 
@@ -111,36 +128,10 @@ const VuePokeFinder: FC<VuePokeFinderProps> = ({ statuts }) => {
               ))}
             </select>
           </label>
-          <label>
-            Pokémon par chaîne
-            <input
-              type="number"
-              min={1}
-              max={1025}
-              value={tailleLot}
-              onChange={(e) => {
-                const taille = Number(e.target.value);
-                if (Number.isInteger(taille) && taille > 0) setTailleLot(taille);
-              }}
-            />
-          </label>
           <p className="filtres__compte">{manquants.length} manquants</p>
         </div>
-        <p className="texte-discret">
-          Longueur maximale du champ en jeu inconnue : réduire le nombre par chaîne si le texte est
-          coupé.
-        </p>
         <AvertissementNoms especes={manquants} />
-        <ol className="liste-lots">
-          {lots.map((lot) => (
-            <li key={lot[0]?.slug}>
-              <ChampACopier
-                libelle={`Espèce (${lot[0]?.nomFr} à ${lot[lot.length - 1]?.nomFr})`}
-                valeur={chaineEspeces(lot)}
-              />
-            </li>
-          ))}
-        </ol>
+        <ListeChaines especes={manquants} />
       </div>
     </section>
   );
