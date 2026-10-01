@@ -22,7 +22,7 @@ interface BarreSauvegardeProps {
 type Message = { type: "succes" | "erreur"; texte: string };
 
 /**
- * Export et import de la progression au format JSON.
+ * État de la sauvegarde dans la barre ; un clic ouvre l'export et l'import JSON.
  */
 const BarreSauvegarde: FC<BarreSauvegardeProps> = ({ modeStockage, onExporter, onImporter }) => {
   const champFichier = useRef<HTMLInputElement>(null);
@@ -55,36 +55,37 @@ const BarreSauvegarde: FC<BarreSauvegardeProps> = ({ modeStockage, onExporter, o
   };
 
   return (
-    <div className="sauvegarde">
-      <span
-        className={`stockage stockage--${modeStockage}`}
-        title={LIBELLES_MODE[modeStockage].detail}
-        role="status"
-      >
+    <details className="sauvegarde">
+      <summary className={`stockage stockage--${modeStockage}`} role="status">
         {LIBELLES_MODE[modeStockage].texte}
-      </span>
-      <button type="button" className="bouton" onClick={handleExporter}>
-        Exporter
-      </button>
-      <button type="button" className="bouton" onClick={() => champFichier.current?.click()}>
-        Importer
-      </button>
-      <input
-        ref={champFichier}
-        type="file"
-        accept="application/json,.json"
-        hidden
-        onChange={(e) => void handleFichierChoisi(e.target.files?.[0])}
-      />
-      {message && (
-        <p
-          className={`sauvegarde__message sauvegarde__message--${message.type}`}
-          role={message.type === "erreur" ? "alert" : "status"}
-        >
-          {message.texte}
-        </p>
-      )}
-    </div>
+      </summary>
+      <div className="sauvegarde__menu">
+        <p className="sauvegarde__detail">{LIBELLES_MODE[modeStockage].detail}</p>
+        <div className="sauvegarde__actions">
+          <button type="button" className="bouton" onClick={handleExporter}>
+            Exporter
+          </button>
+          <button type="button" className="bouton" onClick={() => champFichier.current?.click()}>
+            Importer
+          </button>
+        </div>
+        <input
+          ref={champFichier}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={(e) => void handleFichierChoisi(e.target.files?.[0])}
+        />
+        {message && (
+          <p
+            className={`sauvegarde__message sauvegarde__message--${message.type}`}
+            role={message.type === "erreur" ? "alert" : "status"}
+          >
+            {message.texte}
+          </p>
+        )}
+      </div>
+    </details>
   );
 };
 

@@ -275,15 +275,43 @@ label {
   margin-left: auto;
 }
 
-.sauvegarde .bouton {
-  padding-inline: var(--espace-4);
-  background: rgb(28 31 38 / 0.28);
-  border-color: transparent;
-  color: var(--blanc-casse);
+.sauvegarde {
+  position: relative;
 }
 
-.sauvegarde .bouton:hover {
-  background: rgb(28 31 38 / 0.45);
+.sauvegarde > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.sauvegarde > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sauvegarde__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--espace-2));
+  z-index: 20;
+  width: min(20rem, 90vw);
+  display: grid;
+  gap: var(--espace-3);
+  padding: var(--espace-4);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-carte);
+}
+
+.sauvegarde__detail {
+  font-size: var(--texte-sm);
+  color: var(--couleur-texte-discret);
+}
+
+.sauvegarde__actions {
+  display: flex;
+  gap: var(--espace-2);
 }
 
 .sauvegarde__message {
@@ -292,12 +320,11 @@ label {
 }
 
 .sauvegarde__message--succes {
-  color: var(--jaune);
+  color: var(--couleur-succes);
 }
 
 .sauvegarde__message--erreur {
-  color: var(--blanc-casse);
-  text-decoration: underline;
+  color: var(--couleur-erreur);
 }
 
 /* Page */
@@ -1067,13 +1094,19 @@ main {
 /* Indicateur de stockage dans la barre */
 
 .stockage {
-  padding: var(--espace-1) var(--espace-3);
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: var(--espace-2) var(--espace-4);
   border-radius: var(--rayon-pilule);
   background: rgb(28 31 38 / 0.28);
-  font-size: var(--texte-xs);
+  font-size: var(--texte-sm);
   font-weight: 800;
   white-space: nowrap;
-  cursor: help;
+}
+
+.stockage:hover {
+  background: rgb(28 31 38 / 0.45);
 }
 
 .stockage--fichier {
