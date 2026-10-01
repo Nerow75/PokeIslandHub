@@ -5,8 +5,10 @@ import type { Apparition } from "../types/apparitions.ts";
 import { TAG_PARTOUT } from "./apparitions.ts";
 import {
   classerBiomesDeChasse,
+  debutPourTempsRestant,
   especesPresentesPartout,
   formaterDuree,
+  lireDuree,
   tempsRestant,
 } from "./chasse.ts";
 
@@ -72,5 +74,33 @@ describe("minuteur", () => {
 
   it("s'arrête à zéro", () => {
     expect(tempsRestant(debut, new Date("2026-10-01T16:00:00.000Z"))).toBe(0);
+  });
+});
+
+describe("réglage du minuteur", () => {
+  const maintenant = new Date("2026-10-01T14:30:00.000Z");
+
+  it("recalcule le début pour un temps restant donné", () => {
+    const debut = debutPourTempsRestant(42 * 60_000 + 7_000, maintenant);
+    expect(formaterDuree(tempsRestant(debut, maintenant))).toBe("42:07");
+  });
+
+  it("borne le temps restant entre zéro et une heure", () => {
+    expect(tempsRestant(debutPourTempsRestant(-5_000, maintenant), maintenant)).toBe(0);
+    expect(tempsRestant(debutPourTempsRestant(2 * 3_600_000, maintenant), maintenant)).toBe(
+      3_600_000,
+    );
+  });
+
+  it("lit les saisies mm:ss et minutes seules", () => {
+    expect(lireDuree("42:07")).toBe(42 * 60_000 + 7_000);
+    expect(lireDuree("15")).toBe(15 * 60_000);
+    expect(lireDuree("0:30")).toBe(30_000);
+  });
+
+  it("refuse les saisies invalides ou supérieures à une heure", () => {
+    expect(lireDuree("61")).toBeNull();
+    expect(lireDuree("12:75")).toBeNull();
+    expect(lireDuree("abc")).toBeNull();
   });
 });
