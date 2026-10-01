@@ -10,9 +10,11 @@
     "lint": "oxlint",
     "test": "vitest run",
     "generate:pokedex": "node scripts/generate-pokedex.ts",
+    "generate:apparitions": "node scripts/generate-apparitions.ts",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/nunito": "^5.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.6.5"
