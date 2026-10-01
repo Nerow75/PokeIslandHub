@@ -1,13 +1,8 @@
 // src/components/VueEv.tsx
 
 import { useMemo, useState, type FC } from "react";
-import {
-  ESPECES,
-  GENERATIONS,
-  INDEX_RECHERCHE,
-  normaliserRecherche,
-  urlSprite,
-} from "../donnees.ts";
+import { ESPECES, GENERATIONS, INDEX_RECHERCHE, normaliserRecherche } from "../donnees.ts";
+import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, type StatutEnregistre } from "../domaine/statut.ts";
 import type { StatEv } from "../types/pokedex.ts";
 
@@ -119,13 +114,7 @@ const VueEv: FC<VueEvProps> = ({ statuts }) => {
                 <tr key={espece.slug}>
                   <th scope="row">
                     <span className="tableau-ev__pokemon">
-                      <img
-                        src={urlSprite(espece.id)}
-                        alt=""
-                        width={40}
-                        height={40}
-                        loading="lazy"
-                      />
+                      <SpritePokemon espece={espece} taille={40} />
                       <span>
                         {espece.nomFr}
                         <span className="texte-discret"> #{espece.id}</span>

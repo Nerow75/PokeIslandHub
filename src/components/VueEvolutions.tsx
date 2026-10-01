@@ -7,10 +7,10 @@ import {
   INDEX_RECHERCHE,
   normaliserRecherche,
   TRADUCTIONS,
-  urlSprite,
 } from "../donnees.ts";
 import { decrireCondition } from "../domaine/conditionsEvolution.ts";
 import { listerEvolutions, type PorteeEvolutions } from "../domaine/evolutionsAFaire.ts";
+import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, type StatutEnregistre } from "../domaine/statut.ts";
 
 interface VueEvolutionsProps {
@@ -86,14 +86,14 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts }) => {
                 {niveau !== null ? `N.${niveau}` : "–"}
               </span>
               <span className="evolution__pokemon">
-                <img src={urlSprite(depuis.id)} alt="" width={56} height={56} loading="lazy" />
+                <SpritePokemon espece={depuis} taille={56} />
                 {depuis.nomFr}
               </span>
               <span className="evolution__fleche" aria-hidden="true">
                 →
               </span>
               <span className="evolution__pokemon">
-                <img src={urlSprite(vers.id)} alt="" width={56} height={56} loading="lazy" />
+                <SpritePokemon espece={vers} taille={56} />
                 <span>
                   {vers.nomFr}
                   <span className={`etiquette etiquette--${statutCible}`}>

@@ -1,7 +1,7 @@
 // src/components/BarreFiltres.tsx
 
 import { type FC } from "react";
-import { GENERATIONS } from "../donnees.ts";
+import { GENERATION_SERVEUR, GENERATIONS, libelleGeneration } from "../donnees.ts";
 import type { Filtres, FiltreStatut } from "../domaine/filtres.ts";
 
 const LIBELLES_FILTRE_STATUT: Record<FiltreStatut, string> = {
@@ -46,9 +46,9 @@ const BarreFiltres: FC<BarreFiltresProps> = ({ filtres, nombreResultats, onFiltr
           }
         >
           <option value="">Toutes</option>
-          {GENERATIONS.map((generation) => (
+          {[...GENERATIONS, GENERATION_SERVEUR].map((generation) => (
             <option key={generation} value={generation}>
-              {generation}
+              {libelleGeneration(generation)}
             </option>
           ))}
         </select>

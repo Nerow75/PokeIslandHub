@@ -1,7 +1,7 @@
 // src/components/CartePokemon.tsx
 
 import { memo } from "react";
-import { urlSprite } from "../donnees.ts";
+import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, statutSuivant, type StatutPokemon } from "../domaine/statut.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
 
@@ -32,15 +32,7 @@ const CartePokemon = memo(function CartePokemon({
         onClick={() => onStatutChange(espece.slug, suivant)}
       >
         <span className="carte__numero">{numero}</span>
-        <img
-          className="carte__sprite"
-          src={urlSprite(espece.id)}
-          alt=""
-          width={96}
-          height={96}
-          loading="lazy"
-          decoding="async"
-        />
+        <SpritePokemon espece={espece} taille={96} className="carte__sprite" />
         <span className="carte__nom">{espece.nomFr}</span>
         <span className="carte__nom-en">{espece.nomEn}</span>
         <span className="carte__statut">{LIBELLES_STATUT[statut]}</span>

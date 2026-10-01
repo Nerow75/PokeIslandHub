@@ -8,7 +8,12 @@ import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
 import VueEv from "./components/VueEv.tsx";
 import VueEvolutions from "./components/VueEvolutions.tsx";
 import VuePokeFinder from "./components/VuePokeFinder.tsx";
-import { ESPECES, ESPECES_PAR_SLUG, INDEX_RECHERCHE, normaliserRecherche } from "./donnees.ts";
+import {
+  ENTREES_POKEDEX,
+  ESPECES_PAR_SLUG,
+  INDEX_RECHERCHE,
+  normaliserRecherche,
+} from "./donnees.ts";
 import { calculerCompletion, compteSelonBase } from "./domaine/completion.ts";
 import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
 import type { StatutPokemon } from "./domaine/statut.ts";
@@ -67,7 +72,7 @@ const App = () => {
 
   const especesFiltrees = useMemo(() => {
     const termes = normaliserRecherche(rechercheDifferee).split(" ").filter(Boolean);
-    return ESPECES.filter((espece) => {
+    return ENTREES_POKEDEX.filter((espece) => {
       if (filtres.generation !== null && espece.generation !== filtres.generation) {
         return false;
       }

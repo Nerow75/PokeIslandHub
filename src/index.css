@@ -574,3 +574,14 @@ textarea {
 .est-selectionne {
   background: var(--couleur-surface-survol);
 }
+
+.sprite-inconnu {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 2px dashed var(--couleur-bordure);
+  border-radius: 50%;
+  color: var(--couleur-texte-discret);
+  font-size: var(--texte-xl);
+  font-weight: 700;
+}
