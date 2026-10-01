@@ -11,8 +11,6 @@ const DOSSIER_DONNEES_JOUEUR = fileURLToPath(new URL("./donnees", import.meta.ur
 
 export default defineConfig({
   plugins: [react(), pluginSauvegarde(DOSSIER_DONNEES_JOUEUR)],
-  /* Port fixe : la copie de secours du navigateur (localStorage) dépend de l'origine. */
-  server: { port: 5173, strictPort: true },
   test: {
     include: ["src/**/*.test.ts", "scripts/**/*.test.ts", "serveur/**/*.test.ts"],
   },
