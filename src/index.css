@@ -1083,3 +1083,193 @@ main {
   color: var(--blanc-casse);
   text-decoration: underline wavy;
 }
+
+/* Chasse */
+
+.chasse__entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espace-4);
+}
+
+.chasse__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-3);
+}
+
+.chrono {
+  min-width: 7.5rem;
+  padding: var(--espace-2) var(--espace-5);
+  border-radius: var(--rayon-pilule);
+  background: var(--jaune);
+  color: var(--encre);
+  font-size: var(--texte-xl);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.chrono--fini {
+  background: var(--rouge);
+  color: var(--blanc-casse);
+  font-size: var(--texte-base);
+}
+
+.chasse__saisie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espace-3);
+}
+
+.chasse__grille {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--espace-3);
+}
+
+.cible {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espace-1);
+  padding: var(--espace-4) var(--espace-3);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--couleur-type) 30%, var(--couleur-surface)) 0%,
+    var(--couleur-surface) 60%
+  );
+  border: 2px solid var(--couleur-bordure);
+  border-radius: var(--rayon-carte);
+  text-align: center;
+  transition:
+    opacity var(--duree-transition),
+    border-color var(--duree-feedback);
+}
+
+.cible--capturee {
+  border-color: var(--couleur-capture);
+  opacity: 0.6;
+}
+
+.cible__retirer {
+  position: absolute;
+  top: var(--espace-2);
+  right: var(--espace-2);
+  padding: 0 var(--espace-2);
+  background: none;
+  border: none;
+  border-radius: var(--rayon-pilule);
+  color: var(--couleur-texte-discret);
+  font-size: var(--texte-xs);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cible__retirer:hover {
+  background: var(--couleur-surface-2);
+  color: var(--couleur-texte);
+}
+
+.cible__sprite {
+  image-rendering: pixelated;
+}
+
+.cible__nom {
+  font-size: var(--texte-lg);
+  font-weight: 900;
+}
+
+.cible .etiquette {
+  margin: var(--espace-1) 0 0;
+}
+
+.cible__capture {
+  color: var(--couleur-texte);
+}
+
+.biomes-chasse {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--espace-3);
+}
+
+.biome-chasse {
+  display: grid;
+  gap: var(--espace-2);
+  padding: var(--espace-3) var(--espace-4);
+  background: var(--couleur-fond);
+  border-radius: var(--rayon-champ);
+}
+
+.biome-chasse:first-child {
+  outline: 2px solid var(--jaune);
+}
+
+.biome-chasse__nom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-2);
+  font-weight: 900;
+}
+
+.biome-chasse__compte {
+  padding: 0 var(--espace-2);
+  border-radius: var(--rayon-pilule);
+  background: var(--jaune);
+  color: var(--encre);
+  font-size: var(--texte-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.biome-chasse__presences {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--espace-1);
+}
+
+.presence {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  font-size: var(--texte-sm);
+  font-weight: 700;
+}
+
+.presence img {
+  image-rendering: pixelated;
+}
+
+.presence .rarete {
+  margin-left: auto;
+}
+
+.chasse__details {
+  display: grid;
+  gap: var(--espace-2);
+}
+
+.chasse__resume {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chasse__resume img {
+  image-rendering: pixelated;
+}

@@ -1,6 +1,7 @@
 // src/hooks/useSauvegarde.ts
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Chasse } from "../domaine/chasse.ts";
 import type { ReglagesCompletion } from "../domaine/completion.ts";
 import {
   lireSauvegardeDepuisTexte,
@@ -112,6 +113,10 @@ export function useSauvegarde() {
     });
   }, []);
 
+  const modifierChasse = (modifier: (chasse: Chasse) => Chasse): void => {
+    setSauvegarde((precedente) => ({ ...precedente, chasse: modifier(precedente.chasse) }));
+  };
+
   const modifierReglagesCompletion = (reglages: ReglagesCompletion): void => {
     setSauvegarde((precedente) => ({ ...precedente, reglagesCompletion: reglages }));
   };
@@ -138,6 +143,7 @@ export function useSauvegarde() {
     statutDe,
     definirStatut,
     modifierReglagesCompletion,
+    modifierChasse,
     importer,
     exporter,
   };

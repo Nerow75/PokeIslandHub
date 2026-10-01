@@ -166,8 +166,14 @@ export function libelleIdentifiant(identifiant: string): string {
     .replaceAll("_", " ");
 }
 
+/** Biome de Minecraft ou de Cobblemon, par opposition aux biomes de mods tiers (Aether...). */
+export function estBiomeDeBase(tag: string): boolean {
+  return /^#?(minecraft|cobblemon):/.test(tag);
+}
+
 export function libelleBiome(tag: string): string {
-  return BIOMES[tag] ?? libelleIdentifiant(tag);
+  const libelle = BIOMES[tag] ?? libelleIdentifiant(tag);
+  return estBiomeDeBase(tag) ? libelle : `${libelle} (mod)`;
 }
 
 export function libellePosition(position: string): string {

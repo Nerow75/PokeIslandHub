@@ -5,6 +5,7 @@ import BarreFiltres from "./components/BarreFiltres.tsx";
 import BarreSauvegarde from "./components/BarreSauvegarde.tsx";
 import CartePokemon from "./components/CartePokemon.tsx";
 import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
+import VueChasse from "./components/VueChasse.tsx";
 import VueEv from "./components/VueEv.tsx";
 import VueEvolutions from "./components/VueEvolutions.tsx";
 import VueOuTrouver from "./components/VueOuTrouver.tsx";
@@ -21,10 +22,11 @@ import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
 import type { StatutPokemon } from "./domaine/statut.ts";
 import { useSauvegarde } from "./hooks/useSauvegarde.ts";
 
-type Onglet = "pokedex" | "evolutions" | "ou-trouver" | "pokefinder" | "ev";
+type Onglet = "pokedex" | "chasse" | "evolutions" | "ou-trouver" | "pokefinder" | "ev";
 
 const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "pokedex", libelle: "Pokédex" },
+  { id: "chasse", libelle: "Chasse" },
   { id: "evolutions", libelle: "Évolutions" },
   { id: "ou-trouver", libelle: "Où trouver" },
   { id: "pokefinder", libelle: "PokéFinder" },
@@ -61,6 +63,7 @@ const App = () => {
     statutDe,
     definirStatut,
     modifierReglagesCompletion,
+    modifierChasse,
     importer,
     exporter,
   } = useSauvegarde();
@@ -151,6 +154,14 @@ const App = () => {
             onReglagesChange={modifierReglagesCompletion}
           />
 
+          {onglet === "chasse" && (
+            <VueChasse
+              chasse={sauvegarde.chasse}
+              statuts={sauvegarde.statuts}
+              onChasseChange={modifierChasse}
+              onStatutChange={definirStatut}
+            />
+          )}
           {onglet === "evolutions" && (
             <VueEvolutions statuts={sauvegarde.statuts} onStatutChange={definirStatut} />
           )}

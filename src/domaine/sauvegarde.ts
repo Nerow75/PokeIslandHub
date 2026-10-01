@@ -1,6 +1,7 @@
 // src/domaine/sauvegarde.ts
 
 import { z } from "zod";
+import { chasseVide, NOMBRE_POKEMON_CHASSE } from "./chasse.ts";
 import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
 
 /*
@@ -9,7 +10,7 @@ import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 2;
+export const VERSION_SAUVEGARDE = 3;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -17,11 +18,21 @@ const schemaReglagesCompletion = z.object({
   objectif: z.number().min(0).max(100),
 });
 
+const schemaChasse = z.object({
+  /** Slugs des Pokémon à capturer, dans l'ordre de saisie. */
+  especes: z.array(z.string()).max(NOMBRE_POKEMON_CHASSE),
+  /** Slugs déjà capturés pendant cette chasse. */
+  capturees: z.array(z.string()),
+  /** Début du minuteur, ISO 8601 UTC, ou null si non lancé. */
+  debut: z.iso.datetime().nullable(),
+});
+
 export const schemaSauvegarde = z.object({
   version: z.literal(VERSION_SAUVEGARDE),
   /** Slug d'espèce -> statut. Une espèce absente est "non vue". */
   statuts: z.record(z.string(), z.enum(["vu", "capture"])),
   reglagesCompletion: schemaReglagesCompletion,
+  chasse: schemaChasse,
 });
 
 export type Sauvegarde = z.infer<typeof schemaSauvegarde>;
@@ -49,6 +60,8 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
       reglagesCompletion: { ...autresReglages, totalManuel },
     };
   },
+  /* v2 -> v3 : ajout de la chasse en cours, vide. */
+  2: (donnees) => ({ ...donnees, version: 3, chasse: chasseVide() }),
 };
 
 export function sauvegardeVide(): Sauvegarde {
@@ -56,6 +69,7 @@ export function sauvegardeVide(): Sauvegarde {
     version: VERSION_SAUVEGARDE,
     statuts: {},
     reglagesCompletion: { ...REGLAGES_COMPLETION_PAR_DEFAUT },
+    chasse: chasseVide(),
   };
 }
 

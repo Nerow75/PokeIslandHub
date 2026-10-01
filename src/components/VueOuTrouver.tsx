@@ -1,14 +1,10 @@
 // src/components/VueOuTrouver.tsx
 
 import { useMemo, useState, type FC } from "react";
-import { ESPECES, ESPECES_PAR_SLUG, INDEX_RECHERCHE, normaliserRecherche } from "../donnees.ts";
+import { ESPECES, INDEX_RECHERCHE, normaliserRecherche } from "../donnees.ts";
 import {
   apparaitDansBiome,
-  conditionsApparition,
-  libelleAspect,
   libelleBiome,
-  libellePosition,
-  LIBELLES_RARETE,
   meilleureRarete,
   TAG_PARTOUT,
 } from "../domaine/apparitions.ts";
@@ -16,6 +12,7 @@ import { LIBELLES_STATUT, type StatutEnregistre } from "../domaine/statut.ts";
 import { useApparitions } from "../hooks/useApparitions.ts";
 import type { Apparition, ApparitionsGenerees, Rarete } from "../types/apparitions.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
+import { BlocApparition, SansApparition } from "./BlocApparition.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
 
 interface VueOuTrouverProps {
@@ -30,49 +27,6 @@ const ORDRE_RARETE: Record<Rarete, number> = { common: 0, uncommon: 1, rare: 2, 
 
 function correspondAuMoment(apparition: Apparition, moment: FiltreMoment): boolean {
   return moment === "tous" || apparition.moment === undefined || apparition.moment === moment;
-}
-
-function BlocApparition({ apparition }: { apparition: Apparition }) {
-  const conditions = conditionsApparition(apparition);
-  return (
-    <li className="apparition">
-      <div className="apparition__entete">
-        <span className={`rarete rarete--${apparition.rarete}`}>
-          {LIBELLES_RARETE[apparition.rarete]}
-        </span>
-        <span className="apparition__info">{libellePosition(apparition.position)}</span>
-        {apparition.niveaux && <span className="apparition__info">Niv. {apparition.niveaux}</span>}
-        {apparition.aspect && (
-          <span className="apparition__aspect">{libelleAspect(apparition.aspect)}</span>
-        )}
-      </div>
-      <ul className="apparition__biomes" aria-label="Biomes">
-        {apparition.biomes.map((biome) => (
-          <li key={biome} className="biome">
-            {libelleBiome(biome)}
-          </li>
-        ))}
-      </ul>
-      {apparition.biomesExclus.length > 0 && (
-        <p className="apparition__detail">
-          Sauf : {apparition.biomesExclus.map(libelleBiome).join(", ")}
-        </p>
-      )}
-      {conditions.length > 0 && <p className="apparition__detail">{conditions.join(" · ")}</p>}
-    </li>
-  );
-}
-
-function SansApparition({ espece }: { espece: EspecePokemon }) {
-  const parent = espece.evolueDe ? ESPECES_PAR_SLUG.get(espece.evolueDe) : undefined;
-  let message = "N'apparaît pas à l'état sauvage dans Cobblemon.";
-  if (parent) {
-    message = `Pas d'apparition sauvage : à obtenir en faisant évoluer ${parent.nomFr}.`;
-  } else if (espece.estLegendaire || espece.estFabuleux) {
-    message =
-      "Légendaire ou fabuleux : pas d'apparition sauvage classique (événement, autel, serveur).";
-  }
-  return <p className="apparition__detail">{message}</p>;
 }
 
 /**
