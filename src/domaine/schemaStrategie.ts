@@ -29,7 +29,11 @@ const schemaUsage = z.object({
   talents: z.array(schemaPart),
   teras: z.array(schemaPart),
   spreads: z.array(
-    z.object({ nature: z.string(), evs: schemaRepartition, pourcentage: z.number() }),
+    z.object({
+      nature: z.string(),
+      evs: schemaRepartition,
+      pourcentage: z.number(),
+    }),
   ),
 });
 
@@ -46,6 +50,7 @@ export const schemaStrategieGeneree: z.ZodType<StrategieGeneree> = z.object({
     }),
   ),
   efficacites: z.record(z.string(), z.record(z.string(), z.number())),
+  typesCapacites: z.record(z.string(), z.string()),
   traductions: z.object({
     capacites: z.record(z.string(), z.string()),
     objets: z.record(z.string(), z.string()),
@@ -54,6 +59,10 @@ export const schemaStrategieGeneree: z.ZodType<StrategieGeneree> = z.object({
   }),
   natures: z.record(
     z.string(),
-    z.object({ nomFr: z.string(), hausse: schemaStat.nullable(), baisse: schemaStat.nullable() }),
+    z.object({
+      nomFr: z.string(),
+      hausse: schemaStat.nullable(),
+      baisse: schemaStat.nullable(),
+    }),
   ),
 });

@@ -31,12 +31,14 @@ import {
   schemaDetailCoupCritique,
   schemaFichierSetsSmogon,
   schemaListePokemonCoupCritique,
+  schemaCapacitesCoupCritique,
   schemaListeTraduite,
   schemaNaturesCoupCritique,
   schemaTypesCoupCritique,
   tableEfficacites,
   tableTraductions,
   TIER_NON_CLASSE,
+  typesCapacitesOffensives,
 } from "./strategie/parse.ts";
 
 const FICHIER_POKEDEX = join(RACINE_PROJET, "src", "data", "pokedex.json");
@@ -66,7 +68,10 @@ async function telecharger(url: string): Promise<unknown> {
 
 /** Requête JSON mise en cache dans .cache/strategie/. */
 async function lireJson<T>(url: string, schema: z.ZodType<T>): Promise<T> {
-  const cache = join(DOSSIER_CACHE, `${url.replace(/^https:\/\//, "").replace(/[^a-z0-9.]+/gi, "_")}.json`);
+  const cache = join(
+    DOSSIER_CACHE,
+    `${url.replace(/^https:\/\//, "").replace(/[^a-z0-9.]+/gi, "_")}.json`,
+  );
   let brut: unknown;
   try {
     brut = JSON.parse(await readFile(cache, "utf8"));
@@ -83,7 +88,13 @@ async function lireJson<T>(url: string, schema: z.ZodType<T>): Promise<T> {
   return resultat.data;
 }
 
-const STATS_DE_NATURE = ["atk", "def", "spa", "spd", "spe"] as const satisfies readonly StatCombat[];
+const STATS_DE_NATURE = [
+  "atk",
+  "def",
+  "spa",
+  "spd",
+  "spe",
+] as const satisfies readonly StatCombat[];
 
 async function lireNatures(): Promise<Record<string, NatureStrategie>> {
   const { natures } = await lireJson(`${URL_COUP_CRITIQUE}/natures`, schemaNaturesCoupCritique);
@@ -112,6 +123,26 @@ async function lireTraductions(
   return tableTraductions(listes);
 }
 
+/** Types des capacités offensives citées par les sets et les usages. */
+async function lireTypesCapacites(
+  parEspece: Readonly<Record<string, StrategieEspece>>,
+): Promise<Record<string, string>> {
+  const nomsUtiles = new Set<string>();
+  for (const strategie of Object.values(parEspece)) {
+    for (const set of strategie.sets) set.capacites.flat().forEach((nom) => nomsUtiles.add(nom));
+    strategie.usage?.capacites.forEach(({ nom }) => nomsUtiles.add(nom));
+  }
+  const listes = [];
+  for (const generation of GENERATIONS) {
+    const { moves } = await lireJson(
+      `${URL_COUP_CRITIQUE}/moves?gen=${generation}`,
+      schemaCapacitesCoupCritique,
+    );
+    listes.push(moves);
+  }
+  return typesCapacitesOffensives(listes, nomsUtiles);
+}
+
 async function generer(): Promise<void> {
   const pokedex = JSON.parse(await readFile(FICHIER_POKEDEX, "utf8")) as PokedexGenere;
   const slugParCle = new Map(pokedex.especes.map((e) => [cleEspece(e.slug), e.slug]));
@@ -128,7 +159,10 @@ async function generer(): Promise<void> {
 
   const fichiersSets = [];
   for (const generation of GENERATIONS) {
-    const sets = await lireJson(`${URL_SETS_SMOGON}/gen${generation}.json`, schemaFichierSetsSmogon);
+    const sets = await lireJson(
+      `${URL_SETS_SMOGON}/gen${generation}.json`,
+      schemaFichierSetsSmogon,
+    );
     fichiersSets.push({ generation, sets });
   }
   const objets = await lireTraductions("items");
@@ -172,6 +206,7 @@ async function generer(): Promise<void> {
     genereLe: new Date().toISOString(),
     parEspece,
     efficacites: tableEfficacites(types),
+    typesCapacites: await lireTypesCapacites(parEspece),
     traductions: {
       capacites: await lireTraductions("moves"),
       objets,

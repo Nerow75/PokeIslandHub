@@ -81,7 +81,10 @@ export const NOMBRE_SETS_MAX = 3;
 
 /* ---------- Coup Critique ---------- */
 
-const schemaNomTraduit = z.object({ name: z.string(), nom: z.string().nullable() });
+const schemaNomTraduit = z.object({
+  name: z.string(),
+  nom: z.string().nullable(),
+});
 
 export const schemaListePokemonCoupCritique = z.object({
   pokemons: z.array(
@@ -93,7 +96,9 @@ export const schemaListePokemonCoupCritique = z.object({
     }),
   ),
 });
-export type PokemonCoupCritique = z.infer<typeof schemaListePokemonCoupCritique>["pokemons"][number];
+export type PokemonCoupCritique = z.infer<
+  typeof schemaListePokemonCoupCritique
+>["pokemons"][number];
 
 const schemaRepartitionCoupCritique = z.object({
   hp: z.number(),
@@ -130,6 +135,37 @@ export type DetailCoupCritique = z.infer<typeof schemaDetailCoupCritique>;
 export const schemaListeTraduite = (cle: "moves" | "items" | "abilities") =>
   z.object({ [cle]: z.array(schemaNomTraduit) });
 
+export const schemaCapacitesCoupCritique = z.object({
+  moves: z.array(
+    z.object({
+      name: z.string(),
+      category: z.enum(["Physical", "Special", "Status"]),
+      type: z.object({ name: z.string() }),
+    }),
+  ),
+});
+
+/**
+ * Type des capacités offensives citées par les sets et les usages
+ * (nom anglais -> type en minuscules). Les capacités de statut sont omises.
+ * `listes` va de la génération la plus récente à la plus ancienne.
+ */
+export function typesCapacitesOffensives(
+  listes: readonly z.infer<typeof schemaCapacitesCoupCritique>["moves"][],
+  nomsUtiles: ReadonlySet<string>,
+): Record<string, string> {
+  const table: Record<string, string> = {};
+  const vus = new Set<string>();
+  for (const liste of listes) {
+    for (const { name, category, type } of liste) {
+      if (!nomsUtiles.has(name) || vus.has(name)) continue;
+      vus.add(name);
+      if (category !== "Status") table[name] = type.name.toLowerCase();
+    }
+  }
+  return table;
+}
+
 export const schemaNaturesCoupCritique = z.object({
   natures: z.array(
     schemaNomTraduit.extend({
@@ -145,9 +181,7 @@ export const schemaNaturesCoupCritique = z.object({
 export const schemaTypesCoupCritique = z.object({
   types: z.array(
     schemaNomTraduit.extend({
-      weaknesses: z.array(
-        z.object({ type_attacker: schemaNomTraduit, ratio: z.number() }),
-      ),
+      weaknesses: z.array(z.object({ type_attacker: schemaNomTraduit, ratio: z.number() })),
     }),
   ),
 });
@@ -186,7 +220,10 @@ export interface TierRetenu {
  * `listesParGeneration` va de la génération la plus récente à la plus ancienne.
  */
 export function choisirTiers(
-  listesParGeneration: readonly { generation: number; pokemons: PokemonCoupCritique[] }[],
+  listesParGeneration: readonly {
+    generation: number;
+    pokemons: PokemonCoupCritique[];
+  }[],
   slugParCle: ReadonlyMap<string, string>,
 ): Map<string, TierRetenu> {
   const tiers = new Map<string, TierRetenu>();
@@ -208,7 +245,10 @@ function partsUsage(
   return elements
     .filter((e) => e.pourcentage >= 1)
     .slice(0, maximum)
-    .map((e) => ({ nom: e.nom, pourcentage: Math.round(e.pourcentage * 10) / 10 }));
+    .map((e) => ({
+      nom: e.nom,
+      pourcentage: Math.round(e.pourcentage * 10) / 10,
+    }));
 }
 
 function repartitionNonNulle(valeurs: Record<StatCombat, number>, neutre: number): Repartition {
@@ -238,19 +278,31 @@ export function convertirUsage(detail: DetailCoupCritique, tier: string): UsageE
     rang: usage.rank,
     pourcentage: Math.round(usage.percent * 100) / 100,
     capacites: partsUsage(
-      usage.usageMoves.map((m) => ({ nom: m.move.name, pourcentage: m.percent })),
+      usage.usageMoves.map((m) => ({
+        nom: m.move.name,
+        pourcentage: m.percent,
+      })),
       8,
     ),
     objets: partsUsage(
-      usage.usageItems.map((i) => ({ nom: i.item.name, pourcentage: i.percent })),
+      usage.usageItems.map((i) => ({
+        nom: i.item.name,
+        pourcentage: i.percent,
+      })),
       3,
     ),
     talents: partsUsage(
-      usage.usageAbilities.map((a) => ({ nom: a.ability.name, pourcentage: a.percent })),
+      usage.usageAbilities.map((a) => ({
+        nom: a.ability.name,
+        pourcentage: a.percent,
+      })),
       2,
     ),
     teras: partsUsage(
-      usage.usageTeras.map((t) => ({ nom: t.type.name, pourcentage: t.percent })),
+      usage.usageTeras.map((t) => ({
+        nom: t.type.name,
+        pourcentage: t.percent,
+      })),
       3,
     ),
     spreads: usage.usageSpreads.slice(0, 3).map((s) => ({
@@ -347,7 +399,10 @@ export function ordreFormats(tier: string | null): string[] {
  * `fichiersParGeneration` va de la génération la plus récente à la plus ancienne.
  */
 export function choisirSets(
-  fichiersParGeneration: readonly { generation: number; sets: FichierSetsSmogon }[],
+  fichiersParGeneration: readonly {
+    generation: number;
+    sets: FichierSetsSmogon;
+  }[],
   slugParCle: ReadonlyMap<string, string>,
   tierDe: (slug: string) => string | null,
   objetsInterdits: ReadonlySet<string> = new Set(),

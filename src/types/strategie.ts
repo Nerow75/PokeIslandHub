@@ -77,6 +77,8 @@ export interface StrategieGeneree {
   parEspece: Record<string, StrategieEspece>;
   /** Type attaquant -> type défenseur -> multiplicateur (slugs anglais en minuscules). */
   efficacites: Record<string, Record<string, number>>;
+  /** Capacité offensive (nom anglais) -> son type ; les capacités de statut sont absentes. */
+  typesCapacites: Record<string, string>;
   /** Nom anglais -> nom français. */
   traductions: {
     capacites: Record<string, string>;
