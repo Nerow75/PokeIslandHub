@@ -92,8 +92,8 @@ function force(candidat: CandidatEquipe): number {
 
 /**
  * Apport défensif d'un candidat à l'équipe en cours : pénalité pour chaque faiblesse,
- * d'autant plus forte que l'équipe la partage déjà ; bonus s'il résiste à une faiblesse
- * que l'équipe couvre mal.
+ * doublée pour une double faiblesse (×4) et d'autant plus forte que l'équipe la partage
+ * déjà ; bonus s'il résiste à une faiblesse que l'équipe couvre mal.
  */
 function equilibre(
   candidat: CandidatEquipe,
@@ -106,7 +106,7 @@ function equilibre(
     const multiplicateurs = equipe.map((m) => multiplicateurSubi(m.types, typeAttaquant, efficacites));
     const faibles = multiplicateurs.filter((m) => m > 1).length;
     const resistants = multiplicateurs.filter((m) => m < 1).length;
-    if (subi > 1) score -= 1 + 2 * faibles;
+    if (subi > 1) score -= (subi >= 4 ? 2 : 1) * (1 + 3 * faibles);
     else if (subi < 1 && faibles > resistants) score += 2;
   }
   return score;

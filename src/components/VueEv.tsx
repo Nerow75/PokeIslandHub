@@ -8,6 +8,8 @@ import type { StatEv } from "../types/pokedex.ts";
 
 interface VueEvProps {
   statuts: Readonly<Record<string, StatutEnregistre>>;
+  /** Stat choisie à l'ouverture (lien "Où farmer" d'un build). */
+  statInitiale?: StatEv | null;
 }
 
 const STATS: readonly { cle: StatEv; libelle: string; court: string }[] = [
@@ -22,8 +24,8 @@ const STATS: readonly { cle: StatEv; libelle: string; court: string }[] = [
 /**
  * Table des EV rapportés par chaque espèce vaincue, filtrable par statistique.
  */
-const VueEv: FC<VueEvProps> = ({ statuts }) => {
-  const [stat, setStat] = useState<StatEv | null>(null);
+const VueEv: FC<VueEvProps> = ({ statuts, statInitiale = null }) => {
+  const [stat, setStat] = useState<StatEv | null>(statInitiale);
   const [generation, setGeneration] = useState<number | null>(null);
   const [recherche, setRecherche] = useState("");
 

@@ -1750,3 +1750,394 @@ a.bouton {
   font-size: var(--texte-sm);
   color: var(--couleur-texte-discret);
 }
+
+/* Stratégie */
+
+.bouton--petit {
+  padding-inline: var(--espace-3);
+  font-size: var(--texte-sm);
+}
+
+.bouton[aria-pressed="true"] {
+  background: var(--rouge);
+  border-color: var(--rouge);
+  color: var(--blanc-casse);
+}
+
+.lien-bouton {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.tier {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  min-width: 3rem;
+  justify-content: center;
+  padding: 0 var(--espace-2);
+  border: 1.5px solid var(--couleur-bordure);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface-2);
+  font-size: var(--texte-xs);
+  font-weight: 900;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.tier[data-tier="AG"],
+.tier[data-tier="Uber"],
+.tier[data-tier="OU"] {
+  background: var(--rouge);
+  border-color: var(--rouge);
+  color: var(--blanc-casse);
+}
+
+.tier[data-tier="UUBL"],
+.tier[data-tier="UU"],
+.tier[data-tier="RUBL"],
+.tier[data-tier="RU"] {
+  border-color: var(--couleur-capture);
+  color: var(--couleur-capture);
+}
+
+.tier[data-tier="NFE"],
+.tier[data-tier="LC"],
+.tier[data-tier="aucun"] {
+  color: var(--couleur-texte-discret);
+}
+
+.tier__gen {
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+/* Équipe proposée */
+
+.equipe {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: var(--espace-3);
+}
+
+.equipe__membre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espace-1);
+  padding: var(--espace-3);
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      color-mix(in srgb, var(--couleur-type) 28%, transparent) 0%,
+      transparent 65%
+    ),
+    var(--couleur-surface-2);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-carte);
+  text-align: center;
+}
+
+.equipe__sprite {
+  image-rendering: pixelated;
+}
+
+.equipe__nom {
+  font-weight: 800;
+}
+
+.equipe__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--espace-1);
+  margin-top: auto;
+  padding-top: var(--espace-2);
+}
+
+.bilan > summary,
+.usage > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.bilan > summary {
+  padding-block: var(--espace-1);
+}
+
+.bilan[open] > summary {
+  margin-bottom: var(--espace-3);
+}
+
+.tableau-bilan td {
+  font-weight: 800;
+}
+
+.tableau-bilan tbody th .type {
+  display: inline-block;
+  min-width: 5.5rem;
+  text-align: center;
+}
+
+.bilan--faible {
+  color: var(--couleur-erreur);
+}
+
+.bilan--resiste {
+  color: var(--couleur-succes);
+}
+
+/* Classement des Pokémon */
+
+.classement {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--espace-2);
+}
+
+.classement__pokemon {
+  background: var(--couleur-surface);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-carte);
+}
+
+.classement__pokemon > summary {
+  display: grid;
+  grid-template-columns: 3rem minmax(9rem, 14rem) 4.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espace-3);
+  padding: var(--espace-1) var(--espace-4);
+  cursor: pointer;
+  list-style: none;
+}
+
+.classement__pokemon > summary::-webkit-details-marker {
+  display: none;
+}
+
+.classement__pokemon > summary:hover {
+  background: var(--couleur-surface-2);
+  border-radius: var(--rayon-carte);
+}
+
+.classement__pokemon > summary img {
+  image-rendering: pixelated;
+}
+
+.classement__pokemon .carte__types {
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.classement__nom {
+  font-weight: 800;
+}
+
+.classement__usage {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.classement__detail {
+  display: grid;
+  gap: var(--espace-4);
+  padding: var(--espace-4);
+  border-top: 1px solid var(--couleur-bordure);
+}
+
+.classement__evolution {
+  font-weight: 700;
+}
+
+.classement__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-2);
+}
+
+@media (max-width: 767px) {
+  .classement__pokemon > summary {
+    grid-template-columns: 3rem 1fr auto;
+  }
+
+  .classement__pokemon > summary .carte__types,
+  .classement__usage {
+    grid-column: 2 / -1;
+    text-align: left;
+  }
+}
+
+/* Build d'un Pokémon */
+
+.build {
+  display: grid;
+  gap: var(--espace-4);
+}
+
+.build__sets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+
+.build__set {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: var(--espace-6);
+}
+
+@media (max-width: 767px) {
+  .build__set,
+  .build__capacites {
+    grid-template-columns: 1fr;
+  }
+}
+
+.build__fiche {
+  margin: 0;
+  display: grid;
+  gap: var(--espace-3);
+}
+
+.build__fiche > div {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: var(--espace-3);
+}
+
+.build__fiche dt,
+.build__sous-titre {
+  font-size: var(--texte-sm);
+  font-weight: 800;
+  color: var(--couleur-texte-discret);
+}
+
+.build__fiche dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.build__capacites {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espace-1);
+}
+
+.build__capacites li {
+  padding: 0.125rem var(--espace-3);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface-2);
+}
+
+.build__ivs {
+  margin: var(--espace-1) 0 0;
+  padding-left: var(--espace-4);
+}
+
+.build__evs {
+  display: grid;
+  align-content: start;
+  gap: var(--espace-2);
+  justify-items: start;
+}
+
+.build__farm {
+  font-size: var(--texte-sm);
+  font-weight: 700;
+}
+
+.build__farm .lien-fiche {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.evs {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--espace-1);
+}
+
+.evs__ligne {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: var(--espace-2);
+  font-size: var(--texte-sm);
+}
+
+.evs__stat {
+  font-weight: 700;
+  color: var(--couleur-texte-discret);
+}
+
+.evs__barre {
+  height: 0.5rem;
+}
+
+.evs__barre > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-succes);
+}
+
+.evs__valeur {
+  text-align: right;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Usage réel (Showdown) */
+
+.usage {
+  padding: var(--espace-3) var(--espace-4);
+  background: var(--couleur-surface-2);
+  border-radius: var(--rayon-carte);
+}
+
+.usage__grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--espace-4);
+  margin-top: var(--espace-3);
+}
+
+.usage__liste {
+  margin: var(--espace-1) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.125rem;
+  font-size: var(--texte-sm);
+}
+
+.usage__liste li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espace-3);
+}
+
+.usage__pourcentage {
+  white-space: nowrap;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
