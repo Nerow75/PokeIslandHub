@@ -22,6 +22,11 @@ const pokedex: PokedexGenere = donneesBrutes;
 export const ESPECES: readonly EspecePokemon[] = pokedex.especes;
 export const NOMS_TYPES: Readonly<Record<string, string>> = pokedex.types;
 
+/** Liste de types en français : ["fire", "ice"] -> "Feu, Glace". */
+export function listeTypesFr(types: readonly string[]): string {
+  return types.map((type) => NOMS_TYPES[type] ?? type).join(", ");
+}
+
 /** Pseudo-génération regroupant les entrées propres au serveur. */
 export const GENERATION_SERVEUR = 0;
 

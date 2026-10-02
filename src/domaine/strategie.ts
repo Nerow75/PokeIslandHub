@@ -1,7 +1,12 @@
 // src/domaine/strategie.ts
 
 import type { StatEv } from "../types/pokedex.ts";
-import type { Repartition, SetRecommande, StatCombat } from "../types/strategie.ts";
+import type {
+  Repartition,
+  SetRecommande,
+  StatCombat,
+  StrategieEspece,
+} from "../types/strategie.ts";
 
 /* Présentation des builds : libellés, IV conseillés, export au format Showdown. */
 
@@ -72,6 +77,28 @@ export function traduire(table: Readonly<Record<string, string>>, nom: string): 
   return table[nom] ?? nom;
 }
 
+/**
+ * Types des capacités offensives d'un Pokémon : celles du premier set conseillé
+ * (premier choix de chaque case), sinon les plus jouées, sinon ses propres types.
+ */
+export function typesAttaque(
+  strategie: StrategieEspece | undefined,
+  typesEspece: readonly string[],
+  typesCapacites: Readonly<Record<string, string>>,
+): string[] {
+  const premierSet = strategie?.sets[0];
+  const capacites = premierSet
+    ? premierSet.capacites.flatMap((choix) => choix.slice(0, 1))
+    : (strategie?.usage?.capacites.slice(0, 4).map((c) => c.nom) ?? []);
+  const types = new Set(
+    capacites.flatMap((nom) => {
+      const type = typesCapacites[nom];
+      return type ? [type] : [];
+    }),
+  );
+  return types.size > 0 ? [...types] : [...typesEspece];
+}
+
 export interface ConseilIv {
   stat: StatCombat;
   valeur: number;
@@ -88,7 +115,13 @@ export function conseilsIv(ivs: Repartition): ConseilIv[] {
   return STATS_COMBAT.flatMap((stat) => {
     const valeur = ivs[stat];
     if (valeur === undefined || valeur === IV_PAR_DEFAUT) return [];
-    return [{ stat, valeur, raison: RAISONS_IV[stat] ?? "valeur fixée par l'analyse Smogon" }];
+    return [
+      {
+        stat,
+        valeur,
+        raison: RAISONS_IV[stat] ?? "valeur fixée par l'analyse Smogon",
+      },
+    ];
   });
 }
 
@@ -120,4 +153,12 @@ export function texteShowdown(nomEspece: string, set: SetRecommande): string {
     if (capacite) lignes.push(`- ${capacite}`);
   }
   return lignes.join("\n");
+}
+
+/** "×2", "½", "¼", "0" : multiplicateur d'efficacité lisible. */
+export function multiplicateurAffiche(valeur: number): string {
+  if (valeur === 0) return "0";
+  if (valeur === 0.25) return "¼";
+  if (valeur === 0.5) return "½";
+  return `×${valeur}`;
 }

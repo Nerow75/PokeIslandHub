@@ -2141,3 +2141,96 @@ a.bouton {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+
+/* Résumé et suggestions de l'équipe */
+
+.resume-equipe {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--espace-3);
+}
+
+.resume-equipe > div {
+  padding: var(--espace-3) var(--espace-4);
+  background: var(--couleur-surface-2);
+  border-radius: var(--rayon-carte);
+}
+
+.resume-equipe dt {
+  font-size: var(--texte-sm);
+  font-weight: 800;
+  color: var(--couleur-texte-discret);
+}
+
+.resume-equipe dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.suggestions {
+  display: grid;
+  gap: var(--espace-3);
+  padding-top: var(--espace-3);
+  border-top: 1px solid var(--couleur-bordure);
+}
+
+.suggestions__entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-2) var(--espace-4);
+}
+
+.suggestions__entete h4 {
+  font-size: var(--texte-base);
+  font-weight: 800;
+}
+
+.suggestions__liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
+  gap: var(--espace-2);
+}
+
+.suggestion {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr auto;
+  align-items: center;
+  gap: var(--espace-3);
+  padding: var(--espace-2) var(--espace-3);
+  background: var(--couleur-surface-2);
+  border-radius: var(--rayon-carte);
+}
+
+.suggestion img {
+  image-rendering: pixelated;
+}
+
+.suggestion__texte {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.suggestion__nom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  font-weight: 800;
+}
+
+.suggestion__nom .carte__types {
+  margin: 0;
+}
+
+.suggestion .bouton {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}

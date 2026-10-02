@@ -5,27 +5,22 @@ import {
   ESPECES,
   ESPECES_PAR_SLUG,
   evolutionsAffichees,
-  evolutionsVers,
   INDEX_RECHERCHE,
-  NOMS_TYPES,
   normaliserRecherche,
 } from "../donnees.ts";
 import {
   basculerEpingle,
   basculerExclusion,
-  bilanDefensif,
   classerParForce,
   estNonEvolue,
-  proposerEquipe,
-  TAILLE_EQUIPE,
-  type CandidatEquipe,
   type ChoixEquipe,
 } from "../domaine/equipe.ts";
-import { racineFamille } from "../domaine/famille.ts";
 import type { StatutEnregistre } from "../domaine/statut.ts";
 import { useStrategie } from "../hooks/useStrategie.ts";
 import type { StrategieGeneree } from "../types/strategie.ts";
 import BuildPokemon from "./BuildPokemon.tsx";
+import { BadgeTier, TypesPokemon } from "./PastillesStrategie.tsx";
+import SectionEquipe from "./SectionEquipe.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
 
 interface VueStrategieProps {
@@ -33,8 +28,6 @@ interface VueStrategieProps {
   choixEquipe: ChoixEquipe;
   onChoixEquipeChange: (transformer: (choix: ChoixEquipe) => ChoixEquipe) => void;
 }
-
-const parentsDe = (slug: string): string[] => evolutionsVers(slug).map((p) => p.depuis);
 
 /** Formes finales atteignables depuis une espèce, selon les évolutions Cobblemon. */
 function evolutionsFinales(slug: string): string[] {
@@ -51,37 +44,6 @@ function evolutionsFinales(slug: string): string[] {
   return [...finales];
 }
 
-function multiplicateurAffiche(valeur: number): string {
-  if (valeur === 0) return "0";
-  if (valeur === 0.25) return "¼";
-  if (valeur === 0.5) return "½";
-  return `×${valeur}`;
-}
-
-const BadgeTier: FC<{ tier: string | null; generation: number | null }> = ({
-  tier,
-  generation,
-}) => (
-  <span className="tier" data-tier={tier ?? "aucun"}>
-    {tier ?? "?"}
-    {generation !== null && generation < 9 && (
-      <span className="tier__gen" title={`Tier de la génération ${generation}`}>
-        G{generation}
-      </span>
-    )}
-  </span>
-);
-
-const Types: FC<{ types: readonly string[] }> = ({ types }) => (
-  <span className="carte__types">
-    {types.map((type) => (
-      <span key={type} className="type" data-type={type}>
-        {NOMS_TYPES[type] ?? type}
-      </span>
-    ))}
-  </span>
-);
-
 interface ContenuProps extends VueStrategieProps {
   donnees: StrategieGeneree;
 }
@@ -94,30 +56,6 @@ const ContenuStrategie: FC<ContenuProps> = ({
 }) => {
   const [inclureVus, setInclureVus] = useState(false);
   const [recherche, setRecherche] = useState("");
-
-  /* Candidats : Pokémon capturés connus des données de stratégie. */
-  const candidats = useMemo<CandidatEquipe[]>(
-    () =>
-      ESPECES.filter((e) => statuts[e.slug] === "capture" && donnees.parEspece[e.slug]).map(
-        (e) => {
-          const strategie = donnees.parEspece[e.slug];
-          return {
-            slug: e.slug,
-            tier: strategie?.tier ?? null,
-            pourcentageUsage: strategie?.usage?.pourcentage ?? 0,
-            types: e.types,
-            famille: racineFamille(e.slug, parentsDe),
-          };
-        },
-      ),
-    [statuts, donnees],
-  );
-
-  const equipe = useMemo(
-    () => proposerEquipe(candidats, choixEquipe, donnees.efficacites),
-    [candidats, choixEquipe, donnees.efficacites],
-  );
-  const bilan = bilanDefensif(equipe, donnees.efficacites);
 
   const classement = useMemo(() => {
     const termes = normaliserRecherche(recherche).split(" ").filter(Boolean);
@@ -140,136 +78,16 @@ const ContenuStrategie: FC<ContenuProps> = ({
 
   const epingles = new Set(choixEquipe.epingles);
   const exclus = new Set(choixEquipe.exclus);
-  const nombreCaptures = candidats.length;
+  const nombreCaptures = ESPECES.filter((e) => statuts[e.slug] === "capture").length;
 
   return (
     <>
-      <section aria-labelledby="titre-equipe" className="panneau">
-        <h3 id="titre-equipe">Team proposée</h3>
-        <p className="texte-discret">
-          Les plus forts de tes captures selon leur tier, en évitant d'empiler les mêmes faiblesses.
-          Un seul Pokémon par famille, les non évolués sont écartés. Épingle ou retire un membre
-          pour ajuster.
-        </p>
-        {equipe.length === 0 ? (
-          <p className="vide">Capture des Pokémon entièrement évolués pour obtenir une proposition.</p>
-        ) : (
-          <ol className="equipe">
-            {equipe.map((membre) => {
-              const espece = ESPECES_PAR_SLUG.get(membre.slug);
-              if (!espece) return null;
-              const estEpingle = epingles.has(membre.slug);
-              return (
-                <li key={membre.slug} className="equipe__membre" data-type={espece.types[0]}>
-                  <SpritePokemon espece={espece} taille={72} className="equipe__sprite" />
-                  <a className="equipe__nom lien-fiche" href={`#fiche/${espece.slug}`}>
-                    {espece.nomFr}
-                  </a>
-                  <BadgeTier
-                    tier={membre.tier}
-                    generation={donnees.parEspece[membre.slug]?.generationTier ?? null}
-                  />
-                  <Types types={espece.types} />
-                  <div className="equipe__actions">
-                    <button
-                      type="button"
-                      className="bouton bouton--petit"
-                      aria-pressed={estEpingle}
-                      onClick={() => onChoixEquipeChange((c) => basculerEpingle(c, membre.slug))}
-                    >
-                      {estEpingle ? "Épinglé" : "Épingler"}
-                    </button>
-                    <button
-                      type="button"
-                      className="bouton bouton--petit"
-                      onClick={() => onChoixEquipeChange((c) => basculerExclusion(c, membre.slug))}
-                    >
-                      Retirer
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-        {equipe.length > 0 && equipe.length < TAILLE_EQUIPE && (
-          <p className="texte-discret">
-            {equipe.length} sur {TAILLE_EQUIPE} : pas assez de candidats parmi tes captures.
-          </p>
-        )}
-        {choixEquipe.exclus.length > 0 && (
-          <p className="texte-discret">
-            Retirés :{" "}
-            {choixEquipe.exclus.map((slug, index) => (
-              <span key={slug}>
-                {index > 0 && ", "}
-                <button
-                  type="button"
-                  className="lien-bouton"
-                  onClick={() => onChoixEquipeChange((c) => basculerExclusion(c, slug))}
-                  title="Remettre dans les propositions"
-                >
-                  {ESPECES_PAR_SLUG.get(slug)?.nomFr ?? slug}
-                </button>
-              </span>
-            ))}
-          </p>
-        )}
-
-        {equipe.length > 0 && (
-          <details className="bilan">
-            <summary>
-              Faiblesses de la team :{" "}
-              {bilan
-                .filter((b) => b.faibles >= 2 && b.faibles > b.resistants)
-                .map((b) => NOMS_TYPES[b.typeAttaquant] ?? b.typeAttaquant)
-                .join(", ") || "aucune faiblesse partagée"}
-            </summary>
-            <div className="tableau-defilant">
-              <table className="tableau-ev tableau-bilan">
-                <thead>
-                  <tr>
-                    <th scope="col">Attaque</th>
-                    {equipe.map((m) => (
-                      <th key={m.slug} scope="col">
-                        {ESPECES_PAR_SLUG.get(m.slug)?.nomFr ?? m.slug}
-                      </th>
-                    ))}
-                    <th scope="col">Bilan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bilan.map((ligne) => (
-                    <tr key={ligne.typeAttaquant}>
-                      <th scope="row">
-                        <span className="type" data-type={ligne.typeAttaquant}>
-                          {NOMS_TYPES[ligne.typeAttaquant] ?? ligne.typeAttaquant}
-                        </span>
-                      </th>
-                      {ligne.multiplicateurs.map((m, index) => (
-                        <td
-                          key={equipe[index]?.slug ?? index}
-                          className={m > 1 ? "bilan--faible" : m < 1 ? "bilan--resiste" : "ev-nul"}
-                        >
-                          {m === 1 ? "·" : multiplicateurAffiche(m)}
-                        </td>
-                      ))}
-                      <td
-                        className={
-                          ligne.faibles > ligne.resistants ? "bilan--faible" : "texte-discret"
-                        }
-                      >
-                        {ligne.faibles} faible{ligne.faibles > 1 ? "s" : ""}, {ligne.resistants}{" "}
-                        résiste{ligne.resistants > 1 ? "nt" : ""}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </details>
-        )}
-      </section>
+      <SectionEquipe
+        donnees={donnees}
+        statuts={statuts}
+        choixEquipe={choixEquipe}
+        onChoixEquipeChange={onChoixEquipeChange}
+      />
 
       <section aria-labelledby="titre-classement" className="vue">
         <div className="vue__entete">
@@ -308,7 +126,8 @@ const ContenuStrategie: FC<ContenuProps> = ({
           <ul className="classement">
             {classement.map(({ espece, strategie }) => {
               const statut = statuts[espece.slug];
-              const finales = strategie && estNonEvolue(strategie.tier) ? evolutionsFinales(espece.slug) : [];
+              const finales =
+                strategie && estNonEvolue(strategie.tier) ? evolutionsFinales(espece.slug) : [];
               return (
                 <li key={espece.slug}>
                   <details className="classement__pokemon">
@@ -322,7 +141,7 @@ const ContenuStrategie: FC<ContenuProps> = ({
                         tier={strategie?.tier ?? null}
                         generation={strategie?.generationTier ?? null}
                       />
-                      <Types types={espece.types} />
+                      <TypesPokemon types={espece.types} />
                       <span className="classement__usage texte-discret">
                         {strategie?.usage
                           ? `${strategie.usage.pourcentage.toLocaleString("fr-FR")} % en ${strategie.usage.tier}`
@@ -367,7 +186,9 @@ const ContenuStrategie: FC<ContenuProps> = ({
                               onChoixEquipeChange((c) => basculerEpingle(c, espece.slug))
                             }
                           >
-                            {epingles.has(espece.slug) ? "Épinglé dans la team" : "Épingler dans la team"}
+                            {epingles.has(espece.slug)
+                              ? "Épinglé dans la team"
+                              : "Épingler dans la team"}
                           </button>
                           <button
                             type="button"
