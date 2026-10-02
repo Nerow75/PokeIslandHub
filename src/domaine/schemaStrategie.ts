@@ -43,6 +43,7 @@ export const schemaStrategieGeneree: z.ZodType<StrategieGeneree> = z.object({
   parEspece: z.record(
     z.string(),
     z.object({
+      idCoupCritique: z.number().nullable(),
       tier: z.string().nullable(),
       generationTier: z.number().nullable(),
       usage: schemaUsage.nullable(),

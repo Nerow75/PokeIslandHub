@@ -193,3 +193,18 @@ export function evolutionsVers(slug: string): { depuis: string; evolution: Evolu
   }
   return parentsParEspece.get(slug) ?? [];
 }
+
+/** Formes finales atteignables depuis une espèce, selon les évolutions Cobblemon. */
+export function evolutionsFinales(slug: string): string[] {
+  const finales = new Set<string>();
+  const parcourus = new Set<string>();
+  const parcourir = (courant: string): void => {
+    if (parcourus.has(courant)) return;
+    parcourus.add(courant);
+    const suivantes = evolutionsAffichees(courant).map((e) => e.vers);
+    if (suivantes.length === 0 && courant !== slug) finales.add(courant);
+    suivantes.forEach(parcourir);
+  };
+  parcourir(slug);
+  return [...finales];
+}

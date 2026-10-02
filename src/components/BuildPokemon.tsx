@@ -210,7 +210,9 @@ const BuildPokemon: FC<BuildPokemonProps> = ({ nomEn, strategie, donnees }) => {
                 aria-pressed={index === indexSet}
                 onClick={() => setIndexSet(index)}
               >
-                {s.nom}
+                {strategie.sets.filter((autre) => autre.nom === s.nom).length > 1
+                  ? `${s.nom} (${libelleFormat(s.format, s.generation)})`
+                  : s.nom}
               </button>
             ))}
             <span className="texte-discret">Smogon {libelleFormat(set.format, set.generation)}</span>

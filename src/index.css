@@ -2234,3 +2234,25 @@ a.bouton {
   color: inherit;
   text-decoration: none;
 }
+
+/* Stratégie sur la fiche */
+
+.strategie-fiche {
+  display: grid;
+  gap: var(--espace-4);
+}
+
+.strategie-fiche__entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2) var(--espace-3);
+}
+
+.strategie-fiche__lien {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  color: inherit;
+  text-decoration: none;
+}

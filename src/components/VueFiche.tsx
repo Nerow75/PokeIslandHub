@@ -19,6 +19,7 @@ import { LIBELLES_STATUT, type StatutEnregistre, type StatutPokemon } from "../d
 import { useApparitions } from "../hooks/useApparitions.ts";
 import type { StatEv } from "../types/pokedex.ts";
 import { BlocApparition, SansApparition } from "./BlocApparition.tsx";
+import BlocStrategieFiche from "./BlocStrategieFiche.tsx";
 import ChampACopier from "./ChampACopier.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
 import SuggestionsNoms from "./SuggestionsNoms.tsx";
@@ -149,7 +150,8 @@ function OuTrouver({ slug }: { slug: string }) {
 
 /**
  * Fiche d'un Pokémon : identité, statut, famille d'évolution complète (Cobblemon),
- * biomes d'apparition, EV rapportés et chaîne PokéFinder.
+ * stratégie (tier, build, lien Coup Critique), biomes d'apparition, EV rapportés
+ * et chaîne PokéFinder.
  */
 const VueFiche: FC<VueFicheProps> = ({ slug, statuts, onStatutChange }) => {
   const [saisie, setSaisie] = useState("");
@@ -293,6 +295,11 @@ const VueFiche: FC<VueFicheProps> = ({ slug, statuts, onStatutChange }) => {
                 </ul>
               </div>
             </div>
+          </div>
+
+          <div className="panneau">
+            <h3>Stratégie</h3>
+            <BlocStrategieFiche slug={slug} nomEn={espece.nomEn} />
           </div>
 
           <div className="panneau">

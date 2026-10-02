@@ -156,6 +156,12 @@ async function generer(): Promise<void> {
     listesParGeneration.push({ generation, pokemons });
   }
   const tiers = choisirTiers(listesParGeneration, slugParCle);
+  /* La fiche Coup Critique de génération 9 existe pour toutes les espèces, classées ou non. */
+  const idsCoupCritique = new Map<string, number>();
+  for (const pokemon of listesParGeneration[0]?.pokemons ?? []) {
+    const slug = slugParCle.get(cleEspece(pokemon.name));
+    if (slug && !idsCoupCritique.has(slug)) idsCoupCritique.set(slug, pokemon.id);
+  }
 
   const fichiersSets = [];
   for (const generation of GENERATIONS) {
@@ -194,6 +200,7 @@ async function generer(): Promise<void> {
     const setsEspece = sets.get(espece.slug) ?? [];
     if (!tier && setsEspece.length === 0) continue;
     parEspece[espece.slug] = {
+      idCoupCritique: idsCoupCritique.get(espece.slug) ?? null,
       tier: tier?.tier ?? null,
       generationTier: tier?.generation ?? null,
       usage,

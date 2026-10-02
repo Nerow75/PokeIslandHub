@@ -57,6 +57,8 @@ export interface UsageEspece {
 }
 
 export interface StrategieEspece {
+  /** Identifiant de la fiche Coup Critique (génération 9), pour le lien vers le site. */
+  idCoupCritique: number | null;
   /** Tier Smogon (Uber, OU, UUBL...), ou null si aucun n'est connu. */
   tier: string | null;
   /** Génération dont provient le tier. */
