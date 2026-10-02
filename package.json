@@ -9,6 +9,7 @@
     "typecheck": "tsc -b",
     "lint": "oxlint",
     "test": "vitest run",
+    "build:portable": "node scripts/construire-portable.ts",
     "generate:pokedex": "node scripts/generate-pokedex.ts",
     "generate:apparitions": "node scripts/generate-apparitions.ts",
     "generate:cobblemon": "node scripts/generate-cobblemon.ts",

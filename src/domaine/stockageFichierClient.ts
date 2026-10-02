@@ -16,7 +16,13 @@ function estObjet(valeur: unknown): valeur is Record<string, unknown> {
   return typeof valeur === "object" && valeur !== null;
 }
 
+/** Page ouverte comme fichier (version portable) : aucun serveur à interroger. */
+function estOuverteCommeFichier(): boolean {
+  return typeof window !== "undefined" && window.location.protocol === "file:";
+}
+
 export async function chargerSauvegardeFichier(): Promise<ChargementFichier> {
+  if (estOuverteCommeFichier()) return { etat: "indisponible" };
   let corps: unknown;
   try {
     const reponse = await fetch(ROUTE_SAUVEGARDE, { cache: "no-store" });
