@@ -4,7 +4,7 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { sauvegardeVide } from "../src/domaine/sauvegarde.ts";
+import { sauvegardeVide, VERSION_SAUVEGARDE } from "../src/domaine/sauvegarde.ts";
 import { creerStockageFichier, NOM_FICHIER } from "./stockageFichier.ts";
 
 /* Tests sur un vrai dossier temporaire : aucune simulation du système de fichiers. */
@@ -60,7 +60,7 @@ describe("creerStockageFichier", () => {
       }),
     );
     const lecture = await creerStockageFichier(dossier).lire();
-    expect(lecture.etat === "trouvee" && lecture.sauvegarde.version).toBe(4);
+    expect(lecture.etat === "trouvee" && lecture.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
   });
 
   it("archive le fichier précédent dans l'historique du jour", async () => {

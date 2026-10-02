@@ -7,6 +7,7 @@ import {
   sauvegardeVide,
   serialiserSauvegarde,
 } from "./sauvegarde.ts";
+import { choixEquipeVide } from "./equipe.ts";
 import { statutSuivant } from "./statut.ts";
 import { votesParDefaut } from "./votes.ts";
 
@@ -63,11 +64,12 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 4,
+        version: 5,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
         chasse: { especes: [], capturees: [], debut: null },
         votes: votesParDefaut(),
+        equipe: choixEquipeVide(),
       },
     });
   });
@@ -96,6 +98,18 @@ describe("migrations", () => {
     const resultat = lireSauvegarde(v3);
     expect(resultat.succes && resultat.sauvegarde.votes).toEqual(votesParDefaut());
     expect(resultat.succes && resultat.sauvegarde.chasse.especes).toEqual(["pikachu"]);
+  });
+
+  it("ajoute des choix d'équipe vides à une sauvegarde v4 sans toucher au reste", () => {
+    const { equipe: _equipe, ...v4 } = { ...sauvegardeVide(), version: 4, statuts: { mew: "capture" } };
+    const resultat = lireSauvegarde(v4);
+    expect(resultat.succes && resultat.sauvegarde.equipe).toEqual({ epingles: [], exclus: [] });
+    expect(resultat.succes && resultat.sauvegarde.statuts).toEqual({ mew: "capture" });
+  });
+
+  it("refuse plus de six Pokémon épinglés", () => {
+    const equipe = { epingles: ["a", "b", "c", "d", "e", "f", "g"], exclus: [] };
+    expect(lireSauvegarde({ ...sauvegardeVide(), equipe }).succes).toBe(false);
   });
 
   it("refuse un lien de vote non http(s)", () => {
