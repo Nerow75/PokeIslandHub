@@ -12,6 +12,7 @@ import {
   schemaDetailCoupCritique,
   tableEfficacites,
   tableTraductions,
+  typesCapacitesOffensives,
   type FichierSetsSmogon,
 } from "./parse.ts";
 
@@ -41,11 +42,19 @@ describe("choisirTiers", () => {
   const tiers = choisirTiers(listes, slugParCle);
 
   it("retient le tier de la génération la plus récente", () => {
-    expect(tiers.get("garchomp")).toEqual({ tier: "UUBL", generation: 9, idCoupCritique: 7050 });
+    expect(tiers.get("garchomp")).toEqual({
+      tier: "UUBL",
+      generation: 9,
+      idCoupCritique: 7050,
+    });
   });
 
   it("remonte à une génération antérieure pour un Pokémon non classé", () => {
-    expect(tiers.get("beedrill")).toEqual({ tier: "ZU", generation: 7, idCoupCritique: 3144 });
+    expect(tiers.get("beedrill")).toEqual({
+      tier: "ZU",
+      generation: 7,
+      idCoupCritique: 3144,
+    });
   });
 
   it("rapproche les noms Showdown des slugs PokeAPI et ignore les formes", () => {
@@ -83,8 +92,18 @@ describe("convertirSet", () => {
     const interdits = objetsDeFormeSpeciale(
       [
         [
-          { id: 1, name: "Beedrill-Mega", tier: null, requiredItem: { name: "Beedrillite" } },
-          { id: 2, name: "Zacian-Crowned", tier: null, requiredItem: { name: "Rusted Sword" } },
+          {
+            id: 1,
+            name: "Beedrill-Mega",
+            tier: null,
+            requiredItem: { name: "Beedrillite" },
+          },
+          {
+            id: 2,
+            name: "Zacian-Crowned",
+            tier: null,
+            requiredItem: { name: "Rusted Sword" },
+          },
         ],
       ],
       ["Dragonium Z", "Leftovers"],
@@ -187,7 +206,13 @@ describe("convertirUsage", () => {
       rang: 12,
       pourcentage: 5.37,
       objets: [{ nom: "Rocky Helmet", pourcentage: 62.3 }],
-      spreads: [{ nature: "Impish", evs: { hp: 248, def: 216, spe: 44 }, pourcentage: 21.4 }],
+      spreads: [
+        {
+          nature: "Impish",
+          evs: { hp: 248, def: 216, spe: 44 },
+          pourcentage: 21.4,
+        },
+      ],
     });
   });
 
@@ -199,10 +224,44 @@ describe("convertirUsage", () => {
 describe("tables", () => {
   it("garde la première traduction connue, de la génération la plus récente", () => {
     const table = tableTraductions([
-      [{ name: "Return", nom: "Retour" }, { name: "Hidden Power Bug", nom: null }],
-      [{ name: "Return", nom: "Ancien" }, { name: "Hidden Power Bug", nom: "Puissance Cachée" }],
+      [
+        { name: "Return", nom: "Retour" },
+        { name: "Hidden Power Bug", nom: null },
+      ],
+      [
+        { name: "Return", nom: "Ancien" },
+        { name: "Hidden Power Bug", nom: "Puissance Cachée" },
+      ],
     ]);
-    expect(table).toEqual({ Return: "Retour", "Hidden Power Bug": "Puissance Cachée" });
+    expect(table).toEqual({
+      Return: "Retour",
+      "Hidden Power Bug": "Puissance Cachée",
+    });
+  });
+
+  it("garde le type des seules capacités offensives utiles, génération récente d'abord", () => {
+    const capacite = (name: string, category: "Physical" | "Special" | "Status", type: string) => ({
+      name,
+      category,
+      type: { name: type },
+    });
+    const table = typesCapacitesOffensives(
+      [
+        [
+          capacite("Earthquake", "Physical", "Ground"),
+          capacite("Swords Dance", "Status", "Normal"),
+        ],
+        [
+          capacite("Earthquake", "Physical", "Rock"),
+          capacite("Hidden Power Fire", "Special", "Fire"),
+        ],
+      ],
+      new Set(["Earthquake", "Swords Dance", "Hidden Power Fire"]),
+    );
+    expect(table).toEqual({
+      Earthquake: "ground",
+      "Hidden Power Fire": "fire",
+    });
   });
 
   it("construit l'efficacité attaquant -> défenseur sans le type Stellaire", () => {
