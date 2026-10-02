@@ -12,6 +12,7 @@
     "generate:pokedex": "node scripts/generate-pokedex.ts",
     "generate:apparitions": "node scripts/generate-apparitions.ts",
     "generate:cobblemon": "node scripts/generate-cobblemon.ts",
+    "generate:strategie": "node scripts/generate-strategie.ts",
     "preview": "vite preview"
   },
   "dependencies": {
