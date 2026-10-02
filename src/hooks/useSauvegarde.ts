@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Chasse } from "../domaine/chasse.ts";
 import type { ReglagesCompletion } from "../domaine/completion.ts";
+import type { ChoixEquipe } from "../domaine/equipe.ts";
 import {
   lireSauvegardeDepuisTexte,
   serialiserSauvegarde,
@@ -180,6 +181,10 @@ export function useSauvegarde() {
     }));
   };
 
+  const modifierEquipe = (transformerEquipe: (equipe: ChoixEquipe) => ChoixEquipe): void => {
+    modifier((precedente) => ({ ...precedente, equipe: transformerEquipe(precedente.equipe) }));
+  };
+
   const modifierReglagesCompletion = (reglages: ReglagesCompletion): void => {
     modifier((precedente) => ({ ...precedente, reglagesCompletion: reglages }));
   };
@@ -208,6 +213,7 @@ export function useSauvegarde() {
     modifierReglagesCompletion,
     modifierChasse,
     modifierVote,
+    modifierEquipe,
     importer,
     exporter,
   };

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { chasseVide, NOMBRE_POKEMON_CHASSE } from "./chasse.ts";
 import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
+import { choixEquipeVide, TAILLE_EQUIPE } from "./equipe.ts";
 import { votesParDefaut } from "./votes.ts";
 
 /*
@@ -11,7 +12,7 @@ import { votesParDefaut } from "./votes.ts";
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 4;
+export const VERSION_SAUVEGARDE = 5;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -37,6 +38,13 @@ const schemaVote = z.object({
   dernierVote: z.iso.datetime().nullable(),
 });
 
+const schemaEquipe = z.object({
+  /** Slugs imposés dans l'équipe proposée. */
+  epingles: z.array(z.string()).max(TAILLE_EQUIPE),
+  /** Slugs à ne jamais proposer. */
+  exclus: z.array(z.string()),
+});
+
 export const schemaSauvegarde = z.object({
   version: z.literal(VERSION_SAUVEGARDE),
   /** Slug d'espèce -> statut. Une espèce absente est "non vue". */
@@ -44,6 +52,7 @@ export const schemaSauvegarde = z.object({
   reglagesCompletion: schemaReglagesCompletion,
   chasse: schemaChasse,
   votes: z.array(schemaVote),
+  equipe: schemaEquipe,
 });
 
 export type Sauvegarde = z.infer<typeof schemaSauvegarde>;
@@ -75,6 +84,8 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
   2: (donnees) => ({ ...donnees, version: 3, chasse: chasseVide() }),
   /* v3 -> v4 : ajout des votes (2 h et 24 h), liens à renseigner. */
   3: (donnees) => ({ ...donnees, version: 4, votes: votesParDefaut() }),
+  /* v4 -> v5 : ajout des choix d'équipe (onglet Stratégie), vides. */
+  4: (donnees) => ({ ...donnees, version: 5, equipe: choixEquipeVide() }),
 };
 
 export function sauvegardeVide(): Sauvegarde {
@@ -84,6 +95,7 @@ export function sauvegardeVide(): Sauvegarde {
     reglagesCompletion: { ...REGLAGES_COMPLETION_PAR_DEFAUT },
     chasse: chasseVide(),
     votes: votesParDefaut(),
+    equipe: choixEquipeVide(),
   };
 }
 
