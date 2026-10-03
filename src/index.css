@@ -620,6 +620,14 @@ main {
   line-height: 1.6;
 }
 
+.carte__ev {
+  margin-top: var(--espace-1);
+  font-size: var(--texte-xs);
+  font-weight: 800;
+  color: var(--couleur-succes);
+  font-variant-numeric: tabular-nums;
+}
+
 .carte__statut {
   margin-top: auto;
   padding-top: var(--espace-2);

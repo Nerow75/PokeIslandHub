@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { NOMS_TYPES } from "../donnees.ts";
+import { resumeEv } from "../domaine/ev.ts";
 import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, statutSuivant, type StatutPokemon } from "../domaine/statut.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
@@ -23,6 +24,7 @@ const CartePokemon = memo(function CartePokemon({
 }: CartePokemonProps) {
   const suivant = statutSuivant(statut);
   const numero = `#${String(espece.id).padStart(4, "0")}`;
+  const ev = resumeEv(espece.evRapportes);
 
   return (
     <li className="grille__case">
@@ -30,7 +32,7 @@ const CartePokemon = memo(function CartePokemon({
         type="button"
         className={`carte carte--${statut}`}
         data-type={espece.types[0]}
-        aria-label={`${espece.nomFr} ${numero}, ${LIBELLES_STATUT[statut]}. Passer à : ${LIBELLES_STATUT[suivant]}`}
+        aria-label={`${espece.nomFr} ${numero}${ev ? `, EV ${ev}` : ""}, ${LIBELLES_STATUT[statut]}. Passer à : ${LIBELLES_STATUT[suivant]}`}
         onClick={() => onStatutChange(espece.slug, suivant)}
       >
         <span className="carte__haut">
@@ -49,6 +51,11 @@ const CartePokemon = memo(function CartePokemon({
                 {NOMS_TYPES[type] ?? type}
               </span>
             ))}
+          </span>
+        )}
+        {ev && (
+          <span className="carte__ev" title="EV rapportés quand il est mis K.O.">
+            EV {ev}
           </span>
         )}
         <span className="carte__statut">{LIBELLES_STATUT[statut]}</span>
