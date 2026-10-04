@@ -3,13 +3,13 @@
 import type { EvRapportes, StatEv } from "../types/pokedex.ts";
 
 /** Abréviations des statistiques, dans l'ordre du jeu. */
-export const ABREVIATIONS_EV: readonly { stat: StatEv; court: string }[] = [
-  { stat: "pv", court: "PV" },
-  { stat: "attaque", court: "Atq" },
-  { stat: "defense", court: "Déf" },
-  { stat: "attaqueSpeciale", court: "Atq Spé" },
-  { stat: "defenseSpeciale", court: "Déf Spé" },
-  { stat: "vitesse", court: "Vit" },
+export const ABREVIATIONS_EV: readonly { stat: StatEv; court: string; libelle: string }[] = [
+  { stat: "pv", court: "PV", libelle: "PV" },
+  { stat: "attaque", court: "Atq", libelle: "Attaque" },
+  { stat: "defense", court: "Déf", libelle: "Défense" },
+  { stat: "attaqueSpeciale", court: "Atq Spé", libelle: "Attaque Spéciale" },
+  { stat: "defenseSpeciale", court: "Déf Spé", libelle: "Défense Spéciale" },
+  { stat: "vitesse", court: "Vit", libelle: "Vitesse" },
 ] as const;
 
 /** EV rapportés en raccourci : "+2 Vit", "+1 PV +1 Déf" ; vide si aucun. */

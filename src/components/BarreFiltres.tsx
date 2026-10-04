@@ -2,7 +2,10 @@
 
 import { type FC } from "react";
 import { GENERATION_SERVEUR, GENERATIONS, libelleGeneration } from "../donnees.ts";
+import { libelleBiome, type MomentJournee } from "../domaine/apparitions.ts";
+import { ABREVIATIONS_EV } from "../domaine/ev.ts";
 import type { Filtres, FiltreStatut } from "../domaine/filtres.ts";
+import type { StatEv } from "../types/pokedex.ts";
 
 const LIBELLES_FILTRE_STATUT: Record<FiltreStatut, string> = {
   tous: "Tous",
@@ -14,14 +17,22 @@ const LIBELLES_FILTRE_STATUT: Record<FiltreStatut, string> = {
 
 interface BarreFiltresProps {
   filtres: Filtres;
+  /** Biomes proposés au filtre ; null tant que les apparitions se chargent. */
+  biomes: readonly string[] | null;
   nombreResultats: number;
   onFiltresChange: (filtres: Filtres) => void;
 }
 
 /**
- * Recherche par nom (FR ou EN) ou numéro, filtres par génération et par statut.
+ * Recherche par nom (FR ou EN) ou numéro, filtres par génération, statut,
+ * EV rapportés, biome et moment d'apparition.
  */
-const BarreFiltres: FC<BarreFiltresProps> = ({ filtres, nombreResultats, onFiltresChange }) => {
+const BarreFiltres: FC<BarreFiltresProps> = ({
+  filtres,
+  biomes,
+  nombreResultats,
+  onFiltresChange,
+}) => {
   return (
     <div className="filtres" role="search">
       <label className="filtres__recherche">
@@ -65,6 +76,62 @@ const BarreFiltres: FC<BarreFiltresProps> = ({ filtres, nombreResultats, onFiltr
               {LIBELLES_FILTRE_STATUT[statut]}
             </option>
           ))}
+        </select>
+      </label>
+
+      <label>
+        Donne des EV en
+        <select
+          value={filtres.statEv ?? ""}
+          onChange={(e) =>
+            onFiltresChange({
+              ...filtres,
+              statEv: e.target.value === "" ? null : (e.target.value as StatEv),
+            })
+          }
+        >
+          <option value="">Peu importe</option>
+          {ABREVIATIONS_EV.map(({ stat, libelle }) => (
+            <option key={stat} value={stat}>
+              {libelle}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Biome
+        <select
+          value={filtres.biome ?? ""}
+          disabled={biomes === null}
+          onChange={(e) =>
+            onFiltresChange({ ...filtres, biome: e.target.value === "" ? null : e.target.value })
+          }
+        >
+          <option value="">{biomes === null ? "Chargement..." : "Tous"}</option>
+          {(biomes ?? []).map((biome) => (
+            <option key={biome} value={biome}>
+              {libelleBiome(biome)}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Moment
+        <select
+          value={filtres.moment ?? ""}
+          disabled={biomes === null}
+          onChange={(e) =>
+            onFiltresChange({
+              ...filtres,
+              moment: e.target.value === "" ? null : (e.target.value as MomentJournee),
+            })
+          }
+        >
+          <option value="">Jour et nuit</option>
+          <option value="jour">Jour</option>
+          <option value="nuit">Nuit</option>
         </select>
       </label>
 

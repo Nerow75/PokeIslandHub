@@ -2264,3 +2264,30 @@ a.bouton {
   color: inherit;
   text-decoration: none;
 }
+
+/* Repères des cartes du Pokédex : tier, EV, où le trouver */
+
+.carte__reperes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--espace-1) var(--espace-2);
+  margin-top: var(--espace-1);
+}
+
+.carte__reperes .carte__ev {
+  margin-top: 0;
+}
+
+.carte__reperes .tier {
+  min-width: 0;
+}
+
+.carte__ou {
+  margin-top: var(--espace-1);
+  font-size: var(--texte-xs);
+  font-weight: 700;
+  color: var(--couleur-texte-discret);
+  line-height: 1.3;
+}

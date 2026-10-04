@@ -1,7 +1,7 @@
 // src/domaine/chasse.ts
 
 import type { Apparition, Rarete } from "../types/apparitions.ts";
-import { estBiomeDeBase, TAG_PARTOUT } from "./apparitions.ts";
+import { estBiomeDeBase, POIDS_RARETE, TAG_PARTOUT } from "./apparitions.ts";
 
 /*
  * Chasse du serveur : capturer en une heure les six Pokémon imposés.
@@ -20,14 +20,6 @@ export interface Chasse {
 export function chasseVide(): Chasse {
   return { especes: [], capturees: [], debut: null };
 }
-
-/* Un biome où un Pokémon est commun pèse plus qu'un biome où il est ultra-rare. */
-const POIDS_RARETE: Record<Rarete, number> = {
-  common: 4,
-  uncommon: 3,
-  rare: 2,
-  "ultra-rare": 1,
-};
 
 export interface PresenceDansBiome {
   slug: string;

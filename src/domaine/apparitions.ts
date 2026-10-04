@@ -232,6 +232,106 @@ export function apparaitDansBiome(
   );
 }
 
+/* Un biome où un Pokémon est commun pèse plus qu'un biome où il est ultra-rare. */
+export const POIDS_RARETE: Record<Rarete, number> = {
+  common: 4,
+  uncommon: 3,
+  rare: 2,
+  "ultra-rare": 1,
+};
+
+/** Moment choisi par le joueur pour filtrer les apparitions. */
+export type MomentJournee = "jour" | "nuit";
+
+const MOMENTS_COMPATIBLES: Record<MomentJournee, readonly string[]> = {
+  jour: ["day", "dusk"],
+  nuit: ["night", "dusk"],
+};
+
+/** Vrai si l'apparition peut avoir lieu à ce moment ; sans contrainte de moment, toujours. */
+export function apparaitAuMoment(apparition: Apparition, moment: MomentJournee | null): boolean {
+  return (
+    moment === null ||
+    apparition.moment === undefined ||
+    MOMENTS_COMPATIBLES[moment].includes(apparition.moment)
+  );
+}
+
+/**
+ * Vrai si l'espèce peut apparaître dans ce biome (ou partout en Surface) et à ce moment.
+ * Sans biome ni moment, toute espèce qui a au moins une apparition convient.
+ */
+export function apparaitIci(
+  apparitions: readonly Apparition[],
+  biome: string | null,
+  moment: MomentJournee | null,
+): boolean {
+  return apparitions.some(
+    (a) => (biome === null || apparaitDansBiome(a, biome, true)) && apparaitAuMoment(a, moment),
+  );
+}
+
+export interface RepereApparition {
+  /** Tag du biome le plus précis ("partout" seulement à défaut). */
+  biome: string;
+  /** day, night, dusk, ou absent. */
+  moment?: string;
+  rarete: Rarete;
+}
+
+/**
+ * Apparition la plus facile d'une espèce, pour un repère en une ligne : rareté la plus
+ * favorable, puis biome précis plutôt que "partout", puis sans contrainte de moment.
+ * Les biomes de mods tiers sont ignorés ; `biomePrefere` est affiché quand l'apparition le cite.
+ */
+export function apparitionLaPlusFacile(
+  apparitions: readonly Apparition[],
+  biomePrefere: string | null = null,
+): RepereApparition | null {
+  const candidats = apparitions.flatMap((apparition) => {
+    const biomes = apparition.biomes.filter(estBiomeDeBase);
+    const biome =
+      biomes.find((b) => b === biomePrefere) ?? biomes.find((b) => b !== TAG_PARTOUT) ?? biomes[0];
+    return biome ? [{ apparition, biome }] : [];
+  });
+  candidats.sort(
+    (a, b) =>
+      POIDS_RARETE[b.apparition.rarete] - POIDS_RARETE[a.apparition.rarete] ||
+      Number(a.biome === TAG_PARTOUT) - Number(b.biome === TAG_PARTOUT) ||
+      Number(a.apparition.moment !== undefined) - Number(b.apparition.moment !== undefined),
+  );
+  const meilleur = candidats[0];
+  if (!meilleur) return null;
+  const repere: RepereApparition = { biome: meilleur.biome, rarete: meilleur.apparition.rarete };
+  if (meilleur.apparition.moment) repere.moment = meilleur.apparition.moment;
+  return repere;
+}
+
+const MOMENTS_COURTS: Record<string, string> = { day: "jour", night: "nuit", dusk: "crépuscule" };
+
+/** "Jungle, nuit, rare" : repère d'apparition en une ligne. */
+export function libelleRepere(repere: RepereApparition): string {
+  const morceaux = [libelleBiome(repere.biome)];
+  if (repere.moment) morceaux.push(MOMENTS_COURTS[repere.moment] ?? repere.moment);
+  morceaux.push(LIBELLES_RARETE[repere.rarete].toLowerCase());
+  return morceaux.join(", ");
+}
+
+/** Biomes Minecraft et Cobblemon cités par les apparitions (hors "partout"), triés par libellé. */
+export function biomesConnus(
+  apparitionsParEspece: Readonly<Record<string, readonly Apparition[]>>,
+): string[] {
+  const biomes = new Set<string>();
+  for (const apparitions of Object.values(apparitionsParEspece)) {
+    for (const apparition of apparitions) {
+      for (const biome of apparition.biomes) {
+        if (biome !== TAG_PARTOUT && estBiomeDeBase(biome)) biomes.add(biome);
+      }
+    }
+  }
+  return [...biomes].sort((a, b) => libelleBiome(a).localeCompare(libelleBiome(b), "fr"));
+}
+
 /** Rareté la plus favorable d'une liste d'apparitions, pour trier les espèces. */
 export function meilleureRarete(apparitions: readonly Apparition[]): Rarete | null {
   const ordre: Rarete[] = ["common", "uncommon", "rare", "ultra-rare"];

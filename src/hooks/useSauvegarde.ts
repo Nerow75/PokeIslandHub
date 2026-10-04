@@ -152,8 +152,6 @@ export function useSauvegarde() {
     setSauvegarde(transformer);
   }, []);
 
-  const statutDe = (slug: string): StatutPokemon => sauvegarde.statuts[slug] ?? "non-vu";
-
   /* Référence stable : chaque carte du Pokédex (plus de 1000) est mémoïsée sur ce callback. */
   const definirStatut = useCallback(
     (slug: string, statut: StatutPokemon): void => {
@@ -208,7 +206,6 @@ export function useSauvegarde() {
     nombreImports,
     avertissement,
     fermerAvertissement: () => setAvertissement(null),
-    statutDe,
     definirStatut,
     modifierReglagesCompletion,
     modifierChasse,

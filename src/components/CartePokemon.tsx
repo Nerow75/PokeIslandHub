@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { NOMS_TYPES } from "../donnees.ts";
 import { resumeEv } from "../domaine/ev.ts";
+import { BadgeTier } from "./PastillesStrategie.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, statutSuivant, type StatutPokemon } from "../domaine/statut.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
@@ -10,6 +11,11 @@ import type { EspecePokemon } from "../types/pokedex.ts";
 interface CartePokemonProps {
   espece: EspecePokemon;
   statut: StatutPokemon;
+  /** Tier Smogon, null tant que les données ne sont pas chargées ou si inconnu. */
+  tier: string | null;
+  generationTier: number | null;
+  /** Où trouver le Pokémon en une ligne, affiché tant qu'il n'est pas capturé. */
+  repereApparition: string | null;
   onStatutChange: (slug: string, statut: StatutPokemon) => void;
 }
 
@@ -20,6 +26,9 @@ interface CartePokemonProps {
 const CartePokemon = memo(function CartePokemon({
   espece,
   statut,
+  tier,
+  generationTier,
+  repereApparition,
   onStatutChange,
 }: CartePokemonProps) {
   const suivant = statutSuivant(statut);
@@ -53,9 +62,19 @@ const CartePokemon = memo(function CartePokemon({
             ))}
           </span>
         )}
-        {ev && (
-          <span className="carte__ev" title="EV rapportés quand il est mis K.O.">
-            EV {ev}
+        {(ev || tier) && (
+          <span className="carte__reperes">
+            {tier && <BadgeTier tier={tier} generation={generationTier} />}
+            {ev && (
+              <span className="carte__ev" title="EV rapportés quand il est mis K.O.">
+                EV {ev}
+              </span>
+            )}
+          </span>
+        )}
+        {statut !== "capture" && repereApparition && (
+          <span className="carte__ou" title="Apparition la plus facile">
+            {repereApparition}
           </span>
         )}
         <span className="carte__statut">{LIBELLES_STATUT[statut]}</span>
