@@ -11,6 +11,36 @@
   box-sizing: border-box;
 }
 
+/* Barres de défilement du site, héritées par toutes les zones défilantes. */
+:root {
+  scrollbar-color: var(--scroll-pouce) var(--scroll-piste);
+}
+
+/* Navigateurs sans scrollbar-color (Safari) : mêmes couleurs via les pseudo-éléments WebKit. */
+::-webkit-scrollbar {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scroll-piste);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-pouce);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: var(--rayon-pilule);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-pouce-survol);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 body {
   margin: 0;
   min-height: 100dvh;
@@ -64,6 +94,70 @@ input[type="search"]:hover,
 input[type="number"]:hover,
 select:hover {
   border-color: var(--couleur-texte-discret);
+}
+
+/*
+ * Listes déroulantes personnalisables (Chrome et Edge récents) : la liste ouverte
+ * reprend le style du site, barre de défilement comprise. Ailleurs, liste native.
+ */
+@supports (appearance: base-select) {
+  select,
+  ::picker(select) {
+    appearance: base-select;
+  }
+
+  select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espace-2);
+    cursor: pointer;
+  }
+
+  select::picker-icon {
+    color: var(--couleur-texte-discret);
+    transition: rotate var(--duree-transition) var(--courbe);
+  }
+
+  select:open::picker-icon {
+    rotate: 180deg;
+  }
+
+  ::picker(select) {
+    margin-block: var(--espace-1);
+    padding: var(--espace-1);
+    max-height: min(22rem, 60dvh);
+    background: var(--couleur-surface);
+    color: var(--couleur-texte);
+    border: 1px solid var(--couleur-bordure);
+    border-radius: var(--rayon-champ);
+    box-shadow: var(--ombre-carte);
+    scrollbar-color: var(--scroll-pouce) transparent;
+  }
+
+  option {
+    padding: var(--espace-2) var(--espace-3);
+    border-radius: calc(var(--rayon-champ) - 0.25rem);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  option:hover,
+  option:focus-visible {
+    background: var(--couleur-surface-2);
+    outline: none;
+  }
+
+  option:checked {
+    color: var(--couleur-capture);
+    font-weight: 800;
+  }
+
+  option::checkmark {
+    order: 1;
+    margin-left: auto;
+    color: var(--couleur-capture);
+  }
 }
 
 textarea {

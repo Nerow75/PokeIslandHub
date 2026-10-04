@@ -70,6 +70,11 @@
   --duree-transition: 250ms;
   --courbe: cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* Barres de défilement : pouce rouge Pokédex adouci, piste discrète */
+  --scroll-pouce: color-mix(in srgb, var(--rouge) 70%, var(--couleur-bordure));
+  --scroll-pouce-survol: var(--rouge);
+  --scroll-piste: var(--couleur-fond);
+
   /* Couleur de type par défaut (entrées sans type) */
   --couleur-type: var(--couleur-bordure);
   --texte-type: var(--couleur-texte);
