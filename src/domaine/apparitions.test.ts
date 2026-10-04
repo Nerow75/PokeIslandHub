@@ -3,7 +3,12 @@
 import { describe, expect, it } from "vitest";
 import type { Apparition } from "../types/apparitions.ts";
 import {
+  apparaitAuMoment,
   apparaitDansBiome,
+  apparaitIci,
+  apparitionLaPlusFacile,
+  biomesConnus,
+  libelleRepere,
   conditionsApparition,
   libelleBiome,
   libelleIdentifiant,
@@ -82,5 +87,46 @@ describe("meilleureRarete", () => {
       ]),
     ).toBe("uncommon");
     expect(meilleureRarete([])).toBeNull();
+  });
+});
+
+describe("repères et filtres d'apparition", () => {
+  const nuit = { ...base, moment: "night" };
+  const partout = { ...base, rarete: "uncommon" as const, biomes: [TAG_PARTOUT] };
+
+  it("accepte au moment voulu les apparitions sans contrainte et le crépuscule", () => {
+    expect(apparaitAuMoment(base, "jour")).toBe(true);
+    expect(apparaitAuMoment(nuit, "jour")).toBe(false);
+    expect(apparaitAuMoment({ ...base, moment: "dusk" }, "nuit")).toBe(true);
+  });
+
+  it("trouve une espèce dans un biome, y compris via une apparition partout", () => {
+    expect(apparaitIci([nuit], "#cobblemon:is_jungle", "nuit")).toBe(true);
+    expect(apparaitIci([nuit], "#cobblemon:is_jungle", "jour")).toBe(false);
+    expect(apparaitIci([partout], "#cobblemon:is_desert", null)).toBe(true);
+    expect(apparaitIci([], null, null)).toBe(false);
+  });
+
+  it("résume l'apparition la plus facile en une ligne", () => {
+    const repere = apparitionLaPlusFacile([
+      { ...base, rarete: "rare" },
+      partout,
+      { ...nuit, rarete: "uncommon" },
+    ]);
+    expect(repere).toEqual({ biome: "#cobblemon:is_jungle", moment: "night", rarete: "uncommon" });
+    expect(repere && libelleRepere(repere)).toBe("Jungle, nuit, peu commun");
+    expect(apparitionLaPlusFacile([{ ...base, biomes: ["#aether:is_aether"] }])).toBeNull();
+    const double = { ...base, biomes: ["#cobblemon:is_freshwater", "#cobblemon:is_jungle"] };
+    expect(apparitionLaPlusFacile([double], "#cobblemon:is_jungle")?.biome).toBe(
+      "#cobblemon:is_jungle",
+    );
+  });
+
+  it("liste les biomes connus sans partout ni mods tiers", () => {
+    const biomes = biomesConnus({
+      a: [base, partout],
+      b: [{ ...base, biomes: ["#cobblemon:is_desert", "#aether:is_aether"] }],
+    });
+    expect(biomes).toEqual(["#cobblemon:is_desert", "#cobblemon:is_jungle"]);
   });
 });
