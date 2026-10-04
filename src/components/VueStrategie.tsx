@@ -19,6 +19,7 @@ import type { StatutEnregistre } from "../domaine/statut.ts";
 import { useStrategie } from "../hooks/useStrategie.ts";
 import type { StrategieGeneree } from "../types/strategie.ts";
 import BuildPokemon from "./BuildPokemon.tsx";
+import LegendeTiers from "./LegendeTiers.tsx";
 import { BadgeTier, TypesPokemon } from "./PastillesStrategie.tsx";
 import SectionEquipe from "./SectionEquipe.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
@@ -219,6 +220,7 @@ const VueStrategie: FC<VueStrategieProps> = (props) => {
           plus difficiles à obtenir. Les tiers ne sont pas une règle du serveur.
         </p>
       </div>
+      <LegendeTiers />
       {chargement.etat === "chargement" && (
         <div className="squelette__ligne" aria-busy="true" aria-label="Chargement des données" />
       )}

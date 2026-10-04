@@ -39,6 +39,36 @@ export const ORDRE_TIERS = [
   "LC",
 ] as const;
 
+export type TierSmogon = (typeof ORDRE_TIERS)[number];
+
+/** Signification de chaque tier Smogon, du plus fort au plus faible. */
+export const DESCRIPTIONS_TIERS: Record<TierSmogon, { nom: string; description: string }> = {
+  AG: { nom: "Anything Goes", description: "tout est permis : les plus forts de tous" },
+  Uber: { nom: "Uber", description: "légendaires et monstres trop puissants pour l'OU" },
+  OU: { nom: "OverUsed", description: "les meilleurs du jeu standard, les plus joués" },
+  UUBL: { nom: "UU BorderLine", description: "trop forts pour l'UU, juste sous l'OU" },
+  UU: { nom: "UnderUsed", description: "solides, un cran sous l'OU" },
+  RUBL: { nom: "RU BorderLine", description: "trop forts pour le RU, juste sous l'UU" },
+  RU: { nom: "RarelyUsed", description: "corrects, un cran sous l'UU" },
+  NUBL: { nom: "NU BorderLine", description: "trop forts pour le NU, juste sous le RU" },
+  NU: { nom: "NeverUsed", description: "moyens, un cran sous le RU" },
+  PUBL: { nom: "PU BorderLine", description: "trop forts pour le PU, juste sous le NU" },
+  PU: { nom: "PU", description: "faibles, un cran sous le NU" },
+  ZUBL: { nom: "ZU BorderLine", description: "trop forts pour le ZU, juste sous le PU" },
+  ZU: { nom: "ZeroUsed", description: "les plus faibles des Pokémon évolués" },
+  NFE: { nom: "Not Fully Evolved", description: "peut encore évoluer" },
+  LC: { nom: "Little Cup", description: "premier stade d'évolution" },
+};
+
+/** "OU : OverUsed, les meilleurs du jeu standard (3e sur 15)" ; null si tier inconnu. */
+export function expliquerTier(tier: string | null): string | null {
+  const rang = rangTier(tier);
+  const cle = ORDRE_TIERS[rang];
+  if (!cle) return null;
+  const { nom, description } = DESCRIPTIONS_TIERS[cle];
+  return `${cle} : ${nom}, ${description} (${rang + 1}e sur ${ORDRE_TIERS.length}, du plus fort au plus faible)`;
+}
+
 /** Tiers des Pokémon qui peuvent encore évoluer. */
 const TIERS_NON_EVOLUES = new Set(["NFE", "LC"]);
 

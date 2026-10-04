@@ -2724,3 +2724,66 @@ a.bouton {
 .recherche-rapide__nom {
   font-weight: 800;
 }
+
+/* Pense-bête des tiers */
+
+.legende-tiers {
+  padding: var(--espace-3) var(--espace-4);
+  background: var(--couleur-surface);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-carte);
+}
+
+.legende-tiers > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2) var(--espace-4);
+  cursor: pointer;
+}
+
+.legende-tiers__titre {
+  font-size: var(--texte-sm);
+  font-weight: 800;
+  color: var(--couleur-texte-discret);
+}
+
+.legende-tiers__echelle {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-1);
+}
+
+.legende-tiers__echelle li + li::before {
+  content: ">";
+  margin-right: var(--espace-1);
+  color: var(--couleur-texte-discret);
+  font-size: var(--texte-xs);
+  font-weight: 800;
+}
+
+.legende-tiers__echelle .tier,
+.legende-tiers__detail .tier {
+  min-width: 0;
+}
+
+.legende-tiers__detail {
+  margin: var(--espace-4) 0 var(--espace-3);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--espace-2) var(--espace-4);
+}
+
+.legende-tiers__detail dt {
+  font-weight: 800;
+}
+
+.legende-tiers__detail dd {
+  margin: 0;
+  font-size: var(--texte-sm);
+  color: var(--couleur-texte-discret);
+}

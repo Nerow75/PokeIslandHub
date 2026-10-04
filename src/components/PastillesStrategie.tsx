@@ -2,13 +2,14 @@
 
 import { type FC } from "react";
 import { NOMS_TYPES } from "../donnees.ts";
+import { expliquerTier } from "../domaine/equipe.ts";
 
 /** Pastille du tier Smogon, avec la génération quand elle n'est pas la plus récente. */
 export const BadgeTier: FC<{
   tier: string | null;
   generation: number | null;
 }> = ({ tier, generation }) => (
-  <span className="tier" data-tier={tier ?? "aucun"}>
+  <span className="tier" data-tier={tier ?? "aucun"} title={expliquerTier(tier) ?? undefined}>
     {tier ?? "?"}
     {generation !== null && generation < 9 && (
       <span className="tier__gen" title={`Tier de la génération ${generation}`}>
