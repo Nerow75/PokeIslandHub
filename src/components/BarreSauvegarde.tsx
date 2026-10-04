@@ -4,10 +4,10 @@ import { useRef, useState, type FC } from "react";
 import type { ModeStockage, ResultatImport } from "../hooks/useSauvegarde.ts";
 
 const LIBELLES_MODE: Record<ModeStockage, { texte: string; detail: string }> = {
-  synchronisation: { texte: "Synchronisation…", detail: "Lecture du fichier de sauvegarde." },
+  synchronisation: { texte: "Synchro…", detail: "Lecture du fichier de sauvegarde." },
   fichier: { texte: "Sauvegardé", detail: "Progression enregistrée dans donnees/sauvegarde.json." },
   navigateur: {
-    texte: "Navigateur seul",
+    texte: "Navigateur",
     detail:
       "Serveur de dev absent : progression gardée dans ce navigateur uniquement. Pensez à exporter.",
   },
@@ -56,8 +56,13 @@ const BarreSauvegarde: FC<BarreSauvegardeProps> = ({ modeStockage, onExporter, o
 
   return (
     <details className="sauvegarde">
-      <summary className={`stockage stockage--${modeStockage}`} role="status">
-        {LIBELLES_MODE[modeStockage].texte}
+      <summary
+        className={`repere stockage stockage--${modeStockage}`}
+        role="status"
+        title={LIBELLES_MODE[modeStockage].detail}
+      >
+        <span className="stockage__point" aria-hidden="true" />
+        <span className="repere__libelle">{LIBELLES_MODE[modeStockage].texte}</span>
       </summary>
       <div className="sauvegarde__menu">
         <p className="sauvegarde__detail">{LIBELLES_MODE[modeStockage].detail}</p>

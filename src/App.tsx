@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AlerteVotes from "./components/AlerteVotes.tsx";
 import BarreSauvegarde from "./components/BarreSauvegarde.tsx";
 import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
+import IndicateurCompletion from "./components/IndicateurCompletion.tsx";
 import RechercheRapide from "./components/RechercheRapide.tsx";
 import VueChasse from "./components/VueChasse.tsx";
 import VueEv from "./components/VueEv.tsx";
@@ -123,12 +124,29 @@ const App = () => {
   return (
     <>
       <header className="barre">
-        <div className="barre__contenu">
+        <div className="barre__haut">
           <h1 className="logo">
             <span className="pokeball" aria-hidden="true" />
-            PokeIsland<span className="logo__hub">Hub</span>
+            <span className="logo__texte">
+              PokeIsland<span className="logo__hub">Hub</span>
+            </span>
           </h1>
-          <nav aria-label="Sections" className="onglets">
+          <RechercheRapide />
+          <div className="barre__reperes">
+            <IndicateurCompletion
+              etat={etatCompletion}
+              onOuvrir={() => handleOngletChange("pokedex")}
+            />
+            <AlerteVotes votes={sauvegarde.votes} onOuvrir={() => handleOngletChange("votes")} />
+            <BarreSauvegarde
+              modeStockage={modeStockage}
+              onExporter={exporter}
+              onImporter={importer}
+            />
+          </div>
+        </div>
+        <nav aria-label="Sections" className="onglets">
+          <div className="onglets__liste">
             {ONGLETS.map(({ id, libelle }) => (
               <button
                 key={id}
@@ -140,15 +158,8 @@ const App = () => {
                 {libelle}
               </button>
             ))}
-          </nav>
-          <RechercheRapide />
-          <AlerteVotes votes={sauvegarde.votes} onOuvrir={() => handleOngletChange("votes")} />
-          <BarreSauvegarde
-            modeStockage={modeStockage}
-            onExporter={exporter}
-            onImporter={importer}
-          />
-        </div>
+          </div>
+        </nav>
       </header>
 
       <div className="page">
@@ -162,15 +173,17 @@ const App = () => {
         )}
 
         <main>
-          <EnTeteCompletion
-            key={nombreImports}
-            etat={etatCompletion}
-            reglages={reglages}
-            nombreVus={nombreVus}
-            nombreCaptures={nombreCaptures}
-            totalAutomatique={TOTAL_POKEDEX_SERVEUR}
-            onReglagesChange={modifierReglagesCompletion}
-          />
+          {onglet === "pokedex" && (
+            <EnTeteCompletion
+              key={nombreImports}
+              etat={etatCompletion}
+              reglages={reglages}
+              nombreVus={nombreVus}
+              nombreCaptures={nombreCaptures}
+              totalAutomatique={TOTAL_POKEDEX_SERVEUR}
+              onReglagesChange={modifierReglagesCompletion}
+            />
+          )}
 
           {onglet === "fiche" && (
             <VueFiche

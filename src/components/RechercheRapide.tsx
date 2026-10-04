@@ -68,7 +68,8 @@ const RechercheRapide: FC = () => {
   return (
     <>
       <button type="button" className="recherche-rapide__bouton" onClick={ouvrir}>
-        Rechercher <kbd>Ctrl K</kbd>
+        <span className="recherche-rapide__invite">Rechercher un Pokémon…</span>
+        <kbd>Ctrl K</kbd>
       </button>
       <dialog
         ref={fenetre}

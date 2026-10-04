@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type FC } from "react";
 import { lirePreferenceNotifications, notificationsDisponibles } from "../domaine/preferences.ts";
-import { attenteAvantVote, prochainVote, type Vote } from "../domaine/votes.ts";
+import { attenteAvantVote, formaterAttente, prochainVote, type Vote } from "../domaine/votes.ts";
 import { useMaintenant } from "../hooks/useMaintenant.ts";
 
 interface AlerteVotesProps {
@@ -14,7 +14,8 @@ interface AlerteVotesProps {
 const FENETRE_NOTIFICATION_MS = 5_000;
 
 /**
- * Pastille de la barre du haut signalant les votes disponibles, et notification
+ * Repère de la barre du haut : votes disponibles (mis en avant) ou délai avant le
+ * prochain, et notification
  * système au moment où un vote se libère (quel que soit l'onglet affiché).
  * Composant isolé : seul lui se rafraîchit chaque seconde.
  */
@@ -41,11 +42,30 @@ const AlerteVotes: FC<AlerteVotesProps> = ({ votes, onOuvrir }) => {
     }
   }, [votes, maintenant]);
 
-  const disponibles = votes.filter((vote) => attenteAvantVote(vote, maintenant) === 0).length;
-  if (disponibles === 0) return null;
+  if (votes.length === 0) return null;
+  const attentes = votes.map((vote) => attenteAvantVote(vote, maintenant));
+  const disponibles = attentes.filter((attente) => attente === 0).length;
+  if (disponibles > 0) {
+    return (
+      <button
+        type="button"
+        className="repere repere--votes-dispo"
+        onClick={onOuvrir}
+        aria-label={disponibles === 1 ? "1 vote disponible" : `${disponibles} votes disponibles`}
+      >
+        Votes <span className="repere__compteur">{disponibles}</span>
+      </button>
+    );
+  }
   return (
-    <button type="button" className="alerte-votes" onClick={onOuvrir}>
-      {disponibles === 1 ? "1 vote disponible" : `${disponibles} votes disponibles`}
+    <button
+      type="button"
+      className="repere"
+      onClick={onOuvrir}
+      title="Aucun vote disponible : délai avant le prochain"
+    >
+      <span className="repere__libelle">Vote dans</span>
+      <span className="repere__chiffre">{formaterAttente(Math.min(...attentes))}</span>
     </button>
   );
 };
