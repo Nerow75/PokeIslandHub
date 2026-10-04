@@ -64,7 +64,7 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 6,
+        version: 7,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
         chasse: { especes: [], capturees: [], debut: null },
@@ -134,7 +134,26 @@ describe("migrations", () => {
       delaiMinutes: 120,
       dernier: "2026-10-04T10:00:00.000Z",
     });
-    expect(autres.map((m) => m.categorie)).toEqual(["dresseur", "dresseur", "pokestop"]);
+    expect(autres.map((m) => m.categorie)).toEqual([
+      "dresseur",
+      "dresseur",
+      "pokestop",
+      "pokestop",
+    ]);
+  });
+
+  it("ajoute à une sauvegarde v6 les PokéStops du monde de l'eau sans toucher aux autres", () => {
+    const leo = { ...minuteursParDefaut()[2], dernier: "2026-10-04T14:00:00.000Z" };
+    const resultat = lireSauvegarde({ ...sauvegardeVide(), version: 6, minuteurs: [leo] });
+    expect(resultat.succes).toBe(true);
+    if (!resultat.succes) return;
+    expect(resultat.sauvegarde.minuteurs.map((m) => m.id)).toEqual([
+      "dresseur-leo",
+      "dresseur-arene-eau",
+      "pokestops-spawn",
+      "pokestops-monde-eau",
+    ]);
+    expect(resultat.sauvegarde.minuteurs[0]?.dernier).toBe("2026-10-04T14:00:00.000Z");
   });
 
   it("refuse plus de six Pokémon épinglés", () => {
