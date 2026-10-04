@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AlerteVotes from "./components/AlerteVotes.tsx";
 import BarreSauvegarde from "./components/BarreSauvegarde.tsx";
 import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
+import RechercheRapide from "./components/RechercheRapide.tsx";
 import VueChasse from "./components/VueChasse.tsx";
 import VueEv from "./components/VueEv.tsx";
 import VueFiche from "./components/VueFiche.tsx";
@@ -140,6 +141,7 @@ const App = () => {
               </button>
             ))}
           </nav>
+          <RechercheRapide />
           <AlerteVotes votes={sauvegarde.votes} onOuvrir={() => handleOngletChange("votes")} />
           <BarreSauvegarde
             modeStockage={modeStockage}

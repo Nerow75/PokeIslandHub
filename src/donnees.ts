@@ -101,6 +101,30 @@ export const INDEX_RECHERCHE: ReadonlyMap<string, string> = new Map(
   ]),
 );
 
+/**
+ * Recherche rapide par nom (FR ou EN) ou numéro, parmi les espèces officielles :
+ * nom exact d'abord, puis nom qui commence par la saisie, puis le reste.
+ */
+export function rechercherEspeces(saisie: string, maximum: number): EspecePokemon[] {
+  const termes = normaliserRecherche(saisie).split(" ").filter(Boolean);
+  if (termes.length === 0) return [];
+  const requete = termes.join(" ");
+  const pertinence = (espece: EspecePokemon): number => {
+    const noms = [espece.nomFr, espece.nomEn].map(normaliserRecherche);
+    if (noms.includes(requete) || String(espece.id) === requete) return 0;
+    if (noms.some((nom) => nom.startsWith(requete))) return 1;
+    return 2;
+  };
+  return ESPECES.filter((espece) => {
+    const texte = INDEX_RECHERCHE.get(espece.slug) ?? "";
+    return termes.every((terme) => texte.includes(terme));
+  })
+    .map((espece) => ({ espece, rang: pertinence(espece) }))
+    .sort((a, b) => a.rang - b.rang || a.espece.id - b.espece.id)
+    .slice(0, maximum)
+    .map(({ espece }) => espece);
+}
+
 /** Sprite PokeAPI, ou null pour une entrée propre au serveur. */
 export function urlSprite(espece: EspecePokemon): string | null {
   if (estEntreeServeur(espece)) {

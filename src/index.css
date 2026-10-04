@@ -2360,3 +2360,88 @@ a.bouton {
 .spot__autres[open] > summary {
   margin-bottom: var(--espace-2);
 }
+
+/* Recherche rapide (Ctrl+K) */
+
+.recherche-rapide__bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-2);
+  min-height: 2.5rem;
+  padding: var(--espace-1) var(--espace-3);
+  background: color-mix(in srgb, var(--blanc-casse) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--blanc-casse) 30%, transparent);
+  border-radius: var(--rayon-pilule);
+  color: var(--blanc-casse);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.recherche-rapide__bouton:hover {
+  background: color-mix(in srgb, var(--blanc-casse) 24%, transparent);
+}
+
+.recherche-rapide__bouton kbd {
+  padding: 0 var(--espace-1);
+  border-radius: 0.375rem;
+  background: color-mix(in srgb, var(--encre) 30%, transparent);
+  font: inherit;
+  font-size: var(--texte-xs);
+}
+
+.recherche-rapide {
+  width: min(36rem, calc(100vw - 2rem));
+  margin: 12vh auto auto;
+  padding: 0;
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-carte);
+}
+
+.recherche-rapide::backdrop {
+  background: rgb(5 8 15 / 0.55);
+}
+
+.recherche-rapide__contenu {
+  display: grid;
+  gap: var(--espace-2);
+  padding: var(--espace-4);
+}
+
+.recherche-rapide__champ {
+  width: 100%;
+  font-size: var(--texte-lg);
+}
+
+.recherche-rapide__liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.125rem;
+}
+
+.recherche-rapide__resultat {
+  display: grid;
+  grid-template-columns: 2.5rem auto 1fr;
+  align-items: center;
+  gap: var(--espace-3);
+  padding: var(--espace-1) var(--espace-3);
+  border-radius: var(--rayon-champ);
+  cursor: pointer;
+}
+
+.recherche-rapide__resultat[aria-selected="true"] {
+  background: var(--couleur-surface-2);
+  box-shadow: inset 3px 0 0 var(--rouge);
+}
+
+.recherche-rapide__resultat img {
+  image-rendering: pixelated;
+}
+
+.recherche-rapide__nom {
+  font-weight: 800;
+}
