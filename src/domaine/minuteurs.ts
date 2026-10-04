@@ -106,6 +106,14 @@ export function minuteursDresseursEtPokestops(): Minuteur[] {
       delaiMinutes: 60,
       dernier: null,
     },
+    {
+      id: "pokestops-monde-eau",
+      nom: "PokéStops du monde de l'eau",
+      categorie: "pokestop",
+      url: null,
+      delaiMinutes: 60,
+      dernier: null,
+    },
   ];
 }
 

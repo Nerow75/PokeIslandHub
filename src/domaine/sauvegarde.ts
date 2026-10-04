@@ -16,7 +16,7 @@ import {
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 6;
+export const VERSION_SAUVEGARDE = 7;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -118,6 +118,19 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
           return { ...champs, categorie: "vote", dernier: dernierVote ?? null };
         }),
         ...minuteursDresseursEtPokestops(),
+      ],
+    };
+  },
+  /* v6 -> v7 : ajout des minuteurs du serveur encore absents (PokéStops du monde de l'eau). */
+  6: (donnees) => {
+    const minuteurs = Array.isArray(donnees["minuteurs"]) ? donnees["minuteurs"] : [];
+    const ids = new Set(minuteurs.map((m: unknown) => (estObjet(m) ? m["id"] : undefined)));
+    return {
+      ...donnees,
+      version: 7,
+      minuteurs: [
+        ...minuteurs,
+        ...minuteursDresseursEtPokestops().filter((m) => !ids.has(m.id)),
       ],
     };
   },
