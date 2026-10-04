@@ -9,7 +9,7 @@ import {
 } from "./sauvegarde.ts";
 import { choixEquipeVide } from "./equipe.ts";
 import { statutSuivant } from "./statut.ts";
-import { votesParDefaut } from "./votes.ts";
+import { minuteursParDefaut } from "./minuteurs.ts";
 
 describe("lireSauvegarde", () => {
   it("relit une sauvegarde exportée à l'identique", () => {
@@ -64,11 +64,11 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 5,
+        version: 6,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
         chasse: { especes: [], capturees: [], debut: null },
-        votes: votesParDefaut(),
+        minuteurs: minuteursParDefaut(),
         equipe: choixEquipeVide(),
       },
     });
@@ -96,15 +96,45 @@ describe("migrations", () => {
       chasse: { especes: ["pikachu"], capturees: [], debut: null },
     };
     const resultat = lireSauvegarde(v3);
-    expect(resultat.succes && resultat.sauvegarde.votes).toEqual(votesParDefaut());
+    expect(resultat.succes && resultat.sauvegarde.minuteurs).toEqual(minuteursParDefaut());
     expect(resultat.succes && resultat.sauvegarde.chasse.especes).toEqual(["pikachu"]);
   });
 
+  const voteV4 = {
+    id: "vote-2h",
+    nom: "Serveurs Minecraft",
+    url: "https://exemple.fr/vote",
+    delaiMinutes: 120,
+    dernierVote: "2026-10-04T10:00:00.000Z",
+  };
+  const v4 = {
+    version: 4,
+    statuts: { mew: "capture" },
+    reglagesCompletion: { base: "capture", totalManuel: null, objectif: 45 },
+    chasse: { especes: [], capturees: [], debut: null },
+    votes: [voteV4],
+  };
+
   it("ajoute des choix d'équipe vides à une sauvegarde v4 sans toucher au reste", () => {
-    const { equipe: _equipe, ...v4 } = { ...sauvegardeVide(), version: 4, statuts: { mew: "capture" } };
     const resultat = lireSauvegarde(v4);
     expect(resultat.succes && resultat.sauvegarde.equipe).toEqual({ epingles: [], exclus: [] });
     expect(resultat.succes && resultat.sauvegarde.statuts).toEqual({ mew: "capture" });
+  });
+
+  it("convertit les votes v5 en minuteurs et ajoute dresseurs et PokéStops", () => {
+    const resultat = lireSauvegarde({ ...v4, version: 5, equipe: { epingles: [], exclus: [] } });
+    expect(resultat.succes).toBe(true);
+    if (!resultat.succes) return;
+    const [vote, ...autres] = resultat.sauvegarde.minuteurs;
+    expect(vote).toEqual({
+      id: "vote-2h",
+      nom: "Serveurs Minecraft",
+      categorie: "vote",
+      url: "https://exemple.fr/vote",
+      delaiMinutes: 120,
+      dernier: "2026-10-04T10:00:00.000Z",
+    });
+    expect(autres.map((m) => m.categorie)).toEqual(["dresseur", "dresseur", "pokestop"]);
   });
 
   it("refuse plus de six Pokémon épinglés", () => {
@@ -113,8 +143,8 @@ describe("migrations", () => {
   });
 
   it("refuse un lien de vote non http(s)", () => {
-    const votes = [{ ...votesParDefaut()[0], url: "javascript:alert(1)" }];
-    expect(lireSauvegarde({ ...sauvegardeVide(), votes }).succes).toBe(false);
+    const minuteurs = [{ ...minuteursParDefaut()[0], url: "javascript:alert(1)" }];
+    expect(lireSauvegarde({ ...sauvegardeVide(), minuteurs }).succes).toBe(false);
   });
 
   it("refuse une chasse de plus de six Pokémon", () => {
