@@ -9,6 +9,7 @@ import {
   choixEquipeVide,
   classerParForce,
   evaluerEquipe,
+  expliquerTier,
   multiplicateurInflige,
   multiplicateurSubi,
   proposerEquipes,
@@ -52,6 +53,16 @@ describe("rangTier", () => {
     expect(rangTier("UUBL")).toBeGreaterThan(rangTier("OU"));
     expect(rangTier("UUBL")).toBeLessThan(rangTier("UU"));
     expect(rangTier(null)).toBeGreaterThan(rangTier("LC"));
+  });
+});
+
+describe("expliquerTier", () => {
+  it("donne le nom, le sens et le rang d'un tier", () => {
+    expect(expliquerTier("OU")).toBe(
+      "OU : OverUsed, les meilleurs du jeu standard, les plus joués (3e sur 15, du plus fort au plus faible)",
+    );
+    expect(expliquerTier("Inconnu")).toBeNull();
+    expect(expliquerTier(null)).toBeNull();
   });
 });
 
