@@ -7,6 +7,7 @@ import {
   ESPECES,
   ESPECES_PAR_SLUG,
   estEntreeServeur,
+  rechercherEspeces,
   TOTAL_POKEDEX_SERVEUR,
 } from "./donnees.ts";
 
@@ -30,5 +31,24 @@ describe("entrées du Pokédex", () => {
   it("n'expose pas les entrées serveur sans nom anglais au PokéFinder", () => {
     const especes = [...ESPECE_PAR_NOM_NORMALISE.values()];
     expect(especes.some(estEntreeServeur)).toBe(false);
+  });
+});
+
+describe("rechercherEspeces", () => {
+  it("place le nom exact avant les noms qui le contiennent", () => {
+    const noms = rechercherEspeces("mew", 5).map((e) => e.slug);
+    expect(noms[0]).toBe("mew");
+    expect(noms).toContain("mewtwo");
+  });
+
+  it("trouve par nom français, anglais ou numéro", () => {
+    expect(rechercherEspeces("carchacrok", 3)[0]?.slug).toBe("garchomp");
+    expect(rechercherEspeces("Garchomp", 3)[0]?.slug).toBe("garchomp");
+    expect(rechercherEspeces("445", 3)[0]?.slug).toBe("garchomp");
+  });
+
+  it("ne renvoie rien pour une saisie vide et respecte le maximum", () => {
+    expect(rechercherEspeces("  ", 5)).toEqual([]);
+    expect(rechercherEspeces("a", 4)).toHaveLength(4);
   });
 });
