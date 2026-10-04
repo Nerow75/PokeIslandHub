@@ -10,7 +10,11 @@ import {
   type Sauvegarde,
 } from "../domaine/sauvegarde.ts";
 import type { StatutPokemon } from "../domaine/statut.ts";
-import type { Vote } from "../domaine/votes.ts";
+import {
+  nouveauMinuteur,
+  type CategorieMinuteur,
+  type Minuteur,
+} from "../domaine/minuteurs.ts";
 import {
   chargerSauvegardeFichier,
   enregistrerSauvegardeFichier,
@@ -172,10 +176,24 @@ export function useSauvegarde() {
     modifier((precedente) => ({ ...precedente, chasse: transformerChasse(precedente.chasse) }));
   };
 
-  const modifierVote = (id: string, transformerVote: (vote: Vote) => Vote): void => {
+  const modifierMinuteur = (id: string, transformer: (minuteur: Minuteur) => Minuteur): void => {
     modifier((precedente) => ({
       ...precedente,
-      votes: precedente.votes.map((vote) => (vote.id === id ? transformerVote(vote) : vote)),
+      minuteurs: precedente.minuteurs.map((m) => (m.id === id ? transformer(m) : m)),
+    }));
+  };
+
+  /** Ajoute un élément à une catégorie (dresseur, PokéStops...) et renvoie son identifiant. */
+  const ajouterMinuteur = (categorie: CategorieMinuteur): string => {
+    const minuteur = nouveauMinuteur(categorie, new Date());
+    modifier((precedente) => ({ ...precedente, minuteurs: [...precedente.minuteurs, minuteur] }));
+    return minuteur.id;
+  };
+
+  const supprimerMinuteur = (id: string): void => {
+    modifier((precedente) => ({
+      ...precedente,
+      minuteurs: precedente.minuteurs.filter((m) => m.id !== id),
     }));
   };
 
@@ -209,7 +227,9 @@ export function useSauvegarde() {
     definirStatut,
     modifierReglagesCompletion,
     modifierChasse,
-    modifierVote,
+    modifierMinuteur,
+    ajouterMinuteur,
+    supprimerMinuteur,
     modifierEquipe,
     importer,
     exporter,

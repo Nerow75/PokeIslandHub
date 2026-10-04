@@ -1,7 +1,7 @@
 // src/App.tsx
 
 import { useEffect, useState } from "react";
-import AlerteVotes from "./components/AlerteVotes.tsx";
+import AlerteMinuteurs from "./components/AlerteMinuteurs.tsx";
 import BarreSauvegarde from "./components/BarreSauvegarde.tsx";
 import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
 import IndicateurCompletion from "./components/IndicateurCompletion.tsx";
@@ -14,7 +14,7 @@ import VueOuTrouver from "./components/VueOuTrouver.tsx";
 import VuePokedex from "./components/VuePokedex.tsx";
 import VueStrategie from "./components/VueStrategie.tsx";
 import VuePokeFinder from "./components/VuePokeFinder.tsx";
-import VueVotes from "./components/VueVotes.tsx";
+import VueMinuteurs from "./components/VueMinuteurs.tsx";
 import { ESPECES_PAR_SLUG, TOTAL_POKEDEX_SERVEUR } from "./donnees.ts";
 import { calculerCompletion, compteSelonBase } from "./domaine/completion.ts";
 import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
@@ -31,7 +31,7 @@ type Onglet =
   | "ou-trouver"
   | "pokefinder"
   | "ev"
-  | "votes";
+  | "minuteurs";
 
 const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "pokedex", libelle: "Pokédex" },
@@ -42,7 +42,7 @@ const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "ou-trouver", libelle: "Où trouver" },
   { id: "pokefinder", libelle: "PokéFinder" },
   { id: "ev", libelle: "EV" },
-  { id: "votes", libelle: "Votes" },
+  { id: "minuteurs", libelle: "Minuteurs" },
 ] as const;
 
 interface Navigation {
@@ -62,7 +62,9 @@ function estStatEv(valeur: string): valeur is StatEv {
 /** Navigation indiquée dans l'URL (#evolutions, #fiche/eevee, #ev/vitesse...), conservée au rafraîchissement. */
 function navigationDepuisUrl(): Navigation {
   const [demande = "", parametre] = window.location.hash.slice(1).split("/");
-  const onglet = ONGLETS.find((o) => o.id === demande)?.id ?? "pokedex";
+  /* Ancien lien #votes : l'onglet s'appelle désormais Minuteurs. */
+  const demandeCourante = demande === "votes" ? "minuteurs" : demande;
+  const onglet = ONGLETS.find((o) => o.id === demandeCourante)?.id ?? "pokedex";
   return {
     onglet,
     slugFiche: onglet === "fiche" && parametre ? decodeURIComponent(parametre) : null,
@@ -83,7 +85,9 @@ const App = () => {
     definirStatut,
     modifierReglagesCompletion,
     modifierChasse,
-    modifierVote,
+    modifierMinuteur,
+    ajouterMinuteur,
+    supprimerMinuteur,
     modifierEquipe,
     importer,
     exporter,
@@ -137,7 +141,10 @@ const App = () => {
               etat={etatCompletion}
               onOuvrir={() => handleOngletChange("pokedex")}
             />
-            <AlerteVotes votes={sauvegarde.votes} onOuvrir={() => handleOngletChange("votes")} />
+            <AlerteMinuteurs
+              minuteurs={sauvegarde.minuteurs}
+              onOuvrir={() => handleOngletChange("minuteurs")}
+            />
             <BarreSauvegarde
               modeStockage={modeStockage}
               onExporter={exporter}
@@ -212,7 +219,14 @@ const App = () => {
           )}
           {onglet === "ou-trouver" && <VueOuTrouver statuts={sauvegarde.statuts} />}
           {onglet === "pokefinder" && <VuePokeFinder statuts={sauvegarde.statuts} />}
-          {onglet === "votes" && <VueVotes votes={sauvegarde.votes} onVoteChange={modifierVote} />}
+          {onglet === "minuteurs" && (
+            <VueMinuteurs
+              minuteurs={sauvegarde.minuteurs}
+              onMinuteurChange={modifierMinuteur}
+              onAjouter={ajouterMinuteur}
+              onSupprimer={supprimerMinuteur}
+            />
+          )}
           {onglet === "ev" && (
             <VueEv key={statEv ?? ""} statuts={sauvegarde.statuts} statInitiale={statEv} />
           )}

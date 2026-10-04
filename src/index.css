@@ -1614,9 +1614,25 @@ main {
   flex-basis: 100%;
 }
 
-/* Votes */
+/* Minuteurs : votes, dresseurs, PokéStops */
 
-.votes {
+.minuteurs__section {
+  display: grid;
+  gap: var(--espace-3);
+}
+
+.minuteurs__entete {
+  display: flex;
+  align-items: center;
+  gap: var(--espace-3);
+}
+
+.minuteurs__entete h3 {
+  font-size: var(--texte-lg);
+  font-weight: 900;
+}
+
+.minuteurs {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1625,7 +1641,7 @@ main {
   gap: var(--espace-4);
 }
 
-.vote {
+.minuteur {
   display: flex;
   flex-direction: column;
   gap: var(--espace-3);
@@ -1635,24 +1651,23 @@ main {
   border-radius: var(--rayon-carte);
 }
 
-.vote--disponible {
+.minuteur--disponible {
   border-color: var(--jaune);
 }
 
-.vote__entete {
+.minuteur__entete {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--espace-3);
 }
 
-.vote__entete h3 {
+.minuteur__entete h4 {
   font-size: var(--texte-lg);
   font-weight: 900;
 }
 
-.vote__modifier,
-.vote__annuler {
+.minuteur__lien-discret {
   padding: var(--espace-1) var(--espace-2);
   background: none;
   border: none;
@@ -1663,40 +1678,39 @@ main {
   cursor: pointer;
 }
 
-.vote__modifier:hover,
-.vote__annuler:hover {
+.minuteur__lien-discret:hover {
   background: var(--couleur-surface-2);
   color: var(--couleur-texte);
 }
 
-.vote__annuler {
+.minuteur__annuler {
   align-self: flex-start;
 }
 
-.vote__etat {
+.minuteur__etat {
   font-size: var(--texte-2xl);
   font-weight: 900;
   font-variant-numeric: tabular-nums;
 }
 
-.vote--disponible .vote__etat {
+.minuteur--disponible .minuteur__etat {
   color: var(--jaune);
 }
 
 @media (prefers-color-scheme: light) {
-  .vote--disponible .vote__etat {
+  .minuteur--disponible .minuteur__etat {
     color: var(--couleur-succes);
   }
 }
 
-.vote__jauge {
+.minuteur__jauge {
   height: 0.5rem;
   border-radius: var(--rayon-pilule);
   background: var(--couleur-surface-2);
   overflow: hidden;
 }
 
-.vote__jauge span {
+.minuteur__jauge span {
   display: block;
   height: 100%;
   background: linear-gradient(to right, var(--jaune), #ff9d00);
@@ -1704,7 +1718,7 @@ main {
   transition: transform 1s linear;
 }
 
-.vote__boutons {
+.minuteur__boutons {
   display: flex;
   flex-wrap: wrap;
   gap: var(--espace-2);
@@ -1717,12 +1731,17 @@ a.bouton {
   text-decoration: none;
 }
 
-.vote__formulaire {
+.minuteur__supprimer {
+  margin-left: auto;
+  color: var(--couleur-erreur);
+}
+
+.minuteur__formulaire {
   display: grid;
   gap: var(--espace-3);
 }
 
-.vote__formulaire input {
+.minuteur__formulaire input {
   min-height: 2.75rem;
   padding: var(--espace-2) var(--espace-4);
   background: var(--couleur-fond);

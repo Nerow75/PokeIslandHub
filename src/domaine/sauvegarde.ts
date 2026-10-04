@@ -4,7 +4,11 @@ import { z } from "zod";
 import { chasseVide, NOMBRE_POKEMON_CHASSE } from "./chasse.ts";
 import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
 import { choixEquipeVide, TAILLE_EQUIPE } from "./equipe.ts";
-import { votesParDefaut } from "./votes.ts";
+import {
+  CATEGORIES_MINUTEUR,
+  minuteursDresseursEtPokestops,
+  minuteursParDefaut,
+} from "./minuteurs.ts";
 
 /*
  * Format de la sauvegarde utilisateur.
@@ -12,7 +16,7 @@ import { votesParDefaut } from "./votes.ts";
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 5;
+export const VERSION_SAUVEGARDE = 6;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -29,13 +33,14 @@ const schemaChasse = z.object({
   debut: z.iso.datetime().nullable(),
 });
 
-const schemaVote = z.object({
+const schemaMinuteur = z.object({
   id: z.string().min(1),
   nom: z.string().min(1).max(60),
+  categorie: z.enum(CATEGORIES_MINUTEUR),
   /* http(s) uniquement : le lien est ouvert tel quel. */
   url: z.url({ protocol: /^https?$/ }).nullable(),
   delaiMinutes: z.number().int().positive(),
-  dernierVote: z.iso.datetime().nullable(),
+  dernier: z.iso.datetime().nullable(),
 });
 
 const schemaEquipe = z.object({
@@ -51,7 +56,8 @@ export const schemaSauvegarde = z.object({
   statuts: z.record(z.string(), z.enum(["vu", "capture"])),
   reglagesCompletion: schemaReglagesCompletion,
   chasse: schemaChasse,
-  votes: z.array(schemaVote),
+  /** Votes, dresseurs et PokéStops avec leur délai. */
+  minuteurs: z.array(schemaMinuteur),
   equipe: schemaEquipe,
 });
 
@@ -59,6 +65,12 @@ export type Sauvegarde = z.infer<typeof schemaSauvegarde>;
 
 export type ResultatLecture =
   { succes: true; sauvegarde: Sauvegarde } | { succes: false; erreur: string };
+
+/* Votes par défaut au format v4, figés : la migration v3 -> v4 ne doit pas suivre le format courant. */
+const VOTES_V4_PAR_DEFAUT = [
+  { id: "vote-2h", nom: "Vote toutes les 2 h", url: null, delaiMinutes: 120, dernierVote: null },
+  { id: "vote-24h", nom: "Vote toutes les 24 h", url: null, delaiMinutes: 1440, dernierVote: null },
+] as const;
 
 /* Anciennes valeurs par défaut du total, remplacées par le calcul automatique. */
 const ANCIENS_TOTAUX_PAR_DEFAUT = new Set([1025, 1045]);
@@ -83,9 +95,32 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
   /* v2 -> v3 : ajout de la chasse en cours, vide. */
   2: (donnees) => ({ ...donnees, version: 3, chasse: chasseVide() }),
   /* v3 -> v4 : ajout des votes (2 h et 24 h), liens à renseigner. */
-  3: (donnees) => ({ ...donnees, version: 4, votes: votesParDefaut() }),
+  3: (donnees) => ({
+    ...donnees,
+    version: 4,
+    votes: VOTES_V4_PAR_DEFAUT.map((vote) => ({ ...vote })),
+  }),
   /* v4 -> v5 : ajout des choix d'équipe (onglet Stratégie), vides. */
   4: (donnees) => ({ ...donnees, version: 5, equipe: choixEquipeVide() }),
+  /*
+   * v5 -> v6 : les votes deviennent des minuteurs de catégorie "vote" (dernierVote -> dernier),
+   * et les dresseurs et PokéStops du serveur sont ajoutés.
+   */
+  5: (donnees) => {
+    const { votes, ...reste } = donnees;
+    const anciensVotes = Array.isArray(votes) ? votes : [];
+    return {
+      ...reste,
+      version: 6,
+      minuteurs: [
+        ...anciensVotes.map((vote: unknown) => {
+          const { dernierVote, ...champs } = estObjet(vote) ? vote : {};
+          return { ...champs, categorie: "vote", dernier: dernierVote ?? null };
+        }),
+        ...minuteursDresseursEtPokestops(),
+      ],
+    };
+  },
 };
 
 export function sauvegardeVide(): Sauvegarde {
@@ -94,7 +129,7 @@ export function sauvegardeVide(): Sauvegarde {
     statuts: {},
     reglagesCompletion: { ...REGLAGES_COMPLETION_PAR_DEFAUT },
     chasse: chasseVide(),
-    votes: votesParDefaut(),
+    minuteurs: minuteursParDefaut(),
     equipe: choixEquipeVide(),
   };
 }
