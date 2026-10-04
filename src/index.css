@@ -2291,3 +2291,72 @@ a.bouton {
   color: var(--couleur-texte-discret);
   line-height: 1.3;
 }
+
+/* Spots de farm d'EV */
+
+.spots {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--espace-3);
+}
+
+.spot {
+  display: grid;
+  gap: var(--espace-2);
+  padding: var(--espace-3) var(--espace-4);
+  background: var(--couleur-surface-2);
+  border-radius: var(--rayon-carte);
+}
+
+.spot__titre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2) var(--espace-3);
+  font-weight: 800;
+}
+
+.spot__rang {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--rayon-pilule);
+  background: var(--rouge);
+  color: var(--blanc-casse);
+  font-size: var(--texte-sm);
+}
+
+.spot__especes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-1) var(--espace-3);
+}
+
+.spot__espece {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  font-size: var(--texte-sm);
+  font-weight: 700;
+}
+
+.spot__espece img {
+  image-rendering: pixelated;
+}
+
+.spot__autres > summary {
+  cursor: pointer;
+  font-size: var(--texte-sm);
+  font-weight: 700;
+  color: var(--couleur-texte-discret);
+}
+
+.spot__autres[open] > summary {
+  margin-bottom: var(--espace-2);
+}

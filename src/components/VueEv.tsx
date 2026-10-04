@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FC } from "react";
 import { ESPECES, GENERATIONS, INDEX_RECHERCHE, normaliserRecherche } from "../donnees.ts";
+import SpotsDeFarm from "./SpotsDeFarm.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, type StatutEnregistre } from "../domaine/statut.ts";
 import type { StatEv } from "../types/pokedex.ts";
@@ -95,6 +96,8 @@ const VueEv: FC<VueEvProps> = ({ statuts, statInitiale = null }) => {
           {lignes.length} Pokémon
         </p>
       </div>
+
+      {stat !== null && <SpotsDeFarm key={stat} stat={stat} />}
 
       <div className="tableau-defilant">
         <table className="tableau-ev">
