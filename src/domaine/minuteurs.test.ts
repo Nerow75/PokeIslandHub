@@ -22,13 +22,13 @@ const vote2h: Minuteur = {
 };
 
 describe("minuteurs", () => {
-  it("propose les votes, les dresseurs (4 h) et les PokéStops des huit lieux du serveur (1 h)", () => {
+  it("propose les votes, les arènes et Léo (4 h) et les PokéStops de chaque lieu du serveur (1 h)", () => {
     const parDefaut = minuteursParDefaut();
     expect(parDefaut.map((m) => [m.categorie, m.delaiMinutes])).toEqual([
       ["vote", 120],
       ["vote", 1440],
       ["dresseur", 240],
-      ["dresseur", 240],
+      ...Array.from({ length: 7 }, () => ["dresseur", 240]),
       ["pokestop", 60],
       ...Array.from({ length: 7 }, () => ["pokestop", 60]),
     ]);

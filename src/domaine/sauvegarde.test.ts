@@ -62,6 +62,19 @@ describe("migrations", () => {
     "pokestops-monde-plante",
     "pokestops-monde-messa",
   ];
+  const ARENES_MONDES_V9 = [
+    "dresseur-arene-feu",
+    "dresseur-arene-frozen",
+    "dresseur-arene-ghost",
+    "dresseur-arene-rock",
+    "dresseur-arene-plante",
+    "dresseur-arene-messa",
+  ];
+  const minuteurParDefaut = (id: string) => {
+    const minuteur = minuteursParDefaut().find((m) => m.id === id);
+    if (!minuteur) throw new Error(`Minuteur par défaut absent : ${id}`);
+    return minuteur;
+  };
   const v1 = (total: number) => ({
     version: 1,
     statuts: { pikachu: "capture" },
@@ -72,7 +85,7 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 8,
+        version: 9,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
         chasse: { especes: [], capturees: [], debut: null },
@@ -143,20 +156,20 @@ describe("migrations", () => {
       dernier: "2026-10-04T10:00:00.000Z",
     });
     expect(autres.map((m) => m.categorie)).toEqual([
-      "dresseur",
-      "dresseur",
+      ...Array<string>(8).fill("dresseur"),
       ...Array<string>(8).fill("pokestop"),
     ]);
   });
 
   it("ajoute à une sauvegarde v6 les PokéStops du monde de l'eau sans toucher aux autres", () => {
-    const leo = { ...minuteursParDefaut()[2], dernier: "2026-10-04T14:00:00.000Z" };
+    const leo = { ...minuteurParDefaut("dresseur-leo"), dernier: "2026-10-04T14:00:00.000Z" };
     const resultat = lireSauvegarde({ ...sauvegardeVide(), version: 6, minuteurs: [leo] });
     expect(resultat.succes).toBe(true);
     if (!resultat.succes) return;
     expect(resultat.sauvegarde.minuteurs.map((m) => m.id)).toEqual([
       "dresseur-leo",
       "dresseur-arene-eau",
+      ...ARENES_MONDES_V9,
       "pokestops-spawn",
       "pokestops-monde-eau",
       ...POKESTOPS_MONDES_V8,
@@ -165,7 +178,7 @@ describe("migrations", () => {
   });
 
   it("ajoute à une sauvegarde v7 les PokéStops des autres mondes sans toucher aux existants", () => {
-    const eau = { ...minuteursParDefaut()[5], dernier: "2026-10-05T09:00:00.000Z" };
+    const eau = { ...minuteurParDefaut("pokestops-monde-eau"), dernier: "2026-10-05T09:00:00.000Z" };
     const resultat = lireSauvegarde({ ...sauvegardeVide(), version: 7, minuteurs: [eau] });
     expect(resultat.succes).toBe(true);
     if (!resultat.succes) return;
@@ -173,10 +186,30 @@ describe("migrations", () => {
       "pokestops-monde-eau",
       "dresseur-leo",
       "dresseur-arene-eau",
+      ...ARENES_MONDES_V9,
       "pokestops-spawn",
       ...POKESTOPS_MONDES_V8,
     ]);
     expect(resultat.sauvegarde.minuteurs[0]?.dernier).toBe("2026-10-05T09:00:00.000Z");
+  });
+
+  it("ajoute à une sauvegarde v8 les arènes des autres mondes sans toucher aux existants", () => {
+    const areneEau = {
+      ...minuteurParDefaut("dresseur-arene-eau"),
+      dernier: "2026-10-05T16:00:00.000Z",
+    };
+    const resultat = lireSauvegarde({ ...sauvegardeVide(), version: 8, minuteurs: [areneEau] });
+    expect(resultat.succes).toBe(true);
+    if (!resultat.succes) return;
+    expect(resultat.sauvegarde.minuteurs.map((m) => m.id)).toEqual([
+      "dresseur-arene-eau",
+      "dresseur-leo",
+      ...ARENES_MONDES_V9,
+      "pokestops-spawn",
+      "pokestops-monde-eau",
+      ...POKESTOPS_MONDES_V8,
+    ]);
+    expect(resultat.sauvegarde.minuteurs[0]?.dernier).toBe("2026-10-05T16:00:00.000Z");
   });
 
   it("refuse plus de six Pokémon épinglés", () => {
