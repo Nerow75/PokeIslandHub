@@ -79,6 +79,16 @@ export function minuteursParDefaut(): Minuteur[] {
   ];
 }
 
+/** Mondes du serveur dont les PokéStops se retournent toutes les heures, en plus du spawn et de l'eau. */
+const MONDES_A_POKESTOPS = [
+  { id: "feu", nom: "du feu" },
+  { id: "frozen", nom: "Frozen" },
+  { id: "ghost", nom: "Ghost" },
+  { id: "rock", nom: "Rock" },
+  { id: "plante", nom: "Plante" },
+  { id: "messa", nom: "Messa" },
+] as const;
+
 /** Dresseurs et PokéStops du serveur, ajoutés aux sauvegardes qui n'en avaient pas. */
 export function minuteursDresseursEtPokestops(): Minuteur[] {
   return [
@@ -114,6 +124,16 @@ export function minuteursDresseursEtPokestops(): Minuteur[] {
       delaiMinutes: 60,
       dernier: null,
     },
+    ...MONDES_A_POKESTOPS.map(
+      ({ id, nom }): Minuteur => ({
+        id: `pokestops-monde-${id}`,
+        nom: `PokéStops du monde ${nom}`,
+        categorie: "pokestop",
+        url: null,
+        delaiMinutes: 60,
+        dernier: null,
+      }),
+    ),
   ];
 }
 

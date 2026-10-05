@@ -16,7 +16,7 @@ import {
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 7;
+export const VERSION_SAUVEGARDE = 8;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -75,6 +75,20 @@ const VOTES_V4_PAR_DEFAUT = [
 /* Anciennes valeurs par défaut du total, remplacées par le calcul automatique. */
 const ANCIENS_TOTAUX_PAR_DEFAUT = new Set([1025, 1045]);
 
+/** Complète les minuteurs avec ceux du serveur encore absents, sans toucher aux existants. */
+function ajouterMinuteursServeurAbsents(
+  donnees: Record<string, unknown>,
+  version: number,
+): Record<string, unknown> {
+  const minuteurs = Array.isArray(donnees["minuteurs"]) ? donnees["minuteurs"] : [];
+  const ids = new Set(minuteurs.map((m: unknown) => (estObjet(m) ? m["id"] : undefined)));
+  return {
+    ...donnees,
+    version,
+    minuteurs: [...minuteurs, ...minuteursDresseursEtPokestops().filter((m) => !ids.has(m.id))],
+  };
+}
+
 /**
  * Migrations successives : MIGRATIONS[n] convertit une sauvegarde de version n
  * en version n + 1.
@@ -122,18 +136,9 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
     };
   },
   /* v6 -> v7 : ajout des minuteurs du serveur encore absents (PokéStops du monde de l'eau). */
-  6: (donnees) => {
-    const minuteurs = Array.isArray(donnees["minuteurs"]) ? donnees["minuteurs"] : [];
-    const ids = new Set(minuteurs.map((m: unknown) => (estObjet(m) ? m["id"] : undefined)));
-    return {
-      ...donnees,
-      version: 7,
-      minuteurs: [
-        ...minuteurs,
-        ...minuteursDresseursEtPokestops().filter((m) => !ids.has(m.id)),
-      ],
-    };
-  },
+  6: (donnees) => ajouterMinuteursServeurAbsents(donnees, 7),
+  /* v7 -> v8 : idem pour les PokéStops des mondes feu, Frozen, Ghost, Rock, Plante et Messa. */
+  7: (donnees) => ajouterMinuteursServeurAbsents(donnees, 8),
 };
 
 export function sauvegardeVide(): Sauvegarde {
