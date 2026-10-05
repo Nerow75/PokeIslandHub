@@ -16,7 +16,7 @@ import {
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 8;
+export const VERSION_SAUVEGARDE = 9;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -139,6 +139,8 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
   6: (donnees) => ajouterMinuteursServeurAbsents(donnees, 7),
   /* v7 -> v8 : idem pour les PokéStops des mondes feu, Frozen, Ghost, Rock, Plante et Messa. */
   7: (donnees) => ajouterMinuteursServeurAbsents(donnees, 8),
+  /* v8 -> v9 : idem pour les arènes des mondes feu, Frozen, Ghost, Rock, Plante et Messa. */
+  8: (donnees) => ajouterMinuteursServeurAbsents(donnees, 9),
 };
 
 export function sauvegardeVide(): Sauvegarde {
