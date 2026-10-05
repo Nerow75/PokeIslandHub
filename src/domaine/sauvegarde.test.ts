@@ -54,6 +54,14 @@ describe("lireSauvegarde", () => {
 });
 
 describe("migrations", () => {
+  const POKESTOPS_MONDES_V8 = [
+    "pokestops-monde-feu",
+    "pokestops-monde-frozen",
+    "pokestops-monde-ghost",
+    "pokestops-monde-rock",
+    "pokestops-monde-plante",
+    "pokestops-monde-messa",
+  ];
   const v1 = (total: number) => ({
     version: 1,
     statuts: { pikachu: "capture" },
@@ -64,7 +72,7 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 7,
+        version: 8,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
         chasse: { especes: [], capturees: [], debut: null },
@@ -137,8 +145,7 @@ describe("migrations", () => {
     expect(autres.map((m) => m.categorie)).toEqual([
       "dresseur",
       "dresseur",
-      "pokestop",
-      "pokestop",
+      ...Array<string>(8).fill("pokestop"),
     ]);
   });
 
@@ -152,8 +159,24 @@ describe("migrations", () => {
       "dresseur-arene-eau",
       "pokestops-spawn",
       "pokestops-monde-eau",
+      ...POKESTOPS_MONDES_V8,
     ]);
     expect(resultat.sauvegarde.minuteurs[0]?.dernier).toBe("2026-10-04T14:00:00.000Z");
+  });
+
+  it("ajoute à une sauvegarde v7 les PokéStops des autres mondes sans toucher aux existants", () => {
+    const eau = { ...minuteursParDefaut()[5], dernier: "2026-10-05T09:00:00.000Z" };
+    const resultat = lireSauvegarde({ ...sauvegardeVide(), version: 7, minuteurs: [eau] });
+    expect(resultat.succes).toBe(true);
+    if (!resultat.succes) return;
+    expect(resultat.sauvegarde.minuteurs.map((m) => m.id)).toEqual([
+      "pokestops-monde-eau",
+      "dresseur-leo",
+      "dresseur-arene-eau",
+      "pokestops-spawn",
+      ...POKESTOPS_MONDES_V8,
+    ]);
+    expect(resultat.sauvegarde.minuteurs[0]?.dernier).toBe("2026-10-05T09:00:00.000Z");
   });
 
   it("refuse plus de six Pokémon épinglés", () => {
