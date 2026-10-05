@@ -30,3 +30,8 @@ dist-ssr
 
 # Sauvegarde du joueur (fichier local, jamais versionné)
 donnees
+
+# Outillage de dev personnel (instructions Claude Code, mémoire du projet), gardé en local
+.claude
+CLAUDE.md
+tasks
