@@ -16,8 +16,10 @@ import {
 import type { StatutEnregistre, StatutPokemon } from "../domaine/statut.ts";
 import { useApparitions } from "../hooks/useApparitions.ts";
 import { useStrategie } from "../hooks/useStrategie.ts";
+import { usePagination } from "../hooks/usePagination.ts";
 import BarreFiltres from "./BarreFiltres.tsx";
 import CartePokemon from "./CartePokemon.tsx";
+import Pagination from "./Pagination.tsx";
 
 interface VuePokedexProps {
   filtres: Filtres;
@@ -25,6 +27,8 @@ interface VuePokedexProps {
   statuts: Readonly<Record<string, StatutEnregistre>>;
   onStatutChange: (slug: string, statut: StatutPokemon) => void;
 }
+
+const POKEMON_PAR_PAGE = 60;
 
 /**
  * Grille du Pokédex et ses filtres. Les tiers et les apparitions (chargés à la demande)
@@ -76,6 +80,8 @@ const VuePokedex: FC<VuePokedexProps> = ({ filtres, onFiltresChange, statuts, on
     });
   }, [rechercheDifferee, filtres, statuts, parEspeceApparitions]);
 
+  const pagination = usePagination(especesFiltrees, POKEMON_PAR_PAGE, JSON.stringify(filtres));
+
   return (
     <section aria-labelledby="titre-pokedex">
       <h2 id="titre-pokedex" className="visuellement-masque">
@@ -93,22 +99,30 @@ const VuePokedex: FC<VuePokedexProps> = ({ filtres, onFiltresChange, statuts, on
       {especesFiltrees.length === 0 ? (
         <p className="vide">Aucun Pokémon ne correspond à ces filtres.</p>
       ) : (
-        <ul className="grille">
-          {especesFiltrees.map((espece) => {
-            const strategieEspece = parEspeceStrategie?.[espece.slug];
-            return (
-              <CartePokemon
-                key={espece.slug}
-                espece={espece}
-                statut={statuts[espece.slug] ?? "non-vu"}
-                tier={strategieEspece?.tier ?? null}
-                generationTier={strategieEspece?.generationTier ?? null}
-                repereApparition={reperes.get(espece.slug) ?? null}
-                onStatutChange={onStatutChange}
-              />
-            );
-          })}
-        </ul>
+        <>
+          <ul className="grille">
+            {pagination.elementsPage.map((espece) => {
+              const strategieEspece = parEspeceStrategie?.[espece.slug];
+              return (
+                <CartePokemon
+                  key={espece.slug}
+                  espece={espece}
+                  statut={statuts[espece.slug] ?? "non-vu"}
+                  tier={strategieEspece?.tier ?? null}
+                  generationTier={strategieEspece?.generationTier ?? null}
+                  repereApparition={reperes.get(espece.slug) ?? null}
+                  onStatutChange={onStatutChange}
+                />
+              );
+            })}
+          </ul>
+          <Pagination
+            page={pagination.page}
+            nombrePages={pagination.nombrePages}
+            libelle="Pokémon"
+            onPageChange={pagination.allerALaPage}
+          />
+        </>
       )}
     </section>
   );

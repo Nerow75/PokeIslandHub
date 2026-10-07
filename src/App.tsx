@@ -18,7 +18,8 @@ import VuePokeFinder from "./components/VuePokeFinder.tsx";
 import VueMinuteurs from "./components/VueMinuteurs.tsx";
 import { ESPECES_PAR_SLUG, TOTAL_POKEDEX_SERVEUR } from "./donnees.ts";
 import { calculerCompletion, compteSelonBase } from "./domaine/completion.ts";
-import { FILTRES_PAR_DEFAUT, type Filtres } from "./domaine/filtres.ts";
+import { FILTRES_PAR_DEFAUT, schemaFiltres } from "./domaine/filtres.ts";
+import { useFiltresMemorises } from "./hooks/useFiltresMemorises.ts";
 import { STAT_EV } from "./domaine/strategie.ts";
 import type { StatEv } from "./types/pokedex.ts";
 import { useSauvegarde } from "./hooks/useSauvegarde.ts";
@@ -111,7 +112,7 @@ const App = () => {
     setNavigation({ onglet: id, slugFiche: slug, statEv: null });
     window.history.replaceState(null, "", slug ? `#fiche/${slug}` : `#${id}`);
   };
-  const [filtres, setFiltres] = useState<Filtres>(FILTRES_PAR_DEFAUT);
+  const [filtres, setFiltres] = useFiltresMemorises("pokedex", schemaFiltres, FILTRES_PAR_DEFAUT);
 
   /* Seules les espèces connues du Pokédex comptent : une entrée inconnue reste stockée mais ignorée. */
   const statutsConnus = Object.entries(sauvegarde.statuts)

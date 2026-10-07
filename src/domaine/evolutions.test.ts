@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { ESPECES, ESPECES_PAR_SLUG, evolutionsAffichees, evolutionsVers } from "../donnees.ts";
-import { cleEvolution, listerEvolutions } from "./evolutionsAFaire.ts";
+import { cleEvolution, listerEvolutions, regrouperEvolutions } from "./evolutionsAFaire.ts";
 import type { StatutPokemon } from "./statut.ts";
 
 /* Tests sur les données Cobblemon réelles générées (src/data/cobblemon.json). */
@@ -109,5 +109,36 @@ describe("listerEvolutions", () => {
 
   it("indique le statut de l'espèce cible", () => {
     expect(evolutions[0]?.statutCible).toBe("vu");
+  });
+});
+
+describe("regrouperEvolutions", () => {
+  const tout = listerEvolutions(
+    ESPECES,
+    ESPECES_PAR_SLUG,
+    () => "non-vu",
+    "tout",
+    evolutionsAffichees,
+  );
+  const groupes = regrouperEvolutions(tout);
+
+  it("met les quatre variantes de Feurisson sur une seule ligne, la standard en tête", () => {
+    const typhlosion = groupes.filter((g) => g.depuis.slug === "quilava");
+    expect(typhlosion).toHaveLength(1);
+    expect(typhlosion[0]?.niveau).toBe(36);
+    expect(typhlosion[0]?.variantes).toHaveLength(4);
+    expect(typhlosion[0]?.variantes[0]).toEqual({
+      vers: "typhlosion",
+      niveau: 36,
+      description: "Niveau 36",
+    });
+  });
+
+  it("garde une ligne par espèce obtenue : Évoli a huit évolutions distinctes", () => {
+    expect(groupes.filter((g) => g.depuis.slug === "eevee")).toHaveLength(8);
+  });
+
+  it("ne perd aucune variante", () => {
+    expect(groupes.reduce((total, g) => total + g.variantes.length, 0)).toBe(tout.length);
   });
 });

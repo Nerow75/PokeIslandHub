@@ -1,6 +1,7 @@
 // src/components/VueOuTrouver.tsx
 
-import { useMemo, useState, type FC } from "react";
+import { useMemo, type FC } from "react";
+import { z } from "zod";
 import { ESPECES, INDEX_RECHERCHE, normaliserRecherche } from "../donnees.ts";
 import {
   apparaitDansBiome,
@@ -10,9 +11,12 @@ import {
 } from "../domaine/apparitions.ts";
 import { LIBELLES_STATUT, type StatutEnregistre } from "../domaine/statut.ts";
 import { useApparitions } from "../hooks/useApparitions.ts";
+import { useFiltresMemorises } from "../hooks/useFiltresMemorises.ts";
+import { usePagination } from "../hooks/usePagination.ts";
 import type { Apparition, ApparitionsGenerees, Rarete } from "../types/apparitions.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
 import { BlocApparition, SansApparition } from "./BlocApparition.tsx";
+import Pagination from "./Pagination.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
 
 interface VueOuTrouverProps {
@@ -23,6 +27,31 @@ type FiltreStatut = "non-capture" | "non-vu" | "tous";
 type FiltreMoment = "tous" | "day" | "night";
 
 const TAILLE_PAGE = 40;
+
+interface FiltresOuTrouver {
+  recherche: string;
+  /** Tag de biome, ou "" pour tous les biomes. */
+  biome: string;
+  inclurePartout: boolean;
+  statut: FiltreStatut;
+  moment: FiltreMoment;
+}
+
+const FILTRES_PAR_DEFAUT: FiltresOuTrouver = {
+  recherche: "",
+  biome: "",
+  inclurePartout: false,
+  statut: "non-capture",
+  moment: "tous",
+};
+
+const schemaFiltresOuTrouver: z.ZodType<FiltresOuTrouver> = z.object({
+  recherche: z.string(),
+  biome: z.string(),
+  inclurePartout: z.boolean(),
+  statut: z.enum(["non-capture", "non-vu", "tous"]),
+  moment: z.enum(["tous", "day", "night"]),
+});
 const ORDRE_RARETE: Record<Rarete, number> = { common: 0, uncommon: 1, rare: 2, "ultra-rare": 3 };
 
 function correspondAuMoment(apparition: Apparition, moment: FiltreMoment): boolean {
@@ -71,12 +100,14 @@ function ListeOuTrouver({
   statuts: Readonly<Record<string, StatutEnregistre>>;
   donnees: ApparitionsGenerees;
 }) {
-  const [recherche, setRecherche] = useState("");
-  const [biome, setBiome] = useState("");
-  const [inclurePartout, setInclurePartout] = useState(false);
-  const [filtreStatut, setFiltreStatut] = useState<FiltreStatut>("non-capture");
-  const [moment, setMoment] = useState<FiltreMoment>("tous");
-  const [nombreAffiches, setNombreAffiches] = useState(TAILLE_PAGE);
+  const [filtres, setFiltres] = useFiltresMemorises(
+    "ou-trouver",
+    schemaFiltresOuTrouver,
+    FILTRES_PAR_DEFAUT,
+  );
+  const { recherche, biome, inclurePartout, statut: filtreStatut, moment } = filtres;
+  const modifier = (changement: Partial<FiltresOuTrouver>): void =>
+    setFiltres({ ...filtres, ...changement });
 
   const biomesDisponibles = useMemo(() => {
     const tags = new Set<string>();
@@ -117,7 +148,7 @@ function ListeOuTrouver({
     return lignes;
   }, [donnees, statuts, recherche, biome, inclurePartout, filtreStatut, moment]);
 
-  const reinitialiserPagination = () => setNombreAffiches(TAILLE_PAGE);
+  const pagination = usePagination(resultats, TAILLE_PAGE, JSON.stringify(filtres));
 
   return (
     <>
@@ -128,21 +159,12 @@ function ListeOuTrouver({
             type="search"
             placeholder="Nom FR, nom EN ou numéro"
             value={recherche}
-            onChange={(e) => {
-              setRecherche(e.target.value);
-              reinitialiserPagination();
-            }}
+            onChange={(e) => modifier({ recherche: e.target.value })}
           />
         </label>
         <label>
           Je suis dans le biome
-          <select
-            value={biome}
-            onChange={(e) => {
-              setBiome(e.target.value);
-              reinitialiserPagination();
-            }}
-          >
+          <select value={biome} onChange={(e) => modifier({ biome: e.target.value })}>
             <option value="">Tous les biomes</option>
             {biomesDisponibles.map((tag) => (
               <option key={tag} value={tag}>
@@ -155,10 +177,7 @@ function ListeOuTrouver({
           Moment
           <select
             value={moment}
-            onChange={(e) => {
-              setMoment(e.target.value as FiltreMoment);
-              reinitialiserPagination();
-            }}
+            onChange={(e) => modifier({ moment: e.target.value as FiltreMoment })}
           >
             <option value="tous">Jour et nuit</option>
             <option value="day">Jour</option>
@@ -169,10 +188,7 @@ function ListeOuTrouver({
           Afficher
           <select
             value={filtreStatut}
-            onChange={(e) => {
-              setFiltreStatut(e.target.value as FiltreStatut);
-              reinitialiserPagination();
-            }}
+            onChange={(e) => modifier({ statut: e.target.value as FiltreStatut })}
           >
             <option value="non-capture">Non capturés</option>
             <option value="non-vu">Jamais vus</option>
@@ -184,7 +200,7 @@ function ListeOuTrouver({
             <input
               type="checkbox"
               checked={inclurePartout}
-              onChange={(e) => setInclurePartout(e.target.checked)}
+              onChange={(e) => modifier({ inclurePartout: e.target.checked })}
             />
             Inclure ceux présents partout
           </label>
@@ -198,7 +214,7 @@ function ListeOuTrouver({
         <p className="vide">Aucun Pokémon ne correspond à ces critères.</p>
       ) : (
         <ul className="liste-ou-trouver">
-          {resultats.slice(0, nombreAffiches).map(({ espece, apparitions }) => {
+          {pagination.elementsPage.map(({ espece, apparitions }) => {
             const statut = statuts[espece.slug] ?? "non-vu";
             return (
               <li key={espece.slug} className="fiche-apparition" data-type={espece.types[0]}>
@@ -232,15 +248,12 @@ function ListeOuTrouver({
           })}
         </ul>
       )}
-      {resultats.length > nombreAffiches && (
-        <button
-          type="button"
-          className="bouton bouton--plein plus"
-          onClick={() => setNombreAffiches((n) => n + TAILLE_PAGE)}
-        >
-          Afficher {Math.min(TAILLE_PAGE, resultats.length - nombreAffiches)} de plus
-        </button>
-      )}
+      <Pagination
+        page={pagination.page}
+        nombrePages={pagination.nombrePages}
+        libelle="Pokémon"
+        onPageChange={pagination.allerALaPage}
+      />
     </>
   );
 }

@@ -1,9 +1,14 @@
 // src/components/VueEv.tsx
 
-import { useMemo, useState, type FC } from "react";
+import { useMemo, type FC } from "react";
+import { z } from "zod";
 import { ESPECES, GENERATIONS, INDEX_RECHERCHE, normaliserRecherche } from "../donnees.ts";
 import SpotsDeFarm from "./SpotsDeFarm.tsx";
+import Pagination from "./Pagination.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
+import { usePagination } from "../hooks/usePagination.ts";
+import { useFiltresMemorises } from "../hooks/useFiltresMemorises.ts";
+import { schemaStatEv } from "../domaine/filtres.ts";
 import { LIBELLES_STATUT, type StatutEnregistre } from "../domaine/statut.ts";
 import type { StatEv } from "../types/pokedex.ts";
 
@@ -22,13 +27,37 @@ const STATS: readonly { cle: StatEv; libelle: string; court: string }[] = [
   { cle: "vitesse", libelle: "Vitesse", court: "Vit" },
 ] as const;
 
+const LIGNES_PAR_PAGE = 50;
+
+interface FiltresEv {
+  stat: StatEv | null;
+  generation: number | null;
+  recherche: string;
+}
+
+const FILTRES_PAR_DEFAUT: FiltresEv = { stat: null, generation: null, recherche: "" };
+
+const schemaFiltresEv: z.ZodType<FiltresEv> = z.object({
+  stat: schemaStatEv.nullable(),
+  generation: z.number().int().positive().nullable(),
+  recherche: z.string(),
+});
+
 /**
  * Table des EV rapportés par chaque espèce vaincue, filtrable par statistique.
  */
 const VueEv: FC<VueEvProps> = ({ statuts, statInitiale = null }) => {
-  const [stat, setStat] = useState<StatEv | null>(statInitiale);
-  const [generation, setGeneration] = useState<number | null>(null);
-  const [recherche, setRecherche] = useState("");
+  const [filtres, setFiltres] = useFiltresMemorises(
+    "ev",
+    schemaFiltresEv,
+    FILTRES_PAR_DEFAUT,
+    statInitiale !== null ? { stat: statInitiale } : {},
+  );
+  const { stat, generation, recherche } = filtres;
+  const setStat = (valeur: StatEv | null): void => setFiltres({ ...filtres, stat: valeur });
+  const setGeneration = (valeur: number | null): void =>
+    setFiltres({ ...filtres, generation: valeur });
+  const setRecherche = (valeur: string): void => setFiltres({ ...filtres, recherche: valeur });
 
   const lignes = useMemo(() => {
     const termes = normaliserRecherche(recherche).split(" ").filter(Boolean);
@@ -43,6 +72,7 @@ const VueEv: FC<VueEvProps> = ({ statuts, statInitiale = null }) => {
       ? filtrees
       : [...filtrees].sort((a, b) => b.evRapportes[stat] - a.evRapportes[stat] || a.id - b.id);
   }, [stat, generation, recherche]);
+  const pagination = usePagination(lignes, LIGNES_PAR_PAGE, `${stat}|${generation}|${recherche}`);
 
   return (
     <section aria-labelledby="titre-ev" className="vue">
@@ -113,7 +143,7 @@ const VueEv: FC<VueEvProps> = ({ statuts, statInitiale = null }) => {
             </tr>
           </thead>
           <tbody>
-            {lignes.map((espece) => {
+            {pagination.elementsPage.map((espece) => {
               const statut = statuts[espece.slug] ?? "non-vu";
               return (
                 <tr key={espece.slug}>
@@ -148,6 +178,12 @@ const VueEv: FC<VueEvProps> = ({ statuts, statInitiale = null }) => {
           </tbody>
         </table>
       </div>
+      <Pagination
+        page={pagination.page}
+        nombrePages={pagination.nombrePages}
+        libelle="Pokémon"
+        onPageChange={pagination.allerALaPage}
+      />
     </section>
   );
 };

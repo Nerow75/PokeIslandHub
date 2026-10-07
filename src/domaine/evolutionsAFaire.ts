@@ -37,6 +37,54 @@ export interface EvolutionAFaire {
   statutCible: StatutPokemon;
 }
 
+/** Toutes les façons de faire évoluer une espèce vers une autre, sur une seule ligne. */
+export interface GroupeEvolutions {
+  depuis: EspecePokemon;
+  vers: EspecePokemon;
+  statutCible: StatutPokemon;
+  /** Plus petit niveau requis parmi les variantes, ou null si aucune ne dépend du niveau. */
+  niveau: number | null;
+  /** Variante standard (sans aspect) en tête, puis les autres dans l'ordre d'origine. */
+  variantes: EvolutionAffichee[];
+}
+
+function estVarianteStandard(evolution: EvolutionAffichee): boolean {
+  return evolution.aspectDepart === undefined && evolution.aspectObtenu === undefined;
+}
+
+/**
+ * Regroupe les évolutions d'une même espèce vers une même espèce (formes régionales,
+ * tendances...). Le groupe garde la place de sa première évolution dans la liste.
+ */
+export function regrouperEvolutions(evolutions: readonly EvolutionAFaire[]): GroupeEvolutions[] {
+  const groupes = new Map<string, GroupeEvolutions>();
+  for (const { depuis, vers, evolution, statutCible } of evolutions) {
+    const cle = `${depuis.slug}>${vers.slug}`;
+    const groupe = groupes.get(cle);
+    if (!groupe) {
+      groupes.set(cle, {
+        depuis,
+        vers,
+        statutCible,
+        niveau: evolution.niveau,
+        variantes: [evolution],
+      });
+      continue;
+    }
+    groupe.variantes.push(evolution);
+    if (evolution.niveau !== null && (groupe.niveau === null || evolution.niveau < groupe.niveau)) {
+      groupe.niveau = evolution.niveau;
+    }
+  }
+  for (const groupe of groupes.values()) {
+    /* Tri stable : seule la variante standard remonte. */
+    groupe.variantes.sort(
+      (a, b) => Number(estVarianteStandard(b)) - Number(estVarianteStandard(a)),
+    );
+  }
+  return [...groupes.values()];
+}
+
 export function listerEvolutions(
   especes: readonly EspecePokemon[],
   especesParSlug: ReadonlyMap<string, EspecePokemon>,

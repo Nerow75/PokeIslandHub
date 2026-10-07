@@ -242,6 +242,56 @@ label {
   background: var(--rouge-fonce);
 }
 
+/* Pagination */
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--espace-2);
+  margin-top: var(--espace-6);
+}
+
+.pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--espace-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pagination__numero {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 var(--espace-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--rayon-pilule);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--duree-feedback);
+}
+
+.pagination__numero:hover {
+  background: var(--couleur-surface-2);
+}
+
+.pagination__numero--actif,
+.pagination__numero--actif:hover {
+  background: var(--rouge);
+  color: var(--blanc-casse);
+}
+
+.pagination__ellipse {
+  padding: 0 var(--espace-1);
+  color: var(--couleur-texte-discret);
+}
+
 /* Poké Ball en CSS (formes géométriques simples) */
 
 .pokeball {
@@ -1119,11 +1169,27 @@ main {
 
 .evolution__conditions {
   grid-column: 1 / -1;
+  display: grid;
+  gap: var(--espace-1);
+  font-size: var(--texte-sm);
+  font-weight: 600;
+}
+
+.evolution__conditions ul {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: var(--texte-sm);
-  font-weight: 600;
+  display: grid;
+  gap: var(--espace-1);
+}
+
+.evolution__variantes summary {
+  cursor: pointer;
+  color: var(--couleur-texte-discret);
+}
+
+.evolution__variantes[open] summary {
+  margin-bottom: var(--espace-1);
 }
 
 @media (min-width: 768px) {
@@ -1272,10 +1338,6 @@ main {
 .rarete--ultra-rare {
   background: var(--rarete-ultra-rare);
   color: var(--encre);
-}
-
-.plus {
-  align-self: center;
 }
 
 /* Squelette de chargement */
