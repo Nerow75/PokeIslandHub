@@ -346,6 +346,10 @@ const ASPECTS: Record<string, string> = {
   valencian: "Forme de Valencia",
   female: "Femelle",
   male: "Mâle",
+  /* Tendance régionale donnée à l'apparition (ex. Feurisson apparu en taïga) : change la forme obtenue. */
+  "region-bias-alola": "Tendance Alola",
+  "region-bias-galar": "Tendance Galar",
+  "region-bias-hisui": "Tendance Hisui",
 };
 
 /** Aspect parlant pour le joueur (forme régionale, sexe), par opposition aux aspects techniques. */

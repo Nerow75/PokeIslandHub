@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { ESPECES, ESPECES_PAR_SLUG, evolutionsAffichees, evolutionsVers } from "../donnees.ts";
-import { listerEvolutions } from "./evolutionsAFaire.ts";
+import { cleEvolution, listerEvolutions } from "./evolutionsAFaire.ts";
 import type { StatutPokemon } from "./statut.ts";
 
 /* Tests sur les données Cobblemon réelles générées (src/data/cobblemon.json). */
@@ -23,6 +23,25 @@ describe("évolutions Cobblemon en français", () => {
     expect(decrire("eevee", "espeon")).toEqual(["Bonheur ≥ 160, le jour"]);
     expect(decrire("eevee", "sylveon")).toEqual(["Bonheur ≥ 160, en connaissant une capacité Fée"]);
     expect(evolutionsAffichees("eevee")).toHaveLength(8);
+  });
+
+  it("distingue les variantes de Feurisson par tendance régionale et forme obtenue", () => {
+    const variantes = evolutionsAffichees("quilava").map(
+      (e) => `${e.aspectDepart ?? "-"} > ${e.aspectObtenu ?? "-"} : ${e.description}`,
+    );
+    expect(variantes).toEqual([
+      "- > - : Niveau 36",
+      "- > hisuian : Niveau 36, dans : biomes de type Hisui",
+      "region-bias-hisui > - : Niveau 36, dans : biomes de type Johto",
+      "region-bias-hisui > hisuian : Niveau 36",
+    ]);
+  });
+
+  it("donne une clé unique à chaque évolution d'une espèce", () => {
+    for (const espece of ESPECES) {
+      const cles = evolutionsAffichees(espece.slug).map(cleEvolution);
+      expect(new Set(cles).size, espece.slug).toBe(cles.length);
+    }
   });
 
   it("décrit un échange en tenant un objet", () => {

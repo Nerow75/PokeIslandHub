@@ -10,7 +10,11 @@ import {
   normaliserRecherche,
 } from "../donnees.ts";
 import { libelleAspect } from "../domaine/apparitions.ts";
-import { listerEvolutions, type PorteeEvolutions } from "../domaine/evolutionsAFaire.ts";
+import {
+  cleEvolution,
+  listerEvolutions,
+  type PorteeEvolutions,
+} from "../domaine/evolutionsAFaire.ts";
 import SpritePokemon from "./SpritePokemon.tsx";
 import { LIBELLES_STATUT, type StatutEnregistre, type StatutPokemon } from "../domaine/statut.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
@@ -120,10 +124,7 @@ const VueEvolutions: FC<VueEvolutionsProps> = ({ statuts, onStatutChange }) => {
       ) : (
         <ul className="liste-evolutions">
           {evolutionsFiltrees.map(({ depuis, vers, evolution, statutCible }) => (
-            <li
-              key={`${depuis.slug}-${vers.slug}-${evolution.aspectDepart ?? ""}-${evolution.description}`}
-              className="evolution"
-            >
+            <li key={`${depuis.slug}|${cleEvolution(evolution)}`} className="evolution">
               <span
                 className="evolution__niveau"
                 aria-label={evolution.niveau ? `Niveau ${evolution.niveau}` : "Sans niveau"}

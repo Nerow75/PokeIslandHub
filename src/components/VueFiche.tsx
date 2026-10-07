@@ -12,14 +12,15 @@ import {
   NOMS_TYPES,
   normaliserRecherche,
 } from "../donnees.ts";
-import { libelleAspect } from "../domaine/apparitions.ts";
 import { etiquettesAffichables } from "../domaine/etiquettes.ts";
+import { cleEvolution } from "../domaine/evolutionsAFaire.ts";
 import { construireArbre, racineFamille, type NoeudFamille } from "../domaine/famille.ts";
 import { LIBELLES_STATUT, type StatutEnregistre, type StatutPokemon } from "../domaine/statut.ts";
 import { useApparitions } from "../hooks/useApparitions.ts";
 import type { StatEv } from "../types/pokedex.ts";
 import { BlocApparition, SansApparition } from "./BlocApparition.tsx";
 import BlocStrategieFiche from "./BlocStrategieFiche.tsx";
+import ConditionEvolution from "./ConditionEvolution.tsx";
 import ChampACopier from "./ChampACopier.tsx";
 import SpritePokemon from "./SpritePokemon.tsx";
 import SuggestionsNoms from "./SuggestionsNoms.tsx";
@@ -42,11 +43,6 @@ const LIBELLES_EV: Record<StatEv, string> = {
 };
 /* Au-delà, les variantes d'une même évolution (Charmilly...) sont repliées. */
 const VARIANTES_VISIBLES = 3;
-
-/** "Forme d'Alola" -> "forme d'Alola". */
-function minusculeInitiale(texte: string): string {
-  return texte.charAt(0).toLowerCase() + texte.slice(1);
-}
 
 const parentsDe = (slug: string): string[] => evolutionsVers(slug).map((p) => p.depuis);
 
@@ -90,14 +86,7 @@ function Noeud({
               <li key={enfant.slug} className="famille__branche">
                 <ul className="famille__conditions">
                   {visibles.map((evolution) => (
-                    <li key={`${evolution.aspectDepart ?? ""}-${evolution.description}`}>
-                      {evolution.aspectDepart && (
-                        <strong>{libelleAspect(evolution.aspectDepart)} : </strong>
-                      )}
-                      {evolution.description}
-                      {evolution.aspectObtenu &&
-                        ` (donne la ${minusculeInitiale(libelleAspect(evolution.aspectObtenu))})`}
-                    </li>
+                    <ConditionEvolution key={cleEvolution(evolution)} evolution={evolution} />
                   ))}
                 </ul>
                 {cachees.length > 0 && (
@@ -105,9 +94,7 @@ function Noeud({
                     <summary>{cachees.length} autres variantes</summary>
                     <ul className="famille__conditions">
                       {cachees.map((evolution) => (
-                        <li key={`${evolution.aspectDepart ?? ""}-${evolution.description}`}>
-                          {evolution.description}
-                        </li>
+                        <ConditionEvolution key={cleEvolution(evolution)} evolution={evolution} />
                       ))}
                     </ul>
                   </details>

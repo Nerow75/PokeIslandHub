@@ -20,6 +20,16 @@ export interface EvolutionAffichee {
   aspectObtenu?: string;
 }
 
+/**
+ * Clé unique d'une évolution parmi celles d'une espèce : deux variantes peuvent
+ * partager description et aspect de départ en ne différant que par la forme obtenue.
+ */
+export function cleEvolution(evolution: EvolutionAffichee): string {
+  return [evolution.vers, evolution.aspectDepart, evolution.aspectObtenu, evolution.description]
+    .map((partie) => partie ?? "")
+    .join("|");
+}
+
 export interface EvolutionAFaire {
   depuis: EspecePokemon;
   vers: EspecePokemon;
