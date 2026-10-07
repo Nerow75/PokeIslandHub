@@ -16,7 +16,7 @@ import {
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 10;
+export const VERSION_SAUVEGARDE = 11;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -154,6 +154,25 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
       ...donnees,
       version: 10,
       reglagesCompletion: { ...autresReglages, rangActuel: rangsObtenus.at(-1)?.id ?? null },
+    };
+  },
+  /*
+   * v10 -> v11 : le premier vote passe de 2 h à 1 h 30. Délai et nom ne changent que
+   * s'ils sont restés ceux d'origine : un réglage du joueur est conservé.
+   */
+  10: (donnees) => {
+    const minuteurs = Array.isArray(donnees["minuteurs"]) ? donnees["minuteurs"] : [];
+    return {
+      ...donnees,
+      version: 11,
+      minuteurs: minuteurs.map((minuteur: unknown) => {
+        if (!estObjet(minuteur) || minuteur["id"] !== "vote-2h") return minuteur;
+        return {
+          ...minuteur,
+          ...(minuteur["delaiMinutes"] === 120 && { delaiMinutes: 90 }),
+          ...(minuteur["nom"] === "Vote toutes les 2 h" && { nom: "Vote toutes les 1 h 30" }),
+        };
+      }),
     };
   },
 };

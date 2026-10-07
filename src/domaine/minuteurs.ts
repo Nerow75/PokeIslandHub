@@ -61,10 +61,10 @@ export function minuteursParDefaut(): Minuteur[] {
   return [
     {
       id: "vote-2h",
-      nom: "Vote toutes les 2 h",
+      nom: "Vote toutes les 1 h 30",
       categorie: "vote",
       url: null,
-      delaiMinutes: 120,
+      delaiMinutes: 90,
       dernier: null,
     },
     {

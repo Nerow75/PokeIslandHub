@@ -85,7 +85,7 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 10,
+        version: 11,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, rangActuel: "dresseur" },
         chasse: { especes: [], capturees: [], debut: null },
@@ -152,7 +152,7 @@ describe("migrations", () => {
       nom: "Serveurs Minecraft",
       categorie: "vote",
       url: "https://exemple.fr/vote",
-      delaiMinutes: 120,
+      delaiMinutes: 90,
       dernier: "2026-10-04T10:00:00.000Z",
     });
     expect(autres.map((m) => m.categorie)).toEqual([
@@ -225,6 +225,25 @@ describe("migrations", () => {
     expect(reglagesApres(45)).toEqual({ base: "vu", totalManuel: 1100, rangActuel: "eleveur" });
     expect(reglagesApres(5)?.rangActuel).toBeNull();
     expect(reglagesApres(100)?.rangActuel).toBe("mythique");
+  });
+
+  it("passe le premier vote v10 à 1 h 30 sauf si le joueur a changé son délai", () => {
+    const voteV10 = (delaiMinutes: number) => ({
+      ...minuteurParDefaut("vote-2h"),
+      nom: "Vote toutes les 2 h",
+      delaiMinutes,
+      dernier: "2026-10-06T10:00:00.000Z",
+    });
+    const minuteursApres = (delaiMinutes: number) => {
+      const minuteurs = [voteV10(delaiMinutes), minuteurParDefaut("vote-24h")];
+      const resultat = lireSauvegarde({ ...sauvegardeVide(), version: 10, minuteurs });
+      return resultat.succes ? resultat.sauvegarde.minuteurs : null;
+    };
+    expect(minuteursApres(120)).toEqual([
+      { ...voteV10(90), nom: "Vote toutes les 1 h 30" },
+      minuteurParDefaut("vote-24h"),
+    ]);
+    expect(minuteursApres(100)?.[0]?.delaiMinutes).toBe(100);
   });
 
   it("refuse un rang inconnu", () => {
