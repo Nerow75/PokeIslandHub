@@ -604,6 +604,36 @@ label {
   padding: var(--espace-6) var(--espace-4) var(--espace-10);
 }
 
+.pied-de-page {
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: var(--espace-6) var(--espace-4) var(--espace-10);
+  border-top: 1px solid var(--couleur-bordure);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-2);
+  font-size: var(--texte-xs);
+  color: var(--couleur-texte-discret);
+}
+
+.pied-de-page__auteur {
+  font-size: var(--texte-sm);
+  font-weight: 700;
+}
+
+.pied-de-page__auteur a {
+  color: var(--couleur-texte);
+  text-underline-offset: 0.2em;
+}
+
+.pied-de-page__auteur a:hover {
+  color: var(--rouge);
+}
+
+.pied-de-page__mention {
+  max-width: 60rem;
+}
+
 main {
   display: flex;
   flex-direction: column;

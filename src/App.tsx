@@ -5,6 +5,7 @@ import AlerteMinuteurs from "./components/AlerteMinuteurs.tsx";
 import BarreSauvegarde from "./components/BarreSauvegarde.tsx";
 import EnTeteCompletion from "./components/EnTeteCompletion.tsx";
 import IndicateurCompletion from "./components/IndicateurCompletion.tsx";
+import PiedDePage from "./components/PiedDePage.tsx";
 import RechercheRapide from "./components/RechercheRapide.tsx";
 import VueChasse from "./components/VueChasse.tsx";
 import VueEv from "./components/VueEv.tsx";
@@ -241,6 +242,8 @@ const App = () => {
           )}
         </main>
       </div>
+
+      <PiedDePage />
     </>
   );
 };
