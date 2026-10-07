@@ -3,6 +3,7 @@
 import { type FC } from "react";
 import {
   formaterPourcentage,
+  RANGS,
   type BaseCompletion,
   type EtatCompletion,
   type ReglagesCompletion,
@@ -39,12 +40,14 @@ const EnTeteCompletion: FC<EnTeteCompletionProps> = ({
     }
   };
 
-  const handleObjectif = (valeur: string): void => {
-    const nombre = Number(valeur);
-    if (valeur !== "" && nombre >= 0 && nombre <= 100) {
-      onReglagesChange({ ...reglages, objectif: nombre });
-    }
+  const handleRangActuel = (valeur: string): void => {
+    const rang = RANGS.find((r) => r.id === valeur);
+    onReglagesChange({ ...reglages, rangActuel: rang?.id ?? null });
   };
+
+  const libelleObjectif = etat.rangVise
+    ? `Prochain rang, ${etat.rangVise.nom} (${formaterPourcentage(etat.objectif)})`
+    : `Dernier rang obtenu, Pokédex complet (${formaterPourcentage(etat.objectif)})`;
 
   return (
     <section className="completion" aria-labelledby="titre-completion">
@@ -59,8 +62,22 @@ const EnTeteCompletion: FC<EnTeteCompletionProps> = ({
       </div>
 
       <div className="completion__objectif">
+        <label className="completion__rang">
+          Mon rang
+          <select
+            value={reglages.rangActuel ?? ""}
+            onChange={(e) => handleRangActuel(e.target.value)}
+          >
+            <option value="">Aucun rang</option>
+            {RANGS.map((rang) => (
+              <option key={rang.id} value={rang.id}>
+                {rang.nom} ({rang.seuil} %)
+              </option>
+            ))}
+          </select>
+        </label>
         <p>
-          Objectif {formaterPourcentage(etat.objectif)} :{" "}
+          {libelleObjectif} :{" "}
           {etat.restantPourObjectif > 0 ? (
             <strong>encore {etat.restantPourObjectif}</strong>
           ) : (
@@ -122,17 +139,6 @@ const EnTeteCompletion: FC<EnTeteCompletionProps> = ({
             />
           </label>
         )}
-        <label>
-          Objectif (%)
-          <input
-            type="number"
-            min={0}
-            max={100}
-            step={0.01}
-            defaultValue={reglages.objectif}
-            onChange={(e) => handleObjectif(e.target.value)}
-          />
-        </label>
       </details>
     </section>
   );

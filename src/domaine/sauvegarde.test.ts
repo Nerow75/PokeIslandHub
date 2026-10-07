@@ -85,9 +85,9 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 9,
+        version: 10,
         statuts: { pikachu: "capture" },
-        reglagesCompletion: { base: "capture", totalManuel: null, objectif: 20 },
+        reglagesCompletion: { base: "capture", totalManuel: null, rangActuel: "dresseur" },
         chasse: { especes: [], capturees: [], debut: null },
         minuteurs: minuteursParDefaut(),
         equipe: choixEquipeVide(),
@@ -210,6 +210,26 @@ describe("migrations", () => {
       ...POKESTOPS_MONDES_V8,
     ]);
     expect(resultat.sauvegarde.minuteurs[0]?.dernier).toBe("2026-10-05T16:00:00.000Z");
+  });
+
+  it("convertit l'objectif v9 en rang actuel : le dernier rang sous l'objectif", () => {
+    const v9 = (objectif: number) => ({
+      ...sauvegardeVide(),
+      version: 9,
+      reglagesCompletion: { base: "vu", totalManuel: 1100, objectif },
+    });
+    const reglagesApres = (objectif: number) => {
+      const resultat = lireSauvegarde(v9(objectif));
+      return resultat.succes ? resultat.sauvegarde.reglagesCompletion : null;
+    };
+    expect(reglagesApres(45)).toEqual({ base: "vu", totalManuel: 1100, rangActuel: "eleveur" });
+    expect(reglagesApres(5)?.rangActuel).toBeNull();
+    expect(reglagesApres(100)?.rangActuel).toBe("mythique");
+  });
+
+  it("refuse un rang inconnu", () => {
+    const reglagesCompletion = { base: "capture", totalManuel: null, rangActuel: "empereur" };
+    expect(lireSauvegarde({ ...sauvegardeVide(), reglagesCompletion }).succes).toBe(false);
   });
 
   it("refuse plus de six Pokémon épinglés", () => {

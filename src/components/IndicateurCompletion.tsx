@@ -15,10 +15,11 @@ interface IndicateurCompletionProps {
 const IndicateurCompletion: FC<IndicateurCompletionProps> = ({ etat, onOuvrir }) => {
   const progression =
     etat.objectif > 0 ? Math.min(100, (etat.pourcentage / etat.objectif) * 100) : 100;
+  const cible = `${etat.rangVise?.nom ?? "Pokédex complet"} (${formaterPourcentage(etat.objectif)})`;
   const detail =
     etat.restantPourObjectif > 0
-      ? `${etat.compte} / ${etat.total}, encore ${etat.restantPourObjectif} pour ${formaterPourcentage(etat.objectif)}`
-      : `${etat.compte} / ${etat.total}, objectif de ${formaterPourcentage(etat.objectif)} atteint`;
+      ? `${etat.compte} / ${etat.total}, encore ${etat.restantPourObjectif} pour ${cible}`
+      : `${etat.compte} / ${etat.total}, ${cible} atteint`;
   return (
     <button
       type="button"

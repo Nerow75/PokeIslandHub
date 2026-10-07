@@ -702,6 +702,10 @@ main {
   max-width: 40rem;
 }
 
+.completion__rang {
+  align-self: flex-start;
+}
+
 .completion__objectif strong {
   color: var(--couleur-capture);
 }

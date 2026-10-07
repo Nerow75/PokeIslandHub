@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { chasseVide, NOMBRE_POKEMON_CHASSE } from "./chasse.ts";
-import { REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
+import { IDS_RANGS, RANGS, REGLAGES_COMPLETION_PAR_DEFAUT } from "./completion.ts";
 import { choixEquipeVide, TAILLE_EQUIPE } from "./equipe.ts";
 import {
   CATEGORIES_MINUTEUR,
@@ -16,12 +16,12 @@ import {
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 9;
+export const VERSION_SAUVEGARDE = 10;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
   totalManuel: z.number().int().positive().nullable(),
-  objectif: z.number().min(0).max(100),
+  rangActuel: z.enum(IDS_RANGS).nullable(),
 });
 
 const schemaChasse = z.object({
@@ -141,6 +141,21 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
   7: (donnees) => ajouterMinuteursServeurAbsents(donnees, 8),
   /* v8 -> v9 : idem pour les arènes des mondes feu, Frozen, Ghost, Rock, Plante et Messa. */
   8: (donnees) => ajouterMinuteursServeurAbsents(donnees, 9),
+  /*
+   * v9 -> v10 : l'objectif en pourcentage devient le rang actuel du joueur, soit le
+   * dernier rang dont le seuil est sous l'ancien objectif (45 % -> Éleveur).
+   */
+  9: (donnees) => {
+    const reglages = estObjet(donnees["reglagesCompletion"]) ? donnees["reglagesCompletion"] : {};
+    const { objectif, ...autresReglages } = reglages;
+    const rangsObtenus =
+      typeof objectif === "number" ? RANGS.filter((rang) => rang.seuil < objectif) : [];
+    return {
+      ...donnees,
+      version: 10,
+      reglagesCompletion: { ...autresReglages, rangActuel: rangsObtenus.at(-1)?.id ?? null },
+    };
+  },
 };
 
 export function sauvegardeVide(): Sauvegarde {
