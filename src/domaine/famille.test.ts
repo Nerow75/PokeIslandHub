@@ -3,7 +3,12 @@
 import { describe, expect, it } from "vitest";
 import { evolutionsAffichees, evolutionsVers } from "../donnees.ts";
 import { etiquettesAffichables } from "./etiquettes.ts";
-import { construireArbre, racineFamille, tailleFamille } from "./famille.ts";
+import {
+  construireArbre,
+  evolutionsAccessibles,
+  racineFamille,
+  tailleFamille,
+} from "./famille.ts";
 
 /* Sur les données Cobblemon réelles. */
 const parentsDe = (slug: string) => evolutionsVers(slug).map((p) => p.depuis);
@@ -43,5 +48,25 @@ describe("étiquettes", () => {
     expect(etiquettesAffichables(["gen1", "legendary", "kantonian_form"])).toEqual([
       { id: "legendary", libelle: "Légendaire" },
     ]);
+  });
+});
+
+describe("évolutions accessibles depuis les captures", () => {
+  const suivantesDe = (slug: string) => evolutionsAffichees(slug).map((e) => e.vers);
+
+  it("enchaîne tous les stades et retient la capture d'origine", () => {
+    const accessibles = evolutionsAccessibles(["charmander"], suivantesDe);
+    expect(accessibles.get("charmeleon")).toBe("charmander");
+    expect(accessibles.get("charizard")).toBe("charmander");
+  });
+
+  it("ignore les espèces déjà capturées et privilégie l'ancêtre le plus proche", () => {
+    const accessibles = evolutionsAccessibles(["charmander", "charmeleon"], suivantesDe);
+    expect(accessibles.has("charmeleon")).toBe(false);
+    expect(accessibles.get("charizard")).toBe("charmeleon");
+  });
+
+  it("ouvre toutes les branches d'Évoli", () => {
+    expect(evolutionsAccessibles(["eevee"], suivantesDe).size).toBe(8);
   });
 });

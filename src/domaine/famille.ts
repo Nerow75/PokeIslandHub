@@ -62,3 +62,29 @@ export function construireArbre(
 export function tailleFamille(noeud: NoeudFamille): number {
   return 1 + noeud.branches.reduce((total, b) => total + tailleFamille(b.noeud), 0);
 }
+
+/**
+ * Espèces que des captures permettent d'obtenir par évolution sans être capturées
+ * elles-mêmes : slug obtenu -> slug capturé dont il descend. Le parcours en largeur
+ * part de toutes les captures à la fois, l'ancêtre le plus proche l'emporte.
+ */
+export function evolutionsAccessibles(
+  captures: readonly string[],
+  suivantesDe: (slug: string) => readonly string[],
+): Map<string, string> {
+  const dejaCaptures = new Set(captures);
+  const accessibles = new Map<string, string>();
+  let front = captures.map((slug) => ({ slug, origine: slug }));
+  while (front.length > 0) {
+    const suivant: typeof front = [];
+    for (const { slug, origine } of front) {
+      for (const vers of suivantesDe(slug)) {
+        if (dejaCaptures.has(vers) || accessibles.has(vers)) continue;
+        accessibles.set(vers, origine);
+        suivant.push({ slug: vers, origine });
+      }
+    }
+    front = suivant;
+  }
+  return accessibles;
+}

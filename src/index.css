@@ -978,6 +978,14 @@ main {
   color: var(--couleur-capture);
 }
 
+/* Évolution à faire : jaune de progression en fond, texte sombre lisible dans les deux thèmes. */
+.etiquette--evolution {
+  margin-left: 0;
+  border-color: var(--jaune);
+  background: var(--jaune);
+  color: var(--encre);
+}
+
 /* Vues secondaires */
 
 .vue {

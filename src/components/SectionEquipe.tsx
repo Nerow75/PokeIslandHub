@@ -5,6 +5,7 @@ import {
   ESPECES,
   ESPECES_PAR_SLUG,
   especeCobblemon,
+  evolutionsAffichees,
   evolutionsVers,
   listeTypesFr,
   NOMS_TYPES,
@@ -20,7 +21,7 @@ import {
   type CandidatEquipe,
   type ChoixEquipe,
 } from "../domaine/equipe.ts";
-import { racineFamille } from "../domaine/famille.ts";
+import { evolutionsAccessibles, racineFamille } from "../domaine/famille.ts";
 import type { StatutEnregistre } from "../domaine/statut.ts";
 import { multiplicateurAffiche, typesAttaque } from "../domaine/strategie.ts";
 import type { EspecePokemon } from "../types/pokedex.ts";
@@ -36,6 +37,7 @@ interface SectionEquipeProps {
 }
 
 const parentsDe = (slug: string): string[] => evolutionsVers(slug).map((p) => p.depuis);
+const suivantesDe = (slug: string): string[] => evolutionsAffichees(slug).map((e) => e.vers);
 
 function candidatDepuis(espece: EspecePokemon, donnees: StrategieGeneree): CandidatEquipe {
   const strategie = donnees.parEspece[espece.slug];
@@ -65,14 +67,24 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
 }) => {
   const [indexEquipe, setIndexEquipe] = useState(0);
   const [inclureLegendaires, setInclureLegendaires] = useState(false);
+  const [avecEvolutions, setAvecEvolutions] = useState(false);
+
+  /* Évolutions des captures, comptées comme acquises quand la case est cochée. */
+  const origineEvolution = useMemo(() => {
+    if (!avecEvolutions) return new Map<string, string>();
+    const captures = ESPECES.filter((e) => statuts[e.slug] === "capture").map((e) => e.slug);
+    return evolutionsAccessibles(captures, suivantesDe);
+  }, [statuts, avecEvolutions]);
 
   /* L'optimisation teste des milliers d'équipes : mémoïsée sur ses seules entrées. */
   const equipes = useMemo(() => {
     const candidats = ESPECES.filter(
-      (e) => statuts[e.slug] === "capture" && donnees.parEspece[e.slug],
+      (e) =>
+        (statuts[e.slug] === "capture" || origineEvolution.has(e.slug)) &&
+        donnees.parEspece[e.slug],
     ).map((e) => candidatDepuis(e, donnees));
     return proposerEquipes(candidats, choixEquipe, donnees.efficacites);
-  }, [statuts, choixEquipe, donnees]);
+  }, [statuts, origineEvolution, choixEquipe, donnees]);
 
   const equipe = equipes[indexEquipe] ?? equipes[0];
   const nombreEpingles = choixEquipe.epingles.filter((slug) =>
@@ -84,22 +96,40 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
     const aCapturer = ESPECES.filter(
       (e) =>
         statuts[e.slug] !== "capture" &&
+        !origineEvolution.has(e.slug) &&
         donnees.parEspece[e.slug] &&
         especeCobblemon(e.slug)?.implementee &&
         (inclureLegendaires || (!e.estLegendaire && !e.estFabuleux)),
     ).map((e) => candidatDepuis(e, donnees));
     return suggererCaptures(equipe, nombreEpingles, aCapturer, donnees.efficacites);
-  }, [equipe, nombreEpingles, statuts, donnees, inclureLegendaires]);
+  }, [equipe, nombreEpingles, statuts, origineEvolution, donnees, inclureLegendaires]);
 
   const epingles = new Set(choixEquipe.epingles);
+
+  const caseEvolutions = (
+    <label className="case-a-cocher">
+      <input
+        type="checkbox"
+        checked={avecEvolutions}
+        onChange={(e) => {
+          setAvecEvolutions(e.target.checked);
+          setIndexEquipe(0);
+        }}
+      />
+      Avec toutes mes évolutions possibles
+    </label>
+  );
 
   if (!equipe) {
     return (
       <section aria-labelledby="titre-equipe" className="panneau">
         <h3 id="titre-equipe">Team proposée</h3>
         <p className="vide">
-          Capture des Pokémon entièrement évolués pour obtenir une proposition.
+          {avecEvolutions
+            ? "Aucune de tes captures ne mène à un Pokémon entièrement évolué."
+            : "Capture des Pokémon entièrement évolués pour obtenir une proposition."}
         </p>
+        {caseEvolutions}
       </section>
     );
   }
@@ -116,6 +146,7 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
         de quoi frapper fort un maximum de types. Un seul Pokémon par famille, les non évolués sont
         écartés. Épingle ou retire un membre pour ajuster.
       </p>
+      {caseEvolutions}
 
       {equipes.length > 1 && (
         <div className="build__sets" role="group" aria-label="Équipes proposées">
@@ -138,6 +169,7 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
           const espece = ESPECES_PAR_SLUG.get(membre.slug);
           if (!espece) return null;
           const estEpingle = epingles.has(membre.slug);
+          const origine = origineEvolution.get(membre.slug);
           return (
             <li key={membre.slug} className="equipe__membre" data-type={espece.types[0]}>
               <SpritePokemon espece={espece} taille={72} className="equipe__sprite" />
@@ -149,6 +181,11 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
                 generation={donnees.parEspece[membre.slug]?.generationTier ?? null}
               />
               <TypesPokemon types={espece.types} />
+              {origine && (
+                <span className="etiquette etiquette--evolution">
+                  À faire évoluer : {nomFr(origine)}
+                </span>
+              )}
               <div className="equipe__actions">
                 <button
                   type="button"
