@@ -17,6 +17,7 @@ import {
   bilanOffensif,
   proposerEquipes,
   suggererCaptures,
+  MAX_EPINGLES,
   TAILLE_EQUIPE,
   type CandidatEquipe,
   type ChoixEquipe,
@@ -76,15 +77,23 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
     return evolutionsAccessibles(captures, suivantesDe);
   }, [statuts, avecEvolutions]);
 
+  /*
+   * Toutes les captures sont candidates, pour pouvoir en imposer une sans tier connu ;
+   * seules celles qui ont un tier sont proposées d'office.
+   */
+  const candidats = useMemo(
+    () =>
+      ESPECES.filter((e) => statuts[e.slug] === "capture" || origineEvolution.has(e.slug)).map(
+        (e) => candidatDepuis(e, donnees),
+      ),
+    [statuts, origineEvolution, donnees],
+  );
+
   /* L'optimisation teste des milliers d'équipes : mémoïsée sur ses seules entrées. */
-  const equipes = useMemo(() => {
-    const candidats = ESPECES.filter(
-      (e) =>
-        (statuts[e.slug] === "capture" || origineEvolution.has(e.slug)) &&
-        donnees.parEspece[e.slug],
-    ).map((e) => candidatDepuis(e, donnees));
-    return proposerEquipes(candidats, choixEquipe, donnees.efficacites);
-  }, [statuts, origineEvolution, choixEquipe, donnees]);
+  const equipes = useMemo(
+    () => proposerEquipes(candidats, choixEquipe, donnees.efficacites),
+    [candidats, choixEquipe, donnees],
+  );
 
   const equipe = equipes[indexEquipe] ?? equipes[0];
   const nombreEpingles = choixEquipe.epingles.filter((slug) =>
@@ -105,6 +114,11 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
   }, [equipe, nombreEpingles, statuts, origineEvolution, donnees, inclureLegendaires]);
 
   const epingles = new Set(choixEquipe.epingles);
+  const imposables = candidats
+    .filter((c) => !epingles.has(c.slug))
+    .map((c) => ({ slug: c.slug, nom: nomFr(c.slug) }))
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  const epinglesAuMax = choixEquipe.epingles.length >= MAX_EPINGLES;
 
   const caseEvolutions = (
     <label className="case-a-cocher">
@@ -144,7 +158,8 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
       <p className="texte-discret">
         Les meilleures combinaisons de tes captures : Pokémon forts, peu de faiblesses en commun et
         de quoi frapper fort un maximum de types. Un seul Pokémon par famille, les non évolués sont
-        écartés. Épingle ou retire un membre pour ajuster.
+        écartés. Épingle ou retire un membre pour ajuster, ou impose jusqu'à {MAX_EPINGLES}{" "}
+        Pokémon que tu veux garder : la team se construit autour.
       </p>
       {caseEvolutions}
 
@@ -207,6 +222,30 @@ const SectionEquipe: FC<SectionEquipeProps> = ({
           );
         })}
       </ol>
+      <label className="equipe__imposer">
+        <span>Imposer un Pokémon</span>
+        <select
+          value=""
+          disabled={epinglesAuMax || imposables.length === 0}
+          onChange={(e) => {
+            const slug = e.target.value;
+            if (!slug) return;
+            onChoixEquipeChange((c) => basculerEpingle(c, slug));
+            setIndexEquipe(0);
+          }}
+        >
+          <option value="">
+            {epinglesAuMax
+              ? `${MAX_EPINGLES} épinglés au maximum : désépingle-en un`
+              : "Choisir parmi mes captures"}
+          </option>
+          {imposables.map(({ slug, nom }) => (
+            <option key={slug} value={slug}>
+              {nom}
+            </option>
+          ))}
+        </select>
+      </label>
       {membres.length < TAILLE_EQUIPE && (
         <p className="texte-discret">
           {membres.length} sur {TAILLE_EQUIPE} : pas assez de candidats parmi tes captures.

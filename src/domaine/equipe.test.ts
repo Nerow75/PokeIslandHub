@@ -275,8 +275,8 @@ describe("choix du joueur", () => {
     });
   });
 
-  it("refuse un septième épinglé", () => {
-    const plein = { epingles: ["a", "b", "c", "d", "e", "f"], exclus: [] };
+  it("refuse un sixième épinglé : une place reste à l'optimisation", () => {
+    const plein = { epingles: ["a", "b", "c", "d", "e"], exclus: [] };
     expect(basculerEpingle(plein, "g")).toBe(plein);
   });
 });

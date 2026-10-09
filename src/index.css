@@ -2230,6 +2230,23 @@ a.bouton {
   font-weight: 800;
 }
 
+.equipe__imposer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-3);
+  margin-top: var(--espace-3);
+  font-size: var(--texte-sm);
+  font-weight: 800;
+  color: var(--couleur-texte-discret);
+}
+
+.equipe__imposer select {
+  min-width: 14rem;
+  color: var(--couleur-texte);
+  font-weight: 700;
+}
+
 .equipe__actions {
   display: flex;
   flex-wrap: wrap;

@@ -7,6 +7,8 @@
  */
 
 export const TAILLE_EQUIPE = 6;
+/** Une place au moins reste à l'optimisation : sinon il n'y a plus rien à proposer. */
+export const MAX_EPINGLES = TAILLE_EQUIPE - 1;
 
 /** Choix du joueur sur l'équipe proposée, conservés dans la sauvegarde. */
 export interface ChoixEquipe {
@@ -311,7 +313,7 @@ export function proposerEquipes(
   const epingles: Profil[] = [];
   for (const slug of choix.epingles) {
     const p = parSlug.get(slug);
-    if (p && epingles.length < TAILLE_EQUIPE && !epingles.includes(p)) epingles.push(p);
+    if (p && epingles.length < MAX_EPINGLES && !epingles.includes(p)) epingles.push(p);
   }
   const exclus = new Set(choix.exclus);
   const disponibles = [...parSlug.values()].filter(
@@ -460,7 +462,7 @@ export function basculerEpingle(choix: ChoixEquipe, slug: string): ChoixEquipe {
   if (choix.epingles.includes(slug)) {
     return { ...choix, epingles: choix.epingles.filter((s) => s !== slug) };
   }
-  if (choix.epingles.length >= TAILLE_EQUIPE) return choix;
+  if (choix.epingles.length >= MAX_EPINGLES) return choix;
   return {
     epingles: [...choix.epingles, slug],
     exclus: choix.exclus.filter((s) => s !== slug),

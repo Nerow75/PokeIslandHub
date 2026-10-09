@@ -13,6 +13,7 @@ import {
   basculerExclusion,
   classerParForce,
   estNonEvolue,
+  MAX_EPINGLES,
   type ChoixEquipe,
 } from "../domaine/equipe.ts";
 import type { StatutEnregistre } from "../domaine/statut.ts";
@@ -64,6 +65,7 @@ const ContenuStrategie: FC<ContenuProps> = ({
 
   const epingles = new Set(choixEquipe.epingles);
   const exclus = new Set(choixEquipe.exclus);
+  const epinglesAuMax = choixEquipe.epingles.length >= MAX_EPINGLES;
   const nombreCaptures = ESPECES.filter((e) => statuts[e.slug] === "capture").length;
 
   return (
@@ -168,6 +170,12 @@ const ContenuStrategie: FC<ContenuProps> = ({
                             type="button"
                             className="bouton bouton--petit"
                             aria-pressed={epingles.has(espece.slug)}
+                            disabled={epinglesAuMax && !epingles.has(espece.slug)}
+                            title={
+                              epinglesAuMax && !epingles.has(espece.slug)
+                                ? `${MAX_EPINGLES} épinglés au maximum`
+                                : undefined
+                            }
                             onClick={() =>
                               onChoixEquipeChange((c) => basculerEpingle(c, espece.slug))
                             }
