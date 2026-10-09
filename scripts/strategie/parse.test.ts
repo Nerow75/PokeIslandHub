@@ -7,9 +7,11 @@ import {
   choisirTiers,
   convertirSet,
   convertirUsage,
+  fichesCapacites,
   objetsDeFormeSpeciale,
   ordreFormats,
   schemaDetailCoupCritique,
+  tableDescriptions,
   tableEfficacites,
   tableTraductions,
   typesCapacitesOffensives,
@@ -241,6 +243,7 @@ describe("tables", () => {
 
   it("garde le type des seules capacités offensives utiles, génération récente d'abord", () => {
     const capacite = (name: string, category: "Physical" | "Special" | "Status", type: string) => ({
+      id: 1,
       name,
       category,
       type: { name: type },
@@ -261,6 +264,107 @@ describe("tables", () => {
     expect(table).toEqual({
       Earthquake: "ground",
       "Hidden Power Fire": "fire",
+    });
+  });
+
+  it("décrit les capacités utiles : infaillible, sans puissance, génération récente d'abord", () => {
+    const fiches = fichesCapacites(
+      [
+        [
+          {
+            id: 5007,
+            name: "Brave Bird",
+            category: "Physical",
+            type: { name: "Flying" },
+            power: 120,
+            accuracy: 100,
+            pp: 15,
+            priority: 0,
+          },
+          {
+            id: 4957,
+            name: "Aerial Ace",
+            category: "Physical",
+            type: { name: "Flying" },
+            power: 60,
+            accuracy: 1,
+            pp: 20,
+            priority: 0,
+          },
+          {
+            id: 5390,
+            name: "Protect",
+            category: "Status",
+            type: { name: "Normal" },
+            power: 0,
+            accuracy: 1,
+            pp: 10,
+            priority: 4,
+          },
+          { id: 1, name: "Tackle", category: "Physical", type: { name: "Normal" } },
+        ],
+        [{ id: 1042, name: "Brave Bird", category: "Special", type: { name: "Fire" } }],
+      ],
+      new Set(["Brave Bird", "Aerial Ace", "Protect"]),
+    );
+    expect(Object.fromEntries(fiches)).toEqual({
+      "Brave Bird": {
+        idCoupCritique: 5007,
+        fiche: {
+          type: "flying",
+          categorie: "physique",
+          puissance: 120,
+          precision: 100,
+          pp: 15,
+          priorite: 0,
+          description: null,
+        },
+      },
+      "Aerial Ace": {
+        idCoupCritique: 4957,
+        fiche: {
+          type: "flying",
+          categorie: "physique",
+          puissance: 60,
+          precision: null,
+          pp: 20,
+          priorite: 0,
+          description: null,
+        },
+      },
+      Protect: {
+        idCoupCritique: 5390,
+        fiche: {
+          type: "normal",
+          categorie: "statut",
+          puissance: null,
+          precision: null,
+          pp: 10,
+          priorite: 4,
+          description: null,
+        },
+      },
+    });
+  });
+
+  it("garde l'effet des seuls talents utiles, sur une ligne, génération récente d'abord", () => {
+    const table = tableDescriptions(
+      [
+        [
+          { name: "Pressure", description: "Chaque capacité\nperd 1 PP. " },
+          { name: "Levitate", description: "  " },
+          { name: "Stench", description: "Peut apeurer." },
+        ],
+        [
+          { name: "Pressure", description: "Ancien texte" },
+          { name: "Levitate", description: "Immunisé au Sol." },
+        ],
+      ],
+      new Set(["Pressure", "Levitate"]),
+    );
+    expect(table).toEqual({
+      Pressure: "Chaque capacité perd 1 PP.",
+      Levitate: "Immunisé au Sol.",
     });
   });
 

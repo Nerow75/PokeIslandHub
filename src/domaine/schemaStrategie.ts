@@ -52,6 +52,22 @@ export const schemaStrategieGeneree: z.ZodType<StrategieGeneree> = z.object({
   ),
   efficacites: z.record(z.string(), z.record(z.string(), z.number())),
   typesCapacites: z.record(z.string(), z.string()),
+  capacites: z.record(
+    z.string(),
+    z.object({
+      type: z.string(),
+      categorie: z.enum(["physique", "speciale", "statut"]),
+      puissance: z.number().nullable(),
+      precision: z.number().nullable(),
+      pp: z.number().nullable(),
+      priorite: z.number(),
+      description: z.string().nullable(),
+    }),
+  ),
+  descriptions: z.object({
+    talents: z.record(z.string(), z.string()),
+    objets: z.record(z.string(), z.string()),
+  }),
   traductions: z.object({
     capacites: z.record(z.string(), z.string()),
     objets: z.record(z.string(), z.string()),

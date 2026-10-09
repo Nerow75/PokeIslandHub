@@ -2419,6 +2419,61 @@ a.bouton {
   background: var(--couleur-surface-2);
 }
 
+/* Infobulles des capacités, talents et objets */
+.infobulle__declencheur {
+  text-decoration: underline dotted var(--couleur-texte-discret);
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+.infobulle {
+  position: fixed;
+  z-index: 50;
+  display: grid;
+  gap: var(--espace-1);
+  width: max-content;
+  max-width: min(20rem, calc(100dvw - 1rem));
+  padding: var(--espace-2) var(--espace-3);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-champ);
+  box-shadow: var(--ombre-carte);
+  font-size: var(--texte-sm);
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  pointer-events: none;
+  translate: -50% calc(-100% - var(--espace-2));
+}
+
+.infobulle[data-sens="bas"] {
+  translate: -50% var(--espace-2);
+}
+
+.infobulle[hidden] {
+  display: none;
+}
+
+.infobulle__titre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+  font-weight: 800;
+}
+
+.infobulle__categorie,
+.infobulle__chiffres {
+  color: var(--couleur-texte-discret);
+  font-size: var(--texte-xs);
+  font-weight: 700;
+}
+
+.infobulle__chiffres {
+  font-variant-numeric: tabular-nums;
+}
+
 .build__ivs {
   margin: var(--espace-1) 0 0;
   padding-left: var(--espace-4);

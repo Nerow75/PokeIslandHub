@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import type {
+  CategorieCapacite,
+  InfoCapacite,
   PartUsage,
   Repartition,
   SetRecommande,
@@ -132,18 +134,92 @@ export const schemaDetailCoupCritique = z.object({
 });
 export type DetailCoupCritique = z.infer<typeof schemaDetailCoupCritique>;
 
+/* Talents et objets portent leur effet en français ; les capacités, seulement dans leur fiche. */
+const schemaNomDecrit = schemaNomTraduit.extend({
+  description: z.string().nullable().optional(),
+});
+
 export const schemaListeTraduite = (cle: "moves" | "items" | "abilities") =>
-  z.object({ [cle]: z.array(schemaNomTraduit) });
+  z.object({ [cle]: z.array(schemaNomDecrit) });
 
 export const schemaCapacitesCoupCritique = z.object({
   moves: z.array(
     z.object({
+      id: z.number(),
       name: z.string(),
       category: z.enum(["Physical", "Special", "Status"]),
       type: z.object({ name: z.string() }),
+      power: z.number().nullable().optional(),
+      accuracy: z.number().nullable().optional(),
+      pp: z.number().nullable().optional(),
+      priority: z.number().nullable().optional(),
     }),
   ),
 });
+export type CapaciteCoupCritique = z.infer<typeof schemaCapacitesCoupCritique>["moves"][number];
+
+export const schemaDetailCapaciteCoupCritique = z.object({
+  move: z.object({ description: z.string().nullable().optional() }),
+});
+
+const CATEGORIES: Readonly<Record<CapaciteCoupCritique["category"], CategorieCapacite>> = {
+  Physical: "physique",
+  Special: "speciale",
+  Status: "statut",
+};
+
+/** Texte d'effet sur une ligne, ou null s'il est vide. */
+export function nettoyerDescription(texte: string | null | undefined): string | null {
+  const propre = texte?.replace(/\s+/g, " ").trim() ?? "";
+  return propre === "" ? null : propre;
+}
+
+/**
+ * Fiche de chaque capacité utile, sans description : elle se lit sur la fiche Coup Critique
+ * dont l'identifiant accompagne la fiche. `listes` va de la génération la plus récente
+ * à la plus ancienne. Coup Critique code "ne rate jamais" par une précision de 1
+ * et l'absence de puissance par 0.
+ */
+export function fichesCapacites(
+  listes: readonly (readonly CapaciteCoupCritique[])[],
+  nomsUtiles: ReadonlySet<string>,
+): Map<string, { idCoupCritique: number; fiche: InfoCapacite }> {
+  const fiches = new Map<string, { idCoupCritique: number; fiche: InfoCapacite }>();
+  for (const liste of listes) {
+    for (const capacite of liste) {
+      if (!nomsUtiles.has(capacite.name) || fiches.has(capacite.name)) continue;
+      const { power, accuracy, pp, priority } = capacite;
+      fiches.set(capacite.name, {
+        idCoupCritique: capacite.id,
+        fiche: {
+          type: capacite.type.name.toLowerCase(),
+          categorie: CATEGORIES[capacite.category],
+          puissance: power && power > 0 ? power : null,
+          precision: accuracy && accuracy > 1 ? accuracy : null,
+          pp: pp && pp > 0 ? pp : null,
+          priorite: priority ?? 0,
+          description: null,
+        },
+      });
+    }
+  }
+  return fiches;
+}
+
+/** Effets en français des seuls noms utiles, génération récente d'abord. */
+export function tableDescriptions(
+  listes: readonly (readonly { name: string; description?: string | null | undefined }[])[],
+  nomsUtiles: ReadonlySet<string>,
+): Record<string, string> {
+  const table: Record<string, string> = {};
+  for (const liste of listes) {
+    for (const { name, description } of liste) {
+      const texte = nettoyerDescription(description);
+      if (texte && nomsUtiles.has(name) && !(name in table)) table[name] = texte;
+    }
+  }
+  return table;
+}
 
 /**
  * Type des capacités offensives citées par les sets et les usages

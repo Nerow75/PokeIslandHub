@@ -73,6 +73,23 @@ export interface NatureStrategie {
   baisse: StatCombat | null;
 }
 
+export type CategorieCapacite = "physique" | "speciale" | "statut";
+
+/** Fiche d'une capacité citée par les builds, pour l'infobulle. */
+export interface InfoCapacite {
+  /** Type en slug anglais minuscule ("flying"). */
+  type: string;
+  categorie: CategorieCapacite;
+  /** Puissance de base ; null pour un statut ou des dégâts fixes. */
+  puissance: number | null;
+  /** Précision en pourcentage ; null si la capacité ne rate jamais. */
+  precision: number | null;
+  pp: number | null;
+  priorite: number;
+  /** Effet décrit en français par Coup Critique, si disponible. */
+  description: string | null;
+}
+
 export interface StrategieGeneree {
   genereLe: string;
   /** Slug d'espèce PokeAPI -> stratégie. */
@@ -81,6 +98,13 @@ export interface StrategieGeneree {
   efficacites: Record<string, Record<string, number>>;
   /** Capacité offensive (nom anglais) -> son type ; les capacités de statut sont absentes. */
   typesCapacites: Record<string, string>;
+  /** Capacité citée par les sets et les usages (nom anglais) -> sa fiche. */
+  capacites: Record<string, InfoCapacite>;
+  /** Talent ou objet cité par les sets et les usages (nom anglais) -> effet en français. */
+  descriptions: {
+    talents: Record<string, string>;
+    objets: Record<string, string>;
+  };
   /** Nom anglais -> nom français. */
   traductions: {
     capacites: Record<string, string>;

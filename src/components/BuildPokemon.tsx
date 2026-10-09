@@ -1,6 +1,6 @@
 // src/components/BuildPokemon.tsx
 
-import { useState, type FC } from "react";
+import { Fragment, useState, type FC, type ReactNode } from "react";
 import {
   conseilsIv,
   EV_MAX_PAR_STAT,
@@ -17,6 +17,7 @@ import type {
   StrategieEspece,
   StrategieGeneree,
 } from "../types/strategie.ts";
+import { NomAvecEffet, NomCapacite } from "./NomsAvecInfobulle.tsx";
 
 interface BuildPokemonProps {
   nomEn: string;
@@ -48,12 +49,22 @@ const BoutonCopierShowdown: FC<{ texte: string }> = ({ texte }) => {
   );
 };
 
+/** Alternatives séparées par "ou". */
+function listeOu(noms: readonly string[], rendre: (nom: string) => ReactNode): ReactNode {
+  return noms.map((nom, index) => (
+    <Fragment key={nom}>
+      {index > 0 && " ou "}
+      {rendre(nom)}
+    </Fragment>
+  ));
+}
+
 const SetDetaille: FC<{ set: SetRecommande; nomEn: string; donnees: StrategieGeneree }> = ({
   set,
   nomEn,
   donnees,
 }) => {
-  const { traductions, natures } = donnees;
+  const { traductions, natures, descriptions } = donnees;
   const ivs = conseilsIv(set.ivs);
   /* Les 4 EV de reliquat (510 - 2 x 252 - 2) ne valent pas une session de farm. */
   const statsAEntrainer = STATS_COMBAT.filter((stat) => (set.evs[stat] ?? 0) > EV_RELIQUAT);
@@ -68,7 +79,11 @@ const SetDetaille: FC<{ set: SetRecommande; nomEn: string; donnees: StrategieGen
           <dd>
             <ol className="build__capacites">
               {set.capacites.map((choix) => (
-                <li key={choix.join("|")}>{liste(choix, traductions.capacites)}</li>
+                <li key={choix.join("|")}>
+                  {listeOu(choix, (nom) => (
+                    <NomCapacite nom={nom} donnees={donnees} />
+                  ))}
+                </li>
               ))}
             </ol>
           </dd>
@@ -76,13 +91,29 @@ const SetDetaille: FC<{ set: SetRecommande; nomEn: string; donnees: StrategieGen
         {set.talents.length > 0 && (
           <div>
             <dt>Talent</dt>
-            <dd>{liste(set.talents, traductions.talents)}</dd>
+            <dd>
+              {listeOu(set.talents, (nom) => (
+                <NomAvecEffet
+                  nom={nom}
+                  traductions={traductions.talents}
+                  descriptions={descriptions.talents}
+                />
+              ))}
+            </dd>
           </div>
         )}
         {set.objets.length > 0 && (
           <div>
             <dt>Objet</dt>
-            <dd>{liste(set.objets, traductions.objets)}</dd>
+            <dd>
+              {listeOu(set.objets, (nom) => (
+                <NomAvecEffet
+                  nom={nom}
+                  traductions={traductions.objets}
+                  descriptions={descriptions.objets}
+                />
+              ))}
+            </dd>
           </div>
         )}
         {set.natures.length > 0 && (
@@ -172,15 +203,18 @@ const SetDetaille: FC<{ set: SetRecommande; nomEn: string; donnees: StrategieGen
   );
 };
 
-const ListeUsage: FC<{ titre: string; parts: PartUsage[]; table: Readonly<Record<string, string>> }> =
-  ({ titre, parts, table }) =>
+const ListeUsage: FC<{
+  titre: string;
+  parts: PartUsage[];
+  rendreNom: (nom: string) => ReactNode;
+}> = ({ titre, parts, rendreNom }) =>
     parts.length === 0 ? null : (
       <div>
         <p className="build__sous-titre">{titre}</p>
         <ul className="usage__liste">
           {parts.map((part) => (
             <li key={part.nom}>
-              <span>{traduire(table, part.nom)}</span>
+              <span>{rendreNom(part.nom)}</span>
               <span className="usage__pourcentage">{formaterPourcentage(part.pourcentage)}</span>
             </li>
           ))}
@@ -233,11 +267,35 @@ const BuildPokemon: FC<BuildPokemonProps> = ({ nomEn, strategie, donnees }) => {
             <ListeUsage
               titre="Capacités"
               parts={usage.capacites}
-              table={donnees.traductions.capacites}
+              rendreNom={(nom) => <NomCapacite nom={nom} donnees={donnees} />}
             />
-            <ListeUsage titre="Objets" parts={usage.objets} table={donnees.traductions.objets} />
-            <ListeUsage titre="Talents" parts={usage.talents} table={donnees.traductions.talents} />
-            <ListeUsage titre="Téra" parts={usage.teras} table={donnees.traductions.types} />
+            <ListeUsage
+              titre="Objets"
+              parts={usage.objets}
+              rendreNom={(nom) => (
+                <NomAvecEffet
+                  nom={nom}
+                  traductions={donnees.traductions.objets}
+                  descriptions={donnees.descriptions.objets}
+                />
+              )}
+            />
+            <ListeUsage
+              titre="Talents"
+              parts={usage.talents}
+              rendreNom={(nom) => (
+                <NomAvecEffet
+                  nom={nom}
+                  traductions={donnees.traductions.talents}
+                  descriptions={donnees.descriptions.talents}
+                />
+              )}
+            />
+            <ListeUsage
+              titre="Téra"
+              parts={usage.teras}
+              rendreNom={(nom) => traduire(donnees.traductions.types, nom)}
+            />
             {usage.spreads.length > 0 && (
               <div>
                 <p className="build__sous-titre">Natures et EV</p>

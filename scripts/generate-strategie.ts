@@ -16,6 +16,7 @@ import { join } from "node:path";
 import type { z } from "zod";
 import type { PokedexGenere } from "../src/types/pokedex.ts";
 import type {
+  InfoCapacite,
   NatureStrategie,
   StatCombat,
   StrategieEspece,
@@ -27,14 +28,18 @@ import {
   choisirSets,
   choisirTiers,
   convertirUsage,
+  fichesCapacites,
+  nettoyerDescription,
   objetsDeFormeSpeciale,
   schemaDetailCoupCritique,
   schemaFichierSetsSmogon,
   schemaListePokemonCoupCritique,
   schemaCapacitesCoupCritique,
+  schemaDetailCapaciteCoupCritique,
   schemaListeTraduite,
   schemaNaturesCoupCritique,
   schemaTypesCoupCritique,
+  tableDescriptions,
   tableEfficacites,
   tableTraductions,
   TIER_NON_CLASSE,
@@ -109,9 +114,8 @@ async function lireNatures(): Promise<Record<string, NatureStrategie>> {
   return table;
 }
 
-async function lireTraductions(
-  cle: "moves" | "items" | "abilities",
-): Promise<Record<string, string>> {
+/** Listes Coup Critique de chaque génération, de la plus récente à la plus ancienne. */
+async function lireListes(cle: "moves" | "items" | "abilities") {
   const listes = [];
   for (const generation of GENERATIONS) {
     const donnees = await lireJson(
@@ -120,18 +124,35 @@ async function lireTraductions(
     );
     listes.push(donnees[cle] ?? []);
   }
-  return tableTraductions(listes);
+  return listes;
 }
 
-/** Types des capacités offensives citées par les sets et les usages. */
-async function lireTypesCapacites(
-  parEspece: Readonly<Record<string, StrategieEspece>>,
-): Promise<Record<string, string>> {
-  const nomsUtiles = new Set<string>();
+/** Capacités, talents et objets cités par les sets et les usages. */
+function nomsCites(parEspece: Readonly<Record<string, StrategieEspece>>) {
+  const capacites = new Set<string>();
+  const talents = new Set<string>();
+  const objets = new Set<string>();
   for (const strategie of Object.values(parEspece)) {
-    for (const set of strategie.sets) set.capacites.flat().forEach((nom) => nomsUtiles.add(nom));
-    strategie.usage?.capacites.forEach(({ nom }) => nomsUtiles.add(nom));
+    for (const set of strategie.sets) {
+      set.capacites.flat().forEach((nom) => capacites.add(nom));
+      set.talents.forEach((nom) => talents.add(nom));
+      set.objets.forEach((nom) => objets.add(nom));
+    }
+    strategie.usage?.capacites.forEach(({ nom }) => capacites.add(nom));
+    strategie.usage?.talents.forEach(({ nom }) => talents.add(nom));
+    strategie.usage?.objets.forEach(({ nom }) => objets.add(nom));
   }
+  return { capacites, talents, objets };
+}
+
+/**
+ * Types des capacités offensives et fiches des capacités citées. La description ne figure
+ * que sur la fiche détaillée de chaque capacité : une requête par capacité, mise en cache.
+ */
+async function lireCapacites(nomsUtiles: ReadonlySet<string>): Promise<{
+  typesCapacites: Record<string, string>;
+  capacites: Record<string, InfoCapacite>;
+}> {
   const listes = [];
   for (const generation of GENERATIONS) {
     const { moves } = await lireJson(
@@ -140,7 +161,15 @@ async function lireTypesCapacites(
     );
     listes.push(moves);
   }
-  return typesCapacitesOffensives(listes, nomsUtiles);
+  const capacites: Record<string, InfoCapacite> = {};
+  for (const [nom, { idCoupCritique, fiche }] of fichesCapacites(listes, nomsUtiles)) {
+    const { move } = await lireJson(
+      `${URL_COUP_CRITIQUE}/moves/${idCoupCritique}`,
+      schemaDetailCapaciteCoupCritique,
+    );
+    capacites[nom] = { ...fiche, description: nettoyerDescription(move.description) };
+  }
+  return { typesCapacites: typesCapacitesOffensives(listes, nomsUtiles), capacites };
 }
 
 async function generer(): Promise<void> {
@@ -171,7 +200,8 @@ async function generer(): Promise<void> {
     );
     fichiersSets.push({ generation, sets });
   }
-  const objets = await lireTraductions("items");
+  const listesObjets = await lireListes("items");
+  const objets = tableTraductions(listesObjets);
   const objetsInterdits = objetsDeFormeSpeciale(
     listesParGeneration.map((l) => l.pokemons),
     Object.keys(objets),
@@ -209,15 +239,23 @@ async function generer(): Promise<void> {
   }
 
   const { types } = await lireJson(`${URL_COUP_CRITIQUE}/types`, schemaTypesCoupCritique);
+  const cites = nomsCites(parEspece);
+  const listesTalents = await lireListes("abilities");
+  const { typesCapacites, capacites } = await lireCapacites(cites.capacites);
   const sortie: StrategieGeneree = {
     genereLe: new Date().toISOString(),
     parEspece,
     efficacites: tableEfficacites(types),
-    typesCapacites: await lireTypesCapacites(parEspece),
+    typesCapacites,
+    capacites,
+    descriptions: {
+      talents: tableDescriptions(listesTalents, cites.talents),
+      objets: tableDescriptions(listesObjets, cites.objets),
+    },
     traductions: {
-      capacites: await lireTraductions("moves"),
+      capacites: tableTraductions(await lireListes("moves")),
       objets,
-      talents: await lireTraductions("abilities"),
+      talents: tableTraductions(listesTalents),
       types: tableTraductions([types]),
     },
     natures: await lireNatures(),
