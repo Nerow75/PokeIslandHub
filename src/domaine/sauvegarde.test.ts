@@ -85,14 +85,30 @@ describe("migrations", () => {
     expect(lireSauvegarde(v1(1025))).toEqual({
       succes: true,
       sauvegarde: {
-        version: 11,
+        version: 12,
         statuts: { pikachu: "capture" },
         reglagesCompletion: { base: "capture", totalManuel: null, rangActuel: "dresseur" },
         chasse: { especes: [], capturees: [], debut: null },
         minuteurs: minuteursParDefaut(),
         equipe: choixEquipeVide(),
+        plantations: {},
       },
     });
+  });
+
+  it("ajoute un inventaire de plantations vide à une sauvegarde v11", () => {
+    const { plantations: _absentes, ...v11 } = { ...sauvegardeVide(), version: 11 };
+    const resultat = lireSauvegarde(v11);
+    expect(resultat.succes && resultat.sauvegarde.plantations).toEqual({});
+  });
+
+  it("refuse un nombre de plants nul ou non entier", () => {
+    expect(
+      lireSauvegarde({ ...sauvegardeVide(), plantations: { "minecraft:wheat": 0 } }).succes,
+    ).toBe(false);
+    expect(
+      lireSauvegarde({ ...sauvegardeVide(), plantations: { "minecraft:wheat": 1.5 } }).succes,
+    ).toBe(false);
   });
 
   it("ajoute une chasse vide à une sauvegarde v2", () => {

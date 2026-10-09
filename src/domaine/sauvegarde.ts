@@ -9,6 +9,7 @@ import {
   minuteursDresseursEtPokestops,
   minuteursParDefaut,
 } from "./minuteurs.ts";
+import { QUANTITE_PLANTS_MAX } from "./plantations.ts";
 
 /*
  * Format de la sauvegarde utilisateur.
@@ -16,7 +17,7 @@ import {
  * migration dans MIGRATIONS : une ancienne sauvegarde ne doit jamais être perdue.
  */
 
-export const VERSION_SAUVEGARDE = 11;
+export const VERSION_SAUVEGARDE = 12;
 
 const schemaReglagesCompletion = z.object({
   base: z.enum(["capture", "vu"]),
@@ -59,6 +60,8 @@ export const schemaSauvegarde = z.object({
   /** Votes, dresseurs et PokéStops avec leur délai. */
   minuteurs: z.array(schemaMinuteur),
   equipe: schemaEquipe,
+  /** Identifiant de plante -> nombre de plants ; une plante absente n'est pas plantée. */
+  plantations: z.record(z.string(), z.number().int().min(1).max(QUANTITE_PLANTS_MAX)),
 });
 
 export type Sauvegarde = z.infer<typeof schemaSauvegarde>;
@@ -175,6 +178,7 @@ const MIGRATIONS: Record<number, (donnees: Record<string, unknown>) => Record<st
       }),
     };
   },
+  11: (donnees) => ({ ...donnees, version: 12, plantations: {} }),
 };
 
 export function sauvegardeVide(): Sauvegarde {
@@ -185,6 +189,7 @@ export function sauvegardeVide(): Sauvegarde {
     chasse: chasseVide(),
     minuteurs: minuteursParDefaut(),
     equipe: choixEquipeVide(),
+    plantations: {},
   };
 }
 

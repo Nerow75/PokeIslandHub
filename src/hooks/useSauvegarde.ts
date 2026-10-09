@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Chasse } from "../domaine/chasse.ts";
 import type { ReglagesCompletion } from "../domaine/completion.ts";
 import type { ChoixEquipe } from "../domaine/equipe.ts";
+import { definirQuantite } from "../domaine/plantations.ts";
 import {
   lireSauvegardeDepuisTexte,
   serialiserSauvegarde,
@@ -201,6 +202,13 @@ export function useSauvegarde() {
     modifier((precedente) => ({ ...precedente, equipe: transformerEquipe(precedente.equipe) }));
   };
 
+  const definirPlants = (id: string, quantite: number): void => {
+    modifier((precedente) => ({
+      ...precedente,
+      plantations: definirQuantite(precedente.plantations, id, quantite),
+    }));
+  };
+
   const modifierReglagesCompletion = (reglages: ReglagesCompletion): void => {
     modifier((precedente) => ({ ...precedente, reglagesCompletion: reglages }));
   };
@@ -231,6 +239,7 @@ export function useSauvegarde() {
     ajouterMinuteur,
     supprimerMinuteur,
     modifierEquipe,
+    definirPlants,
     importer,
     exporter,
   };

@@ -8,17 +8,23 @@
  */
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { z } from "zod";
 import type { CobblemonGenere, EspeceCobblemon } from "../src/types/cobblemon.ts";
 import type { PokedexGenere } from "../src/types/pokedex.ts";
-import { fichiersJsonCobblemon, RACINE_PROJET, VERSION_COBBLEMON } from "./cobblemon/archive.ts";
+import {
+  fichierCobblemon,
+  fichiersJsonCobblemon,
+  RACINE_PROJET,
+  VERSION_COBBLEMON,
+} from "./cobblemon/archive.ts";
 import {
   convertirEspecesCobblemon,
   schemaEspeceCobblemonFichier,
   type EspeceCobblemonFichier,
 } from "./cobblemon/especes.ts";
 import { cleEspece } from "./cobblemon/parse.ts";
+import { listerPlantesCobblemon, schemaTraductionsCobblemon } from "./cobblemon/plantes.ts";
 
 const FICHIER_POKEDEX = join(RACINE_PROJET, "src", "data", "pokedex.json");
 const FICHIER_SORTIE = join(RACINE_PROJET, "src", "data", "cobblemon.json");
@@ -106,6 +112,22 @@ async function traduireCapacites(
   return capacites;
 }
 
+/** Noigrumes et baies plantables, nommés par la traduction française du mod. */
+async function lirePlantes(): Promise<CobblemonGenere["plantes"]> {
+  const traductions = schemaTraductionsCobblemon.parse(
+    JSON.parse(await fichierCobblemon("assets/cobblemon/lang/fr_fr.json")),
+  );
+  const nomsBaies = (await fichiersJsonCobblemon("berries")).map((chemin) =>
+    basename(chemin, ".json"),
+  );
+  const { noigrumes, baies, sansNom } = listerPlantesCobblemon(traductions, nomsBaies);
+  if (sansNom.length > 0) {
+    process.stdout.write(`Attention : baies sans nom français : ${sansNom.join(", ")}
+`);
+  }
+  return { noigrumes, baies };
+}
+
 async function generer(): Promise<void> {
   const fichiers: EspeceCobblemonFichier[] = [];
   for (const chemin of await fichiersJsonCobblemon("species")) {
@@ -134,6 +156,7 @@ async function generer(): Promise<void> {
     parEspece,
     objets: await traduireObjets(parEspece),
     capacites: await traduireCapacites(parEspece),
+    plantes: await lirePlantes(),
   };
   await writeFile(FICHIER_SORTIE, `${JSON.stringify(sortie)}\n`);
   const implementees = Object.values(parEspece).filter((e) => e.implementee).length;

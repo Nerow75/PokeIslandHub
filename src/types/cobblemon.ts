@@ -32,6 +32,13 @@ export interface EspeceCobblemon {
   evolutions: EvolutionCobblemon[];
 }
 
+/** Plante cultivable du mod (noigrume, baie). */
+export interface PlanteCobblemon {
+  /** Identifiant d'objet Cobblemon, ex. "cobblemon:red_apricorn". */
+  id: string;
+  nomFr: string;
+}
+
 export interface CobblemonGenere {
   versionCobblemon: string;
   genereLe: string;
@@ -41,4 +48,9 @@ export interface CobblemonGenere {
   objets: Record<string, string>;
   /** Identifiant de capacité Cobblemon (ex. "ancientpower") -> nom français. */
   capacites: Record<string, string>;
+  /** Plantes cultivables, triées par nom français. */
+  plantes: {
+    noigrumes: PlanteCobblemon[];
+    baies: PlanteCobblemon[];
+  };
 }

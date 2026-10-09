@@ -2963,3 +2963,80 @@ a.bouton {
   font-size: var(--texte-sm);
   color: var(--couleur-texte-discret);
 }
+
+/* Plantations */
+
+.plantations__entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espace-2) var(--espace-4);
+}
+
+.plantations {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espace-2);
+}
+
+@media (min-width: 768px) {
+  .plantations {
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  }
+}
+
+.plantation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-3);
+  padding: var(--espace-1) var(--espace-1) var(--espace-1) var(--espace-4);
+  background: var(--couleur-surface-2);
+  border: 1px solid transparent;
+  border-radius: var(--rayon-pilule);
+  transition: border-color var(--duree-feedback);
+}
+
+.plantation[data-plantee="true"] {
+  border-color: var(--couleur-succes);
+}
+
+.plantation__nom {
+  font-weight: 700;
+}
+
+.plantation[data-plantee="false"] .plantation__nom {
+  color: var(--couleur-texte-discret);
+}
+
+.plantation__compteur {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+}
+
+.plantation__pas {
+  min-width: 2.75rem;
+  justify-content: center;
+  font-size: var(--texte-base);
+  font-weight: 800;
+}
+
+.plantation__compteur input[type="number"] {
+  width: 5rem;
+  padding-inline: var(--espace-2);
+  text-align: center;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+}
+
+.plantation__compteur input[type="number"]::-webkit-inner-spin-button,
+.plantation__compteur input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}

@@ -16,6 +16,7 @@ import VuePokedex from "./components/VuePokedex.tsx";
 import VueStrategie from "./components/VueStrategie.tsx";
 import VuePokeFinder from "./components/VuePokeFinder.tsx";
 import VueMinuteurs from "./components/VueMinuteurs.tsx";
+import VuePlantations from "./components/VuePlantations.tsx";
 import { ESPECES_PAR_SLUG, TOTAL_POKEDEX_SERVEUR } from "./donnees.ts";
 import { calculerCompletion, compteSelonBase } from "./domaine/completion.ts";
 import { FILTRES_PAR_DEFAUT, schemaFiltres } from "./domaine/filtres.ts";
@@ -33,7 +34,8 @@ type Onglet =
   | "ou-trouver"
   | "pokefinder"
   | "ev"
-  | "minuteurs";
+  | "minuteurs"
+  | "plantations";
 
 const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "pokedex", libelle: "Pokédex" },
@@ -45,6 +47,7 @@ const ONGLETS: readonly { id: Onglet; libelle: string }[] = [
   { id: "pokefinder", libelle: "PokéFinder" },
   { id: "ev", libelle: "EV" },
   { id: "minuteurs", libelle: "Minuteurs" },
+  { id: "plantations", libelle: "Plantations" },
 ] as const;
 
 interface Navigation {
@@ -91,6 +94,7 @@ const App = () => {
     ajouterMinuteur,
     supprimerMinuteur,
     modifierEquipe,
+    definirPlants,
     importer,
     exporter,
   } = useSauvegarde();
@@ -227,6 +231,12 @@ const App = () => {
               onMinuteurChange={modifierMinuteur}
               onAjouter={ajouterMinuteur}
               onSupprimer={supprimerMinuteur}
+            />
+          )}
+          {onglet === "plantations" && (
+            <VuePlantations
+              plantations={sauvegarde.plantations}
+              onQuantiteChange={definirPlants}
             />
           )}
           {onglet === "ev" && (

@@ -2,7 +2,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -58,4 +58,21 @@ export async function fichiersJsonCobblemon(dossier: string): Promise<string[]> 
     .map((e) => join(e.parentPath, e.name))
     .filter((chemin) => chemin.replaceAll("\\", "/").includes(`/data/cobblemon/${dossier}/`))
     .sort();
+}
+
+const DOSSIER_RESSOURCES_DEPOT = "common/src/main/resources";
+
+/**
+ * Télécharge (si absent du cache) un fichier du dépôt Cobblemon, chemin relatif à
+ * common/src/main/resources (ex. "assets/cobblemon/lang/fr_fr.json"), et renvoie son texte.
+ */
+export async function fichierCobblemon(chemin: string): Promise<string> {
+  await mkdir(DOSSIER_CACHE, { recursive: true });
+  const cheminCache = join(DOSSIER_CACHE, chemin.replaceAll("/", "_"));
+  if (!existsSync(cheminCache)) {
+    const cheminDepot = encodeURIComponent(`${DOSSIER_RESSOURCES_DEPOT}/${chemin}`);
+    const url = `https://gitlab.com/api/v4/projects/cable-mc%2Fcobblemon/repository/files/${cheminDepot}/raw?ref=${VERSION_COBBLEMON}`;
+    await writeFile(cheminCache, await telechargerAvecReessais(url));
+  }
+  return readFile(cheminCache, "utf8");
 }

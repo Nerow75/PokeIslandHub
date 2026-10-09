@@ -16,6 +16,8 @@ const schemaEvolution = z.object({
   conditions: z.array(schemaCondition),
 });
 
+const schemaPlante = z.object({ id: z.string(), nomFr: z.string() });
+
 /** Validation du fichier généré : le JSON importé n'est pas typé finement par TypeScript. */
 export const schemaCobblemonGenere: z.ZodType<CobblemonGenere> = z.object({
   versionCobblemon: z.string(),
@@ -30,4 +32,8 @@ export const schemaCobblemonGenere: z.ZodType<CobblemonGenere> = z.object({
   ),
   objets: z.record(z.string(), z.string()),
   capacites: z.record(z.string(), z.string()),
+  plantes: z.object({
+    noigrumes: z.array(schemaPlante),
+    baies: z.array(schemaPlante),
+  }),
 });
